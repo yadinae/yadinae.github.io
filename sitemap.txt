@@ -1,3 +1,4 @@
+https://yadinae.github.io/2026/02/15/%E5%A6%82%E4%BD%95%E8%AE%A9AI%E9%80%9A%E8%BF%87Hexo%E6%8E%A5%E7%AE%A1GitHub%E5%8D%9A%E5%AE%A2/
 https://yadinae.github.io/categories/index.html
 https://yadinae.github.io/tags/index.html
 https://yadinae.github.io/links/index.html
@@ -10,4 +11,9 @@ https://yadinae.github.io/tags/Butterfly/
 https://yadinae.github.io/tags/GitHub-Pages/
 https://yadinae.github.io/tags/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/
 https://yadinae.github.io/tags/%E6%95%99%E7%A8%8B/
+https://yadinae.github.io/tags/AI/
+https://yadinae.github.io/tags/GitHub/
+https://yadinae.github.io/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/
+https://yadinae.github.io/tags/%E5%8D%9A%E5%AE%A2/
 https://yadinae.github.io/categories/%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B/
+https://yadinae.github.io/categories/%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B/AI%E5%BA%94%E7%94%A8/
