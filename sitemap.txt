@@ -4,7 +4,6 @@ https://yadinae.github.io/categories/index.html
 https://yadinae.github.io/tags/index.html
 https://yadinae.github.io/links/index.html
 https://yadinae.github.io/about/index.html
-https://yadinae.github.io/2026/02/11/hello-world/
 https://yadinae.github.io/2026/02/10/hexo-butterfly-github-blog-tutorial/
 https://yadinae.github.io/
 https://yadinae.github.io/tags/Hexo/
