@@ -1,0 +1,365 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>OpenClaw 搜索功能排坑实录 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="记录为 OpenClaw 配置国内可用搜索功能的完整排坑过程，从 Brave API 到阿里云百炼 Web-Search MCP 的实战经验。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenClaw 搜索功能排坑实录">
+<meta property="og:url" content="https://yadinae.github.io/2026/03/03/OpenClaw-%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%E6%8E%92%E5%9D%91%E5%AE%9E%E5%BD%95/index.html">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="记录为 OpenClaw 配置国内可用搜索功能的完整排坑过程，从 Brave API 到阿里云百炼 Web-Search MCP 的实战经验。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1506318137071-a8bcbf6d273d?w=1200&q=80">
+<meta property="article:published_time" content="2026-03-03T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-03-03T13:30:00.156Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="AI 助理，阿里云，Web Search">
+<meta property="article:tag" content="OpenClaw">
+<meta property="article:tag" content="技能开发">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1506318137071-a8bcbf6d273d?w=1200&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "OpenClaw 搜索功能排坑实录",
+  "url": "https://yadinae.github.io/2026/03/03/OpenClaw-%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%E6%8E%92%E5%9D%91%E5%AE%9E%E5%BD%95/",
+  "image": "https://images.unsplash.com/photo-1506318137071-a8bcbf6d273d?w=1200&q=80",
+  "datePublished": "2026-03-03T13:30:00.000Z",
+  "dateModified": "2026-03-03T13:30:00.156Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://yadinae.github.io"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yadinae.github.io/2026/03/03/OpenClaw-%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%E6%8E%92%E5%9D%91%E5%AE%9E%E5%BD%95/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const hour = new Date().getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (theme === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else theme === 'light' ? activateLightMode() : activateDarkMode()
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-2RC832V18X"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'G-2RC832V18X')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'G-2RC832V18X', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'OpenClaw 搜索功能排坑实录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"><link rel="alternate" href="/atom.xml" title="颂雅风的博客" type="application/atom+xml">
+</head><body><div class="bg-animation" id="web_bg" style="background-color: #0a0a0f;"></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1506318137071-a8bcbf6d273d?w=1200&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">OpenClaw 搜索功能排坑实录</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">OpenClaw 搜索功能排坑实录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-03T13:30:00.000Z" title="发表于 2026-03-03 21:30:00">2026-03-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-03T13:30:00.156Z" title="更新于 2026-03-03 21:30:00">2026-03-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E6%95%99%E7%A8%8B%EF%BC%8CAI-%E5%B7%A5%E5%85%B7/">技术教程，AI 工具</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="一、毛坯-OpenClaw-并不聪明"><a href="#一、毛坯-OpenClaw-并不聪明" class="headerlink" title="一、毛坯 OpenClaw 并不聪明"></a>一、毛坯 OpenClaw 并不聪明</h2><p>网上很多文章都在讲 OpenClaw（大龙虾）有什么能力、技能，有多强。也有很多非 IT 人员跟风在本地，甚至专门买了云主机去部署 OpenClaw，部署很简单，一键脚本就安装完毕，最多再配置个钉钉、飞书之类的通讯工具，你能和 OpenClaw 交流了，你以为你已经有了 24 小时 AI 助理，但实际上，他连基本的 web 搜索能力还没有。</p>
+<p>作为非 IT 人员，你给大龙虾一个指令”搜索……新闻；搜索……”，结果什么结果也没有。你问龙虾有没有搜索能力，他自信满满的告诉你他有搜索能力，你给他一个具体搜索任务，他又掉链子。</p>
+<p>他告诉你可以配置”Brave Search API”，Brave Search API 确实每天有免费额度，但是：</p>
+<ol>
+<li><strong>国内网络访问不了 Brave</strong></li>
+<li>就算你”想尽办法”可以访问 Brave，想白嫖他的免费额度，<strong>还得绑定一个国外银行卡</strong></li>
+<li>你折腾半天又回到原点</li>
+</ol>
+<p>当你指出他的”无能”时，他倒是很诚实，也能给你提出第二方案，但他只管给方案，从不管方案可行不可行。</p>
+<p>他让我去阿里百炼 MCP 市场再去搞个 MCP 的 key，看到这里，我突然想你你们单位的领导，只管一本正经的拍脑袋，从不管事情能不能干得通。</p>
+<p>走到这一步，我就失去耐心了。</p>
+<hr>
+<h2 id="二、再给-OpenClaw-装个脑子——Claude-Code"><a href="#二、再给-OpenClaw-装个脑子——Claude-Code" class="headerlink" title="二、再给 OpenClaw 装个脑子——Claude Code"></a>二、再给 OpenClaw 装个脑子——Claude Code</h2><p>由于刚部署的大龙虾并不聪明，于是我自己脑洞大开，给 Ubuntu 服务器安装一个 Claude code，让 Claude 去运维包括 openclaw 在内的所有 AI 应用。</p>
+<p>首先说明，我的 OpenClaw 和 Claude 都使用的是阿里 <code>qwen3-max-2026-01-23</code> 模型。</p>
+<p>先看看 Claude 对国内网络配置搜索 brave api 的理解，同样模型下，Claude 确实比 OpenClaw 对任务的理解能力更强。</p>
+<h3 id="Claude-的分析结果"><a href="#Claude-的分析结果" class="headerlink" title="Claude 的分析结果"></a>Claude 的分析结果</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">各</span> <span class="string">API</span> <span class="string">在中国大陆的可用性</span></span><br><span class="line"><span class="string">┌───────────────────┬────────────────┬─────────────────────────────────────────┐</span></span><br><span class="line"><span class="string">│</span> <span class="string">API</span>               <span class="string">│</span> <span class="string">无需梯子可用性</span> <span class="string">│</span> <span class="string">说明</span>                                   <span class="string">│</span></span><br><span class="line"><span class="string">├───────────────────┼────────────────┼─────────────────────────────────────────┤</span></span><br><span class="line"><span class="string">│</span> <span class="string">Brave</span> <span class="string">Search</span> <span class="string">API</span>  <span class="string">│</span> <span class="string">❌</span> <span class="string">不可用</span>       <span class="string">│</span> <span class="string">Brave</span> <span class="string">搜索引擎本身在中国被封锁</span>           <span class="string">│</span></span><br><span class="line"><span class="string">│</span> <span class="string">Google</span> <span class="string">Gemini</span> <span class="string">API</span> <span class="string">│</span> <span class="string">❌</span> <span class="string">不可用</span>       <span class="string">│</span> <span class="string">Google</span> <span class="string">所有服务在中国被封锁</span>             <span class="string">│</span></span><br><span class="line"><span class="string">│</span> <span class="string">Perplexity</span> <span class="string">API</span>    <span class="string">│</span> <span class="string">❌</span> <span class="string">不可用</span>       <span class="string">│</span> <span class="string">Perplexity</span> <span class="string">也被</span> <span class="string">GFW</span> <span class="string">屏蔽</span>                <span class="string">│</span></span><br><span class="line"><span class="string">│</span> <span class="string">OpenRouter</span> <span class="string">API</span>    <span class="string">│</span> <span class="string">⚠️</span> <span class="string">不稳定</span>       <span class="string">│</span> <span class="string">部分地区可能访问，但不稳定</span>              <span class="string">│</span></span><br><span class="line"><span class="string">└───────────────────┴────────────────┴─────────────────────────────────────────┘</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="无需梯子的替代方案"><a href="#无需梯子的替代方案" class="headerlink" title="无需梯子的替代方案"></a>无需梯子的替代方案</h3><p>既然你在阿里云服务器上运行 OpenClaw，可以考虑以下方案：</p>
+<p><strong>方案 1: 使用阿里云百炼的搜索能力</strong><br>你之前提到的阿里云百炼文档，可能就是关于如何在百炼平台上配置搜索&#x2F;RAG 能力。百炼在国内可访问，但需要确认它是否支持与 OpenClaw 集成。</p>
+<p><strong>方案 2: 使用国内 API</strong></p>
+<ul>
+<li>阿里云 Dashscope - 你已经在用（qwen3.5-plus），但它本身不带网络搜索功能</li>
+<li>百度智能云 - 有搜索 API</li>
+<li>腾讯云 - 有搜索相关服务</li>
+</ul>
+<p><strong>方案 3: 服务器配置代理</strong><br>在你的阿里云服务器上配置代理&#x2F;梯子，让 API 请求通过代理访问。</p>
+<p><strong>方案 4: 使用阿里云百炼应用</strong><br>你之前给的链接可能就是关于如何在百炼上创建带搜索能力的应用，然后通过 API 调用。</p>
+<hr>
+<h2 id="三、按照-Claude-的决策：使用通义-Web-Search-MCP-服务"><a href="#三、按照-Claude-的决策：使用通义-Web-Search-MCP-服务" class="headerlink" title="三、按照 Claude 的决策：使用通义 Web-Search MCP 服务"></a>三、按照 Claude 的决策：使用通义 Web-Search MCP 服务</h2><h3 id="新问题：OpenClaw-不支持自定义-MCP-Provider"><a href="#新问题：OpenClaw-不支持自定义-MCP-Provider" class="headerlink" title="新问题：OpenClaw 不支持自定义 MCP Provider"></a>新问题：OpenClaw 不支持自定义 MCP Provider</h3><p>按照 OpenClaw 文档的 web_search 配置格式，尝试添加 dashscope provider：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;tools&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;web&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;search&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;provider&quot;</span><span class="punctuation">:</span> <span class="string">&quot;dashscope&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;dashscope&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;apiKey&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sk-xxx&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;endpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/mcp&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>结果</strong>：服务启动失败，报错提示不支持 dashscope provider。</p>
+<p>查看 OpenClaw 源码文档确认，当前版本只支持 <code>brave</code>、<code>perplexity</code>、<code>gemini</code> 三种 provider，且都不支持 MCP 协议。</p>
+<p><strong>方案调整</strong>：既然内置工具不支持，就用自定义 Skill 的方式调用 API。</p>
+<hr>
+<h2 id="四、最终方案：自定义-Skill-Shell-脚本"><a href="#四、最终方案：自定义-Skill-Shell-脚本" class="headerlink" title="四、最终方案：自定义 Skill + Shell 脚本"></a>四、最终方案：自定义 Skill + Shell 脚本</h2><p>OpenClaw 支持通过 Skill 文件扩展能力。参考官方 weather skill 的结构，创建了自定义的 <code>web-search-dashscope</code> 技能。</p>
+<h3 id="技能结构"><a href="#技能结构" class="headerlink" title="技能结构"></a>技能结构</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">web-search-dashscope/</span><br><span class="line">├── SKILL.md          <span class="comment"># 技能定义文档（YAML frontmatter + Markdown）</span></span><br><span class="line">├── web-search.sh     <span class="comment"># 可执行脚本</span></span><br><span class="line">└── README.md         <span class="comment"># 配置说明</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="SKILL-md-核心内容"><a href="#SKILL-md-核心内容" class="headerlink" title="SKILL.md 核心内容"></a>SKILL.md 核心内容</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">web-search-dashscope</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">使用阿里云通义</span> <span class="string">Web-Search</span> <span class="string">MCP</span> <span class="string">服务进行实时互联网搜索</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">openclaw:</span></span><br><span class="line">    <span class="attr">emoji:</span> <span class="string">🔍</span></span><br><span class="line">    <span class="attr">requires:</span></span><br><span class="line">      <span class="attr">bins:</span> [<span class="string">&quot;curl&quot;</span>]</span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="调用脚本（web-search-sh）"><a href="#调用脚本（web-search-sh）" class="headerlink" title="调用脚本（web-search.sh）"></a>调用脚本（web-search.sh）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line">DASHSCOPE_API_KEY=<span class="string">&quot;sk-************&quot;</span>  <span class="comment"># 替换成你的 api key</span></span><br><span class="line">MCP_ENDPOINT=<span class="string">&quot;https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/mcp&quot;</span></span><br><span class="line">QUERY=<span class="string">&quot;<span class="variable">$&#123;1:-&#125;</span>&quot;</span></span><br><span class="line">COUNT=<span class="string">&quot;<span class="variable">$&#123;2:-5&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line">curl -s -X POST <span class="string">&quot;<span class="variable">$MCP_ENDPOINT</span>&quot;</span> \</span><br><span class="line">  -H <span class="string">&quot;Authorization: Bearer <span class="variable">$DASHSCOPE_API_KEY</span>&quot;</span> \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&quot;&#123;</span></span><br><span class="line"><span class="string">    \&quot;jsonrpc\&quot;: \&quot;2.0\&quot;,</span></span><br><span class="line"><span class="string">    \&quot;id\&quot;: 1,</span></span><br><span class="line"><span class="string">    \&quot;method\&quot;: \&quot;tools/call\&quot;,</span></span><br><span class="line"><span class="string">    \&quot;params\&quot;: &#123;</span></span><br><span class="line"><span class="string">      \&quot;name\&quot;: \&quot;bailian_web_search\&quot;,</span></span><br><span class="line"><span class="string">      \&quot;arguments\&quot;: &#123;</span></span><br><span class="line"><span class="string">        \&quot;query\&quot;: \&quot;<span class="variable">$QUERY</span>\&quot;,</span></span><br><span class="line"><span class="string">        \&quot;count\&quot;: <span class="variable">$COUNT</span></span></span><br><span class="line"><span class="string">      &#125;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &#125;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="测试验证"><a href="#测试验证" class="headerlink" title="测试验证"></a>测试验证</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">$ ./web-search.sh <span class="string">&quot;今日天气&quot;</span> 2</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;jsonrpc&quot;</span>:<span class="string">&quot;2.0&quot;</span>,</span><br><span class="line">  <span class="string">&quot;id&quot;</span>:1,</span><br><span class="line">  <span class="string">&quot;result&quot;</span>:&#123;</span><br><span class="line">    <span class="string">&quot;content&quot;</span>:[</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="string">&quot;type&quot;</span>:<span class="string">&quot;text&quot;</span>,</span><br><span class="line">        <span class="string">&quot;text&quot;</span>:<span class="string">&quot;&#123;\&quot;pages\&quot;:[&#123;</span></span><br><span class="line"><span class="string">          \&quot;snippet\&quot;:\&quot;北京今日天气详情 多云转晴 3~16℃...\&quot;&quot;</span>,</span><br><span class="line">          \&quot;title\&quot;:\&quot;北京今日天气详情\&quot;,</span><br><span class="line">          \&quot;url\&quot;:\&quot;http://waptianqi.2345.com/...<span class="string">&quot;</span></span><br><span class="line"><span class="string">        &#125;]&#125;&quot;</span>,</span><br><span class="line">        <span class="string">&quot;isError&quot;</span>:<span class="literal">false</span></span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>✅ 成功！</strong> API 返回了结构化搜索结果。</p>
+<hr>
+<h2 id="五、结果验收"><a href="#五、结果验收" class="headerlink" title="五、结果验收"></a>五、结果验收</h2><p>很明显成功了，OpenClaw 可以搜索到今天的实时新闻了！</p>
+<p>现在可以直接在对话中说：</p>
+<ul>
+<li>“搜索今天的人工智能新闻”</li>
+<li>“查一下北京天气”</li>
+<li>“搜索阿里云百炼”</li>
+</ul>
+<p>OpenClaw 会自动调用 <code>web-search-dashscope</code> 技能获取实时信息。</p>
+<hr>
+<h2 id="六、经验总结"><a href="#六、经验总结" class="headerlink" title="六、经验总结"></a>六、经验总结</h2><h3 id="关键决策点"><a href="#关键决策点" class="headerlink" title="关键决策点"></a>关键决策点</h3><ol>
+<li><strong>网络环境约束</strong>：优先选择国内可访问的服务，避免生产环境依赖不稳定网络</li>
+<li><strong>框架限制识别</strong>：当内置功能不支持时，及时切换到自定义扩展方案</li>
+<li><strong>API 验证先行</strong>：在集成到框架前，先用脚本验证 API 可用性</li>
+</ol>
+<h3 id="技术要点"><a href="#技术要点" class="headerlink" title="技术要点"></a>技术要点</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>API Provider</td>
+<td>阿里云百炼 Web-Search MCP</td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td><code>https://dashscope.aliyuncs.com/api/v1/mcps/WebSearch/mcp</code></td>
+</tr>
+<tr>
+<td>认证方式</td>
+<td>Bearer Token (API Key)</td>
+</tr>
+<tr>
+<td>协议</td>
+<td>JSON-RPC 2.0</td>
+</tr>
+<tr>
+<td>服务名称</td>
+<td><code>bailian_web_search</code></td>
+</tr>
+</tbody></table>
+<h3 id="成本与限制"><a href="#成本与限制" class="headerlink" title="成本与限制"></a>成本与限制</h3><ul>
+<li><strong>免费额度</strong>：每月 2000 次调用</li>
+<li><strong>限流</strong>：单用户 5 QPS</li>
+<li><strong>适用场景</strong>：实时新闻、天气、股票、金价、油价等时效信息</li>
+</ul>
+<hr>
+<h2 id="七、后续优化方向"><a href="#七、后续优化方向" class="headerlink" title="七、后续优化方向"></a>七、后续优化方向</h2><ol>
+<li><strong>技能集成</strong>：将脚本调用封装为 OpenClaw 原生 Tool，让 AI 模型自动调用</li>
+<li><strong>结果缓存</strong>：相同查询结果缓存 15-30 分钟，减少 API 调用</li>
+<li><strong>错误处理</strong>：添加重试机制和额度监控告警</li>
+</ol>
+<hr>
+<h2 id="附录：完整配置"><a href="#附录：完整配置" class="headerlink" title="附录：完整配置"></a>附录：完整配置</h2><h3 id="技能文件位置"><a href="#技能文件位置" class="headerlink" title="技能文件位置"></a>技能文件位置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~/.agents/skills/web-search-dashscope/</span><br></pre></td></tr></table></figure>
+
+<h3 id="OpenClaw-配置"><a href="#OpenClaw-配置" class="headerlink" title="OpenClaw 配置"></a>OpenClaw 配置</h3><p>在 <code>~/.openclaw/openclaw.json</code> 中添加：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;skills&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;load&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;extraDirs&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;~/.agents/skills&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;watch&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;watchDebounceMs&quot;</span><span class="punctuation">:</span> <span class="number">250</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;entries&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;web-search-dashscope&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;enabled&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;env&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;DASHSCOPE_API_KEY&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sk-your-api-key-here&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="API-Key-获取"><a href="#API-Key-获取" class="headerlink" title="API Key 获取"></a>API Key 获取</h3><ol>
+<li>访问 <a target="_blank" rel="noopener" href="https://bailian.console.aliyun.com/">阿里云百炼控制台</a></li>
+<li>开通 Web-Search MCP 服务</li>
+<li>在 <a target="_blank" rel="noopener" href="https://dashscope.console.aliyun.com/apiKey">API Key 管理页面</a> 创建密钥</li>
+</ol>
+<hr>
+<p><strong>后记</strong>：这次排坑过程再次验证了一个道理——<strong>好的技术方案不是”最先进”的，而是”最适配约束条件”的</strong>。在国内网络环境下，阿里云服务 + 自定义扩展的组合，是稳定可行的选择。</p>
+<blockquote>
+<p>如果你在类似项目中遇到问题，欢迎交流讨论。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yadinae.github.io">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yadinae.github.io/2026/03/03/OpenClaw-%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%E6%8E%92%E5%9D%91%E5%AE%9E%E5%BD%95/">https://yadinae.github.io/2026/03/03/OpenClaw-%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%E6%8E%92%E5%9D%91%E5%AE%9E%E5%BD%95/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://yadinae.github.io" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/OpenClaw/">OpenClaw</a><a class="post-meta__tags" href="/tags/AI-%E5%8A%A9%E7%90%86%EF%BC%8C%E9%98%BF%E9%87%8C%E4%BA%91%EF%BC%8CWeb-Search/">AI 助理，阿里云，Web Search</a><a class="post-meta__tags" href="/tags/%E6%8A%80%E8%83%BD%E5%BC%80%E5%8F%91/">技能开发</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1506318137071-a8bcbf6d273d?w=1200&amp;q=80" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/03/02/blog-fixes-summary/" title="博客配置问题修复总结：标签页、分类页和社交链接"><img class="cover" src="/img/blog-fixes-cover.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">博客配置问题修复总结：标签页、分类页和社交链接</div></div><div class="info-2"><div class="info-item-1">摘要本文总结博客配置过程中遇到的三个问题及其解决方案：标签页空白、分类页空白、Follow Me 链接错误。通过创建自定义布局文件和使用正确的 Pug 语法，成功修复所有问题。 问题概述问题一：Follow Me 链接错误现象：博客侧边栏的”Follow Me”按钮链接到 https://github.com/xxxxxx 原因：主题配置文件中使用了示例占位符 解决方案： 123# themes/butterfly/_config.ymlsocial:  fab fa-github: https://github.com/yadinae || Github || &#x27;#24292e&#x27;  问题二：标签页空白现象：访问 /tags/ 页面显示空白（0 字节） 原因：缺少 tags.pug 布局文件 解决方案：创建 themes/butterfly/layout/tags.pug 123456789extends includes/layout.pugblock content  - const noCardLayout = &#x27;nc&#x27;  - var...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/02/16/%E5%A6%82%E4%BD%95%E5%9C%A8OpenClaw%E4%B8%AD%E4%BD%BF%E7%94%A8%E9%98%BF%E9%87%8C%E4%BA%91%E7%99%BE%E7%82%BCCoding-Plan%E6%A8%A1%E5%9E%8B/" title="如何在OpenClaw中使用阿里云百炼Coding Plan模型"><img class="cover" src="/img/aliyun-cover.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-16</div><div class="info-item-2">如何在OpenClaw中使用阿里云百炼Coding Plan模型</div></div><div class="info-2"><div class="info-item-1">如何在OpenClaw中使用阿里云百炼Coding Plan模型在探索AI编程助手的过程中，阿里云百炼的Coding Plan模型是一个非常有吸引力的选择。然而，在实际配置和使用过程中，我们遇到了不少坑，走了很多弯路。本文将详细记录这些经验教训，并提供完整的解决方案。 背景介绍OpenClaw 是一个强大的开源AI代理框架，支持多种大模型提供商。阿里云百炼作为国内领先的AI平台，提供了专门针对代码生成优化的Coding Plan模型。然而，Coding Plan与普通的百炼推理模型在配置上有显著差异，如果不注意这些细节，很容易陷入配置错误的困境。 我们走过的弯路弯路一：盲目依赖第三方文档最初，我们参考了一些社区博客和论坛帖子来配置Coding Plan，结果发现这些信息要么过时，要么不完整。这导致我们在错误的配置上浪费了大量时间。 教训：官方文档永远是最权威、最准确的信息源。 弯路二：混淆BaseURL配置我们错误地使用了普通百炼推理服务的BaseURL来配置Coding Plan，结果一直收到404错误。经过反复调试才发现，Coding Plan有自己独立的API端点。 弯路三...</div></div></div></a><a class="pagination-related" href="/2026/03/01/openclaw-knowledge-site-generator/" title="17 分钟上线一个学习网站：OpenClaw 一句话生成知识网站"><img class="cover" src="/img/openclaw-cover.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-01</div><div class="info-item-2">17 分钟上线一个学习网站：OpenClaw 一句话生成知识网站</div></div><div class="info-2"><div class="info-item-1"> 摘要：传统建站需要设计、开发、部署，耗时数天。在 AI 自动化时代，这个过程可以被压缩到几分钟。本文将展示如何使用 OpenClaw 框架和 knowledge-site-creator 技能，通过一句话需求描述，自动生成完整的知识学习网站，并部署到 Vercel 上线。  一个紧急需求 上周三凌晨 2 点，我接到一个紧急需求：周五前上线一个产品培训网站。 传统做法至少需要 3 天，但我用 OpenClaw 只花了 17 分钟。 周五上午 9 点，网站准时上线。老板问我找了哪个外包团队，我说：”一个 AI 助手。”  这篇文章就是那个网站的完整复盘。我会一步步展示如何用 OpenClaw 的 knowledge-site-creator 技能，从一句话需求到完整网站上线。 核心数据：传统建站 3 天 vs OpenClaw 17 分钟，效率提升 250 倍。 传统建站 vs AI 自动化❌ 传统建站流程 需求分析：2-3 小时 UI 设计：1-2 天 前端开发：1-2 天 内容创作：1 天 测试部署：3-4 小时 总计：3-5 天  ✅ OpenClaw 自动化 提出需求：30...</div></div></div></a><a class="pagination-related" href="/2026/02/26/rss-ai-revolution/" title="RSS 订阅 AI 革命：我用 FreshRSS + OpenClaw 打造每日 AI 简报"><img class="cover" src="/img/rss-cover.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-26</div><div class="info-item-2">RSS 订阅 AI 革命：我用 FreshRSS + OpenClaw 打造每日 AI 简报</div></div><div class="info-2"><div class="info-item-1">前言在这个信息爆炸的时代，如何高效获取 AI 领域的最新动态？ 我尝试过：  刷 Twitter&#x2F;X，信息太碎片化 关注各种公众号，质量参差不齐 用聚合新闻 App，广告太多  最后，我找到了最佳方案：RSS + FreshRSS + OpenClaw 自动化 为什么选择 RSS？RSS（Really Simple Syndication）是一种古老但强大的信息订阅协议。 优势：  ✅ 无算法干扰，按时间顺序 ✅ 无广告，纯净阅读 ✅ 一站式聚合，不用到处刷 ✅ 可自动化处理  我的技术栈   组件 作用    FreshRSS RSS 阅读器（自托管）   OpenClaw AI 自动化框架   Notion 知识库存储   飞书&#x2F;微信 消息推送   工作流程1RSS 订阅 → FreshRSS 聚合 → OpenClaw 抓取 → AI 摘要 → 推送到飞书/微信  1. 订阅 AI 相关 RSS 源我订阅了以下来源：  Hacker News (AI 标签) arXiv CS.AI MIT Technology Review The Verge AI 机...</div></div></div></a><a class="pagination-related" href="/2026/02/19/openclaw-backup-migration-guide/" title="GitHub备份与迁移OpenClaw完整指南"><img class="cover" src="/img/github-backup-cover.jpg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-19</div><div class="info-item-2">GitHub备份与迁移OpenClaw完整指南</div></div><div class="info-2"><div class="info-item-1">背景说明在数字化时代，我们的工作记忆、配置文件和个人数据变得越来越重要。作为 OpenClaw 用户，我深知数据安全和可移植性的重要性。今天我想分享一个实用的方案：如何利用 GitHub 私人仓库来安全地备份和转移 OpenClaw 数据。 备份策略设计1. 备份内容规划我的备份策略涵盖了 OpenClaw 的核心组件：  核心配置 (core-config/)：身份信息、基础设置 自定义技能 (skills/)：所有自定义的技能定义和实现 项目数据 (projects/)：包括博客源码、AI新闻项目等 日常记忆 (memory/)：每日笔记和长期记忆 脚本工具 (scripts/, tools/)：自动化脚本和工具集 凭据模板 (credentials-templates/)：安全的凭据模板（不含实际密钥）  2. 自动化备份脚本我创建了一个名为 backup-openclaw.sh 的脚本： 123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">36</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:yadinae@gmail.com" target="_blank" title="邮箱"><i class="fas fa-envelope" style="color: #ea4335;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%AF%9B%E5%9D%AF-OpenClaw-%E5%B9%B6%E4%B8%8D%E8%81%AA%E6%98%8E"><span class="toc-number">1.</span> <span class="toc-text">一、毛坯 OpenClaw 并不聪明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%86%8D%E7%BB%99-OpenClaw-%E8%A3%85%E4%B8%AA%E8%84%91%E5%AD%90%E2%80%94%E2%80%94Claude-Code"><span class="toc-number">2.</span> <span class="toc-text">二、再给 OpenClaw 装个脑子——Claude Code</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Claude-%E7%9A%84%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%9C"><span class="toc-number">2.1.</span> <span class="toc-text">Claude 的分析结果</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%97%A0%E9%9C%80%E6%A2%AF%E5%AD%90%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%A1%88"><span class="toc-number">2.2.</span> <span class="toc-text">无需梯子的替代方案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%8C%89%E7%85%A7-Claude-%E7%9A%84%E5%86%B3%E7%AD%96%EF%BC%9A%E4%BD%BF%E7%94%A8%E9%80%9A%E4%B9%89-Web-Search-MCP-%E6%9C%8D%E5%8A%A1"><span class="toc-number">3.</span> <span class="toc-text">三、按照 Claude 的决策：使用通义 Web-Search MCP 服务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E9%97%AE%E9%A2%98%EF%BC%9AOpenClaw-%E4%B8%8D%E6%94%AF%E6%8C%81%E8%87%AA%E5%AE%9A%E4%B9%89-MCP-Provider"><span class="toc-number">3.1.</span> <span class="toc-text">新问题：OpenClaw 不支持自定义 MCP Provider</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%9C%80%E7%BB%88%E6%96%B9%E6%A1%88%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89-Skill-Shell-%E8%84%9A%E6%9C%AC"><span class="toc-number">4.</span> <span class="toc-text">四、最终方案：自定义 Skill + Shell 脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E8%83%BD%E7%BB%93%E6%9E%84"><span class="toc-number">4.1.</span> <span class="toc-text">技能结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SKILL-md-%E6%A0%B8%E5%BF%83%E5%86%85%E5%AE%B9"><span class="toc-number">4.2.</span> <span class="toc-text">SKILL.md 核心内容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%B0%83%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%88web-search-sh%EF%BC%89"><span class="toc-number">4.3.</span> <span class="toc-text">调用脚本（web-search.sh）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81"><span class="toc-number">4.4.</span> <span class="toc-text">测试验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%BB%93%E6%9E%9C%E9%AA%8C%E6%94%B6"><span class="toc-number">5.</span> <span class="toc-text">五、结果验收</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E7%BB%8F%E9%AA%8C%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">六、经验总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E9%94%AE%E5%86%B3%E7%AD%96%E7%82%B9"><span class="toc-number">6.1.</span> <span class="toc-text">关键决策点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E6%9C%AF%E8%A6%81%E7%82%B9"><span class="toc-number">6.2.</span> <span class="toc-text">技术要点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%88%90%E6%9C%AC%E4%B8%8E%E9%99%90%E5%88%B6"><span class="toc-number">6.3.</span> <span class="toc-text">成本与限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%90%8E%E7%BB%AD%E4%BC%98%E5%8C%96%E6%96%B9%E5%90%91"><span class="toc-number">7.</span> <span class="toc-text">七、后续优化方向</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E5%AE%8C%E6%95%B4%E9%85%8D%E7%BD%AE"><span class="toc-number">8.</span> <span class="toc-text">附录：完整配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%80%E8%83%BD%E6%96%87%E4%BB%B6%E4%BD%8D%E7%BD%AE"><span class="toc-number">8.1.</span> <span class="toc-text">技能文件位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#OpenClaw-%E9%85%8D%E7%BD%AE"><span class="toc-number">8.2.</span> <span class="toc-text">OpenClaw 配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#API-Key-%E8%8E%B7%E5%8F%96"><span class="toc-number">8.3.</span> <span class="toc-text">API Key 获取</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url(https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&amp;q=80);"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2026 By 颂雅风</span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=5.5.4"></script><script src="/js/main.js?v=5.5.4"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
