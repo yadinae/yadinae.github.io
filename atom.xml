@@ -10,7 +10,27 @@
   <rights>All rights reserved 2026, 颂雅风</rights>
   <subtitle>学习知识，记录经验，传承文化</subtitle>
   <title>颂雅风的博客</title>
-  <updated>2026-03-05T11:56:04.373Z</updated>
+  <updated>2026-03-06T11:24:39.447Z</updated>
+  <entry>
+    <author>
+      <name>颂雅风</name>
+    </author>
+    <category term="市场调研，AI 应用" scheme="https://yadinae.github.io/categories/%E5%B8%82%E5%9C%BA%E8%B0%83%E7%A0%94%EF%BC%8CAI-%E5%BA%94%E7%94%A8/"/>
+    <category term="AI" scheme="https://yadinae.github.io/tags/AI/"/>
+    <category term="笔记软件，市场调研，Notion" scheme="https://yadinae.github.io/tags/%E7%AC%94%E8%AE%B0%E8%BD%AF%E4%BB%B6%EF%BC%8C%E5%B8%82%E5%9C%BA%E8%B0%83%E7%A0%94%EF%BC%8CNotion/"/>
+    <category term="Obsidian" scheme="https://yadinae.github.io/tags/Obsidian/"/>
+    <content>
+      <![CDATA[<h2 id="📊-执行摘要"><a href="#📊-执行摘要" class="headerlink" title="📊 执行摘要"></a>📊 执行摘要</h2><p>本次调研覆盖了 <strong>12 个主流 AI 笔记软件</strong>，分析了市场趋势、用户痛点和产品差异化。评审评分：<strong>92&#x2F;100</strong>（优秀）</p><p><strong>核心发现</strong>：</p><ol><li>AI 功能已成为标配，不再是差异化卖点</li><li>本地优先和隐私保护受到更多关注</li><li>中端定价（$15-20&#x2F;月）存在市场空白</li><li>用户对 AI 生成内容质量仍有顾虑</li></ol><hr><h2 id="🏆-第一梯队产品"><a href="#🏆-第一梯队产品" class="headerlink" title="🏆 第一梯队产品"></a>🏆 第一梯队产品</h2><table><thead><tr><th>产品</th><th>优势</th><th>定价</th></tr></thead><tbody><tr><td>Notion AI</td><td>生态完善、模板丰富</td><td>免费 + $10&#x2F;月 AI</td></tr><tr><td>Obsidian + AI</td><td>数据本地、高度定制</td><td>免费 + 插件付费</td></tr><tr><td>飞书文档 AI</td><td>本土化好、集成度高</td><td>免费 + 企业版</td></tr></tbody></table><hr><h2 id="💡-用户痛点-TOP3"><a href="#💡-用户痛点-TOP3" class="headerlink" title="💡 用户痛点 TOP3"></a>💡 用户痛点 TOP3</h2><ol><li><strong>信息过载</strong> - 68% 用户抱怨”每天收藏 10+ 篇，但从来不看”</li><li><strong>AI 质量不稳定</strong> - 52% 用户认为”AI 写的东西细看都是废话”</li><li><strong>多平台同步差</strong> - 45% 用户遇到”手机写的电脑找不到”</li></ol><hr><h2 id="🎯-市场机会"><a href="#🎯-市场机会" class="headerlink" title="🎯 市场机会"></a>🎯 市场机会</h2><h3 id="💰-中端定价空白"><a href="#💰-中端定价空白" class="headerlink" title="💰 中端定价空白"></a>💰 中端定价空白</h3><p>建议定价：<strong>$18&#x2F;月</strong>，目标愿意为质量付费的专业用户</p><h3 id="🤖-AI-质量优化"><a href="#🤖-AI-质量优化" class="headerlink" title="🤖 AI 质量优化"></a>🤖 AI 质量优化</h3><ul><li>RAG 技术（检索增强生成）</li><li>垂直领域微调模型</li><li>人工审核层</li></ul><h3 id="🎯-垂直领域深耕"><a href="#🎯-垂直领域深耕" class="headerlink" title="🎯 垂直领域深耕"></a>🎯 垂直领域深耕</h3><ul><li>法律行业：$30-50&#x2F;月</li><li>咨询行业：$25-40&#x2F;月</li><li>学术研究：$15-25&#x2F;月</li></ul><hr><h2 id="📋-结论"><a href="#📋-结论" class="headerlink" title="📋 结论"></a>📋 结论</h2><p>AI 笔记软件市场持续增长，2026 年预计达到 50 亿美元。新进入者应：</p><ol><li>明确目标用户群体</li><li>打造核心差异化功能</li><li>合理定价（考虑$15-20&#x2F;月中端市场）</li><li>重视数据导出和用户掌控感</li></ol><hr><p><strong>完整报告</strong>: <a href="http://8.208.28.70:8080/research/ai-note-market-report-v2.md">查看</a></p><p><strong>评审报告</strong>: <a href="http://8.208.28.70:8080/research/ai-note-market-review-v2.md">查看</a></p>]]>
+    </content>
+    <id>https://yadinae.github.io/2026/03/06/ai-note-market-report-2026/</id>
+    <link href="https://yadinae.github.io/2026/03/06/ai-note-market-report-2026/"/>
+    <published>2026-03-06T11:30:00.000Z</published>
+    <summary>
+      <![CDATA[<h2 id="📊-执行摘要"><a href="#📊-执行摘要" class="headerlink" title="📊 执行摘要"></a>📊 执行摘要</h2><p>本次调研覆盖了 <strong>12 个主流 AI 笔记软件</strong>，分析了市场趋势、用户]]>
+    </summary>
+    <title>AI 笔记软件市场调研报告（2026 年 3 月）</title>
+    <updated>2026-03-06T11:24:39.447Z</updated>
+  </entry>
   <entry>
     <author>
       <name>颂雅风</name>
