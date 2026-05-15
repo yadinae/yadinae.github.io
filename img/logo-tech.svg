@@ -1,0 +1,36 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a55e8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8a2be2;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 星空背景 -->
+  <rect width="200" height="60" fill="#0a0a0f"/>
+  
+  <!-- 星星点缀 -->
+  <circle cx="10" cy="10" r="1" fill="white" opacity="0.8"/>
+  <circle cx="30" cy="5" r="0.8" fill="white" opacity="0.6"/>
+  <circle cx="50" cy="15" r="1.2" fill="white" opacity="0.7"/>
+  <circle cx="180" cy="8" r="0.9" fill="white" opacity="0.8"/>
+  <circle cx="160" cy="12" r="1.1" fill="white" opacity="0.6"/>
+  <circle cx="140" cy="6" r="0.7" fill="white" opacity="0.7"/>
+  
+  <!-- 主标题文字 -->
+  <text x="70" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#grad1)" filter="url(#glow)">
+    颂雅风
+  </text>
+  
+  <!-- 副标题 -->
+  <text x="75" y="55" font-family="Arial, sans-serif" font-size="12" fill="#a0a0c0" opacity="0.8">
+    Blog
+  </text>
+</svg>
