@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="50%" style="stop-color:#302b63"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d4ff"/>
+      <stop offset="100%" style="stop-color:#7b2ff7"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- 背景 -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- 网格装饰 -->
+  <g opacity="0.05" stroke="#fff" stroke-width="0.5">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+  <!-- 中间卡片 -->
+  <rect x="200" y="150" width="800" height="330" rx="20" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <!-- 标题 -->
+  <text x="600" y="260" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="52" font-weight="bold" fill="#fff" filter="url(#glow)">交付不是终点</text>
+  <text x="600" y="325" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="52" font-weight="bold" fill="url(#accent)">验证合格才是</text>
+  <!-- 分隔线 -->
+  <line x1="450" y1="360" x2="750" y2="360" stroke="url(#accent)" stroke-width="2" opacity="0.5"/>
+  <!-- 副标题 -->
+  <text x="600" y="405" text-anchor="middle" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="22" fill="rgba(255,255,255,0.6)">AI Agent 交付质量门禁实战记录</text>
+  <!-- 底部项目 -->
+  <g font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="16" fill="rgba(255,255,255,0.4)">
+    <text x="600" y="450" text-anchor="middle">三层门禁 · 流程层 — 规则层 — 触发层</text>
+    <text x="600" y="475" text-anchor="middle">我就是自己的判别者</text>
+  </g>
+  <!-- 装饰圆点 -->
+  <circle cx="350" cy="200" r="3" fill="#00d4ff" opacity="0.4"/>
+  <circle cx="850" cy="200" r="3" fill="#7b2ff7" opacity="0.4"/>
+  <circle cx="350" cy="430" r="3" fill="#00d4ff" opacity="0.4"/>
+  <circle cx="850" cy="430" r="3" fill="#7b2ff7" opacity="0.4"/>
+</svg>
