@@ -5,53 +5,53 @@
     </marker>
   </defs>
   <rect width="850" height="620" fill="#f8f9fa" rx="16"/>
-  <text x="425" y="40" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#2c3e50">Hexo 主题选型决策树</text>
+  <text x="425" y="40" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#2c3e50">Hexo Theme Decision Tree</text>
   <rect x="325" y="58" width="200" height="40" rx="20" fill="#2c3e50"/>
-  <text x="425" y="84" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="white">你的博客类型？</text>
+  <text x="425" y="84" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="white">Your Blog Type?</text>
   <line x1="370" y1="98" x2="140" y2="148" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="425" y1="98" x2="425" y2="148" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="480" y1="98" x2="680" y2="148" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
   <line x1="570" y1="110" x2="760" y2="165" stroke="#95a5a6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
   <rect x="45" y="148" width="190" height="40" rx="20" fill="#3498db"/>
-  <text x="140" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">个人技术博客</text>
+  <text x="140" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Personal Tech Blog</text>
   <rect x="330" y="148" width="190" height="40" rx="20" fill="#3498db"/>
-  <text x="425" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">纯写作向</text>
+  <text x="425" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Pure Writing</text>
   <rect x="585" y="148" width="190" height="40" rx="20" fill="#3498db"/>
-  <text x="680" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">内容站点 / 多分类</text>
+  <text x="680" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Content Site / Multi-cat</text>
   <rect x="670" y="165" width="180" height="40" rx="20" fill="#e67e22"/>
-  <text x="760" y="191" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">综合型 / 不知道选什么</text>
+  <text x="760" y="191" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">General / Not Sure</text>
   <line x1="140" y1="188" x2="55" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="140" y1="188" x2="140" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="140" y1="188" x2="225" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <rect x="5" y="230" width="100" height="34" rx="17" fill="#1abc9c"/>
-  <text x="55" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">喜欢折腾 → NexT</text>
+  <text x="55" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Customize → NexT</text>
   <rect x="88" y="230" width="104" height="34" rx="17" fill="#1abc9c"/>
-  <text x="140" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">开箱即用 → Butterfly</text>
+  <text x="140" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Out-of-Box → Butterfly</text>
   <rect x="170" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="225" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">极致性能 → Redefine</text>
+  <text x="225" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Max Speed → Redefine</text>
   <line x1="425" y1="188" x2="340" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="425" y1="188" x2="425" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="425" y1="188" x2="510" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <rect x="285" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="340" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">三栏高效 → Icarus</text>
+  <text x="340" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">3-Column → Icarus</text>
   <rect x="370" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="425" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">极简专注 → Aria</text>
+  <text x="425" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Minimal → Aria</text>
   <rect x="455" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="510" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">富内容嵌入 → Volantis</text>
+  <text x="510" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Rich Content → Volantis</text>
   <line x1="680" y1="188" x2="635" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <line x1="680" y1="188" x2="725" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <rect x="575" y="230" width="120" height="34" rx="17" fill="#1abc9c"/>
-  <text x="635" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">需要知识库 → Stellar</text>
+  <text x="635" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Need Wiki → Stellar</text>
   <rect x="660" y="230" width="130" height="34" rx="17" fill="#1abc9c"/>
-  <text x="725" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Material设计 → Fluid</text>
+  <text x="725" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Material → Fluid</text>
   <line x1="760" y1="205" x2="760" y2="248" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
   <rect x="665" y="248" width="190" height="40" rx="20" fill="#e74c3c"/>
-  <text x="760" y="274" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Butterfly (最稳妥)</text>
-  <text x="425" y="325" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#7f8c8d">先找自己最接近的分类，再沿分支往下选择</text>
+  <text x="760" y="274" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Butterfly (Safest)</text>
+  <text x="425" y="325" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#7f8c8d">Find your type above, then follow the branch down</text>
   <rect x="60" y="370" width="730" height="140" rx="12" fill="white" stroke="#ddd" stroke-width="1.5"/>
-  <text x="425" y="400" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#2c3e50">选型前注意</text>
-  <text x="90" y="428" font-family="sans-serif" font-size="13" fill="#555">维护活跃度：不要装超过一年没更新的主题</text>
-  <text x="90" y="452" font-family="sans-serif" font-size="13" fill="#555">文档质量：有中文文档 > 有英文文档 > 没有文档</text>
-  <text x="90" y="476" font-family="sans-serif" font-size="13" fill="#555">上手成本：Butterfly/安知鱼 < 1小时，NexT可能需要半天</text>
-  <text x="90" y="500" font-family="sans-serif" font-size="13" fill="#555">先装预览版跑跑看，实际效果和截图往往不一样</text>
+  <text x="425" y="400" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#2c3e50">Before Choosing</text>
+  <text x="90" y="428" font-family="sans-serif" font-size="13" fill="#555">Activity: avoid themes with no updates in &gt;1 year</text>
+  <text x="90" y="452" font-family="sans-serif" font-size="13" fill="#555">Docs: Chinese docs &gt; English docs &gt; No docs</text>
+  <text x="90" y="476" font-family="sans-serif" font-size="13" fill="#555">Learning Curve: Butterfly/AnZhiYu &lt; 1hr, NexT may take half-day</text>
+  <text x="90" y="500" font-family="sans-serif" font-size="13" fill="#555">Try preview first — live site often differs from screenshots</text>
 </svg>

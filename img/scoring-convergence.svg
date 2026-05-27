@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="560" viewBox="0 0 800 560">
   <rect width="800" height="560" fill="#f8f9fa" rx="16"/>
-  <text x="400" y="35" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#2c3e50">打分收敛：P0-P4 评分体系</text>
-  <text x="400" y="55" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#7f8c8d">收敛条件：总加权分 < 20 且连续两轮无 P0 问题</text>
+  <text x="400" y="35" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="bold" fill="#2c3e50">Scoring System: P0-P4 Severity Rating</text>
+  <text x="400" y="55" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#7f8c8d">Convergence: weighted total &lt; 20 &amp; no P0 for 2 consecutive rounds</text>
 
   <!-- Table -->
   <rect x="40" y="78" width="720" height="210" rx="10" fill="white" stroke="#ddd" stroke-width="1.5"/>
   <rect x="40" y="78" width="720" height="36" rx="10" fill="#2c3e50"/>
   <rect x="40" y="98" width="720" height="16" fill="#2c3e50"/>
-  <text x="140" y="101" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">等级</text>
-  <text x="340" y="101" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">分值</text>
-  <text x="580" y="101" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">含义</text>
+  <text x="140" y="101" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Level</text>
+  <text x="340" y="101" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Score</text>
+  <text x="580" y="101" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Meaning</text>
 
   <line x1="240" y1="78" x2="240" y2="288" stroke="#ddd" stroke-width="1"/>
   <line x1="440" y1="78" x2="440" y2="288" stroke="#ddd" stroke-width="1"/>
@@ -17,34 +17,34 @@
   <rect x="40" y="114" width="720" height="29" fill="#fff5f5"/>
   <text x="140" y="133" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e74c3c">P0</text>
   <text x="340" y="133" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e74c3c">100</text>
-  <text x="580" y="133" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">致命问题，不修没法用</text>
+  <text x="580" y="133" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">Critical - breaks the system</text>
 
   <rect x="40" y="143" width="720" height="29" fill="#fef9e7"/>
   <text x="140" y="162" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e67e22">P1</text>
   <text x="340" y="162" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e67e22">50</text>
-  <text x="580" y="162" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">重要缺陷，影响使用</text>
+  <text x="580" y="162" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">Major - affects usability</text>
 
   <rect x="40" y="172" width="720" height="29" fill="#fef9e7"/>
   <text x="140" y="191" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#f39c12">P2</text>
   <text x="340" y="191" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#f39c12">20</text>
-  <text x="580" y="191" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">一般问题，建议修复</text>
+  <text x="580" y="191" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">Moderate - should fix</text>
 
   <rect x="40" y="201" width="720" height="29" fill="#eafaf1"/>
   <text x="140" y="220" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#27ae60">P3</text>
   <text x="340" y="220" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#27ae60">10</text>
-  <text x="580" y="220" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">小瑕疵，有空再修</text>
+  <text x="580" y="220" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">Minor - nice to fix</text>
 
   <rect x="40" y="230" width="720" height="29" fill="#eafaf1"/>
   <text x="140" y="249" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#1abc9c">P4</text>
   <text x="340" y="249" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="#1abc9c">5</text>
-  <text x="580" y="249" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">纯风格/偏好，改不改都行</text>
+  <text x="580" y="249" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#555">Cosmetic - personal preference</text>
 
-  <!-- Weighted sum: P0*100 + P1*50 + P2*20 + P3*10 + P4*5 -->
+  <!-- Weighted sum -->
   <rect x="40" y="259" width="720" height="29" rx="4" fill="#2c3e50" opacity="0.1"/>
-  <text x="400" y="278" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#2c3e50">加权总分 = P0x100 + P1x50 + P2x20 + P3x10 + P4x5</text>
+  <text x="400" y="278" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="#2c3e50">Total = P0x100 + P1x50 + P2x20 + P3x10 + P4x5</text>
 
   <!-- Convergence timeline example -->
-  <text x="400" y="325" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#2c3e50">收敛过程示例</text>
+  <text x="400" y="325" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#2c3e50">Convergence Process Example</text>
 
   <!-- Round 1 -->
   <rect x="50" y="345" width="220" height="130" rx="10" fill="white" stroke="#e74c3c" stroke-width="2"/>
@@ -52,7 +52,7 @@
   <text x="160" y="392" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">2 x P2 (40) + 3 x P3 (30)</text>
   <text x="160" y="412" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">+ 1 x P4 (5)</text>
   <line x1="70" y1="425" x2="250" y2="425" stroke="#eee" stroke-width="1"/>
-  <text x="160" y="450" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#e74c3c">= 75分 ✗</text>
+  <text x="160" y="450" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#e74c3c">= 75 pts !</text>
 
   <!-- Arrow -->
   <text x="280" y="410" font-family="sans-serif" font-size="20" fill="#7f8c8d">→</text>
@@ -61,9 +61,9 @@
   <rect x="295" y="345" width="220" height="130" rx="10" fill="white" stroke="#e67e22" stroke-width="2"/>
   <text x="405" y="370" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#e67e22">Round 2</text>
   <text x="405" y="392" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">1 x P2 (20) + 1 x P3 (10)</text>
-  <text x="405" y="412" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">无 P0 问题 ✓</text>
+  <text x="405" y="412" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">No P0 issue</text>
   <line x1="315" y1="425" x2="495" y2="425" stroke="#eee" stroke-width="1"/>
-  <text x="405" y="450" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#e67e22">= 30分 ✗</text>
+  <text x="405" y="450" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#e67e22">= 30 pts !</text>
 
   <!-- Arrow -->
   <text x="525" y="410" font-family="sans-serif" font-size="20" fill="#7f8c8d">→</text>
@@ -72,10 +72,10 @@
   <rect x="540" y="345" width="220" height="130" rx="10" fill="white" stroke="#27ae60" stroke-width="2"/>
   <text x="650" y="370" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="bold" fill="#27ae60">Round 3</text>
   <text x="650" y="392" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">1 x P3 (10) + 1 x P4 (5)</text>
-  <text x="650" y="412" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">连续无 P0 ✓</text>
+  <text x="650" y="412" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#555">2 rounds no P0</text>
   <line x1="560" y1="425" x2="740" y2="425" stroke="#eee" stroke-width="1"/>
-  <text x="650" y="450" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#27ae60">= 15分 ✓ 收敛</text>
+  <text x="650" y="450" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="bold" fill="#27ae60">= 15 pts  Converged!</text>
 
   <!-- Bottom note -->
-  <text x="400" y="515" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#7f8c8d">每一轮 Solver 根据反馈修复问题，总分会逐轮下降，直到收敛条件满足</text>
+  <text x="400" y="515" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#7f8c8d">Each round: Solver fixes issues based on feedback, total score drops until convergence</text>
 </svg>

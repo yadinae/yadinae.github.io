@@ -24,9 +24,9 @@
   <circle cx="160" cy="12" r="1.1" fill="white" opacity="0.6"/>
   <circle cx="140" cy="6" r="0.7" fill="white" opacity="0.7"/>
   
-  <!-- 主标题文字 -->
+  <!-- Main title -->
   <text x="70" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#grad1)" filter="url(#glow)">
-    颂雅风
+    SongYaFeng
   </text>
   
   <!-- 副标题 -->
