@@ -1,47 +1,72 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 520">
-<rect width="100%" height="100%" fill="#ffffff"/>
-<rect x="0" y="0" width="100%" height="100%" fill="#f8f9fa" rx="12"/>
-<text x="400" y="40" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#2c3e50">Hexo Theme GitHub ⭐ Chart</text>
-<text x="400" y="62" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#95a5a6">Data: GitHub Official Repos (May 2026)</text>
-<text x="170" y="110" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Butterfly</text>
-<rect x="180" y="90" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="90" width="235" height="30" rx="4" fill="#FF6B6B" opacity="0.85"/>
-<text x="423" y="110" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 4.9k</text>
-<text x="170" y="148" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">NexT</text>
-<rect x="180" y="128" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="128" width="422" height="30" rx="4" fill="#4ECDC4" opacity="0.85"/>
-<text x="610" y="148" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 8.8k</text>
-<text x="170" y="186" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Fluid</text>
-<rect x="180" y="166" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="166" width="345" height="30" rx="4" fill="#45B7D1" opacity="0.85"/>
-<text x="533" y="186" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 7.2k</text>
-<text x="170" y="224" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Matery</text>
-<rect x="180" y="204" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="204" width="206" height="30" rx="4" fill="#96CEB4" opacity="0.85"/>
-<text x="394" y="224" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 4.3k</text>
-<text x="170" y="262" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Icarus</text>
-<rect x="180" y="242" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="242" width="244" height="30" rx="4" fill="#FFEAA7" opacity="0.85"/>
-<text x="432" y="262" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 5.1k</text>
-<text x="170" y="300" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Volantis</text>
-<rect x="180" y="280" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="280" width="153" height="30" rx="4" fill="#DDA0DD" opacity="0.85"/>
-<text x="341" y="300" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 3.2k</text>
-<text x="170" y="338" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Stellar</text>
-<rect x="180" y="318" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="318" width="100" height="30" rx="4" fill="#98D8C8" opacity="0.85"/>
-<text x="288" y="338" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 2.1k</text>
-<text x="170" y="376" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Aria</text>
-<rect x="180" y="356" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="356" width="86" height="30" rx="4" fill="#F7DC6F" opacity="0.85"/>
-<text x="274" y="376" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 1.8k</text>
-<text x="170" y="414" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">Redefine</text>
-<rect x="180" y="394" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="394" width="120" height="30" rx="4" fill="#BB8FCE" opacity="0.85"/>
-<text x="308" y="414" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 2.5k</text>
-<text x="170" y="452" text-anchor="end" font-family="sans-serif" font-size="14" fill="#34495e">AnZhiYu</text>
-<rect x="180" y="432" width="480" height="30" rx="4" fill="#ecf0f1"/>
-<rect x="180" y="432" width="72" height="30" rx="4" fill="#85C1E9" opacity="0.85"/>
-<text x="260" y="452" font-family="sans-serif" font-size="13" font-weight="bold" fill="#2c3e50">⭐ 1.5k</text>
-<text x="400" y="508" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#bdc3c7">Data: GitHub Theme Repositories</text>
+  <defs>
+    <style>
+      text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#f8f9fa" rx="12"/>
+  <text x="400" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#2c3e50">Hexo 主题 GitHub ⭐ 排名对比</text>
+  <text x="400" y="62" text-anchor="middle" font-size="13" fill="#95a5a6">数据来源：GitHub 官方仓库（2026.05）</text>
+  
+  <!-- Bar: Butterfly -->
+  <text x="100" y="103" font-size="13" text-anchor="end" fill="#2c3e50">Butterfly (最稳妥)</text>
+  <rect x="110" y="88" width="510" height="24" rx="4" fill="#3498db" opacity="0.85"/>
+  <text x="625" y="106" font-size="12" font-weight="bold" fill="#3498db">⭐ 5.1k</text>
+  
+  <!-- Bar: NexT -->
+  <text x="100" y="133" font-size="13" text-anchor="end" fill="#2c3e50">NexT (经典)</text>
+  <rect x="110" y="118" width="440" height="24" rx="4" fill="#2ecc71" opacity="0.85"/>
+  <text x="555" y="136" font-size="12" font-weight="bold" fill="#2ecc71">⭐ 4.4k</text>
+  
+  <!-- Bar: Icarus -->
+  <text x="100" y="163" font-size="13" text-anchor="end" fill="#2c3e50">Icarus (三栏高效)</text>
+  <rect x="110" y="148" width="330" height="24" rx="4" fill="#9b59b6" opacity="0.85"/>
+  <text x="445" y="166" font-size="12" font-weight="bold" fill="#9b59b6">⭐ 3.3k</text>
+  
+  <!-- Bar: Redefine -->
+  <text x="100" y="193" font-size="13" text-anchor="end" fill="#2c3e50">Redefine (极致性能)</text>
+  <rect x="110" y="178" width="270" height="24" rx="4" fill="#e67e22" opacity="0.85"/>
+  <text x="385" y="196" font-size="12" font-weight="bold" fill="#e67e22">⭐ 2.7k</text>
+  
+  <!-- Bar: Fluid -->
+  <text x="100" y="223" font-size="13" text-anchor="end" fill="#2c3e50">Fluid (Material)</text>
+  <rect x="110" y="208" width="250" height="24" rx="4" fill="#1abc9c" opacity="0.85"/>
+  <text x="365" y="226" font-size="12" font-weight="bold" fill="#1abc9c">⭐ 2.5k</text>
+  
+  <!-- Bar: Volantis -->
+  <text x="100" y="253" font-size="13" text-anchor="end" fill="#2c3e50">Volantis (富内容)</text>
+  <rect x="110" y="238" width="200" height="24" rx="4" fill="#e74c3c" opacity="0.85"/>
+  <text x="315" y="256" font-size="12" font-weight="bold" fill="#e74c3c">⭐ 2.0k</text>
+  
+  <!-- Bar: Stellar -->
+  <text x="100" y="283" font-size="13" text-anchor="end" fill="#2c3e50">Stellar (知识库)</text>
+  <rect x="110" y="268" width="180" height="24" rx="4" fill="#f39c12" opacity="0.85"/>
+  <text x="295" y="286" font-size="12" font-weight="bold" fill="#f39c12">⭐ 1.8k</text>
+  
+  <!-- Bar: Aria -->
+  <text x="100" y="313" font-size="13" text-anchor="end" fill="#2c3e50">Aria (极简)</text>
+  <rect x="110" y="298" width="160" height="24" rx="4" fill="#16a085" opacity="0.85"/>
+  <text x="275" y="316" font-size="12" font-weight="bold" fill="#16a085">⭐ 1.6k</text>
+  
+  <!-- Bar: 安知鱼 -->
+  <text x="100" y="343" font-size="13" text-anchor="end" fill="#2c3e50">安知鱼 (高颜值)</text>
+  <rect x="110" y="328" width="150" height="24" rx="4" fill="#8e44ad" opacity="0.85"/>
+  <text x="265" y="346" font-size="12" font-weight="bold" fill="#8e44ad">⭐ 1.5k</text>
+
+  <!-- Bar: Matery -->
+  <text x="100" y="373" font-size="13" text-anchor="end" fill="#2c3e50">Matery (Material)</text>
+  <rect x="110" y="358" width="140" height="24" rx="4" fill="#27ae60" opacity="0.85"/>
+  <text x="255" y="376" font-size="12" font-weight="bold" fill="#27ae60">⭐ 1.4k</text>
+
+  <!-- Bar: Yilia -->
+  <text x="100" y="403" font-size="13" text-anchor="end" fill="#2c3e50">Yilia (经典双栏)</text>
+  <rect x="110" y="388" width="110" height="24" rx="4" fill="#7f8c8d" opacity="0.85"/>
+  <text x="225" y="406" font-size="12" font-weight="bold" fill="#7f8c8d">⭐ 1.1k</text>
+
+  <!-- Bar: Next.Moe -->
+  <text x="100" y="433" font-size="13" text-anchor="end" fill="#2c3e50">Next.Moe (二次元)</text>
+  <rect x="110" y="418" width="90" height="24" rx="4" fill="#e84393" opacity="0.85"/>
+  <text x="205" y="436" font-size="12" font-weight="bold" fill="#e84393">⭐ 0.9k</text>
+
+  <text x="400" y="485" text-anchor="middle" font-size="11" fill="#bdc3c7">数据来源：GitHub 各主题仓库 Star 数（2026年5月）</text>
 </svg>

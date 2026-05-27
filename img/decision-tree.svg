@@ -1,57 +1,113 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="850" height="620" viewBox="0 0 850 620">
   <defs>
+    <style>
+      text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; }
+    </style>
     <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#95a5a6"/>
     </marker>
   </defs>
   <rect width="850" height="620" fill="#f8f9fa" rx="16"/>
-  <text x="425" y="40" text-anchor="middle" font-family="sans-serif" font-size="22" font-weight="bold" fill="#2c3e50">Hexo Theme Decision Tree</text>
-  <rect x="325" y="58" width="200" height="40" rx="20" fill="#2c3e50"/>
-  <text x="425" y="84" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="white">Your Blog Type?</text>
-  <line x1="370" y1="98" x2="140" y2="148" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="425" y1="98" x2="425" y2="148" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="480" y1="98" x2="680" y2="148" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
-  <line x1="570" y1="110" x2="760" y2="165" stroke="#95a5a6" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
-  <rect x="45" y="148" width="190" height="40" rx="20" fill="#3498db"/>
-  <text x="140" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Personal Tech Blog</text>
-  <rect x="330" y="148" width="190" height="40" rx="20" fill="#3498db"/>
-  <text x="425" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Pure Writing</text>
-  <rect x="585" y="148" width="190" height="40" rx="20" fill="#3498db"/>
-  <text x="680" y="174" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Content Site / Multi-cat</text>
-  <rect x="670" y="165" width="180" height="40" rx="20" fill="#e67e22"/>
-  <text x="760" y="191" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">General / Not Sure</text>
-  <line x1="140" y1="188" x2="55" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="140" y1="188" x2="140" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="140" y1="188" x2="225" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <rect x="5" y="230" width="100" height="34" rx="17" fill="#1abc9c"/>
-  <text x="55" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Customize → NexT</text>
-  <rect x="88" y="230" width="104" height="34" rx="17" fill="#1abc9c"/>
-  <text x="140" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Out-of-Box → Butterfly</text>
-  <rect x="170" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="225" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Max Speed → Redefine</text>
-  <line x1="425" y1="188" x2="340" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="425" y1="188" x2="425" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="425" y1="188" x2="510" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <rect x="285" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="340" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">3-Column → Icarus</text>
-  <rect x="370" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="425" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Minimal → Aria</text>
-  <rect x="455" y="230" width="110" height="34" rx="17" fill="#1abc9c"/>
-  <text x="510" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Rich Content → Volantis</text>
-  <line x1="680" y1="188" x2="635" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <line x1="680" y1="188" x2="725" y2="230" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <rect x="575" y="230" width="120" height="34" rx="17" fill="#1abc9c"/>
-  <text x="635" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Need Wiki → Stellar</text>
-  <rect x="660" y="230" width="130" height="34" rx="17" fill="#1abc9c"/>
-  <text x="725" y="252" text-anchor="middle" font-family="sans-serif" font-size="12" fill="white">Material → Fluid</text>
-  <line x1="760" y1="205" x2="760" y2="248" stroke="#95a5a6" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <rect x="665" y="248" width="190" height="40" rx="20" fill="#e74c3c"/>
-  <text x="760" y="274" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white">Butterfly (Safest)</text>
-  <text x="425" y="325" text-anchor="middle" font-family="sans-serif" font-size="13" fill="#7f8c8d">Find your type above, then follow the branch down</text>
-  <rect x="60" y="370" width="730" height="140" rx="12" fill="white" stroke="#ddd" stroke-width="1.5"/>
-  <text x="425" y="400" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="bold" fill="#2c3e50">Before Choosing</text>
-  <text x="90" y="428" font-family="sans-serif" font-size="13" fill="#555">Activity: avoid themes with no updates in &gt;1 year</text>
-  <text x="90" y="452" font-family="sans-serif" font-size="13" fill="#555">Docs: Chinese docs &gt; English docs &gt; No docs</text>
-  <text x="90" y="476" font-family="sans-serif" font-size="13" fill="#555">Learning Curve: Butterfly/AnZhiYu &lt; 1hr, NexT may take half-day</text>
-  <text x="90" y="500" font-family="sans-serif" font-size="13" fill="#555">Try preview first — live site often differs from screenshots</text>
+  
+  <!-- Title -->
+  <text x="425" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#2c3e50">Hexo 主题选型决策树</text>
+  <text x="425" y="62" text-anchor="middle" font-size="13" fill="#95a5a6">先找自己最接近的分类，再沿分支往下选择</text>
+
+  <!-- Root question -->
+  <rect x="325" y="85" width="200" height="36" rx="18" fill="#2c3e50"/>
+  <text x="425" y="108" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">你的博客类型？</text>
+
+  <!-- Level 1 branches -->
+  <line x1="425" y1="121" x2="130" y2="175" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="425" y1="121" x2="425" y2="175" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="425" y1="121" x2="720" y2="175" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- L1: Tech blog -->
+  <rect x="50" y="175" width="160" height="36" rx="18" fill="#3498db"/>
+  <text x="130" y="198" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">个人技术博客</text>
+
+  <!-- L1: Content site -->
+  <rect x="345" y="175" width="160" height="36" rx="18" fill="#e67e22"/>
+  <text x="425" y="198" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">内容站点</text>
+
+  <!-- L1: Not sure -->
+  <rect x="640" y="175" width="160" height="36" rx="18" fill="#9b59b6"/>
+  <text x="720" y="198" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">不知道选什么</text>
+
+  <!-- Lines from L1 tech to L2 -->
+  <line x1="130" y1="211" x2="130" y2="250" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- L2 tech: customization -->
+  <rect x="30" y="255" width="200" height="36" rx="18" fill="#2980b9"/>
+  <text x="130" y="278" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">喜欢折腾 → NexT</text>
+  
+  <!-- Lines from L1 content to L2 -->
+  <line x1="425" y1="211" x2="280" y2="250" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="425" y1="211" x2="425" y2="250" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="425" y1="211" x2="570" y2="250" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- L2 content: pure writing -->
+  <rect x="180" y="255" width="200" height="36" rx="18" fill="#d35400"/>
+  <text x="280" y="278" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">纯写作向 → Aria</text>
+
+  <!-- L2 content: multi-cat -->
+  <rect x="325" y="255" width="200" height="36" rx="18" fill="#e67e22"/>
+  <text x="425" y="278" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">多分类 → Icarus</text>
+
+  <!-- L2 content: rich content -->
+  <rect x="470" y="255" width="200" height="36" rx="18" fill="#d35400"/>
+  <text x="570" y="278" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">富内容 → Volantis</text>
+
+  <!-- Lines from L1 not sure to L2 -->
+  <line x1="720" y1="211" x2="720" y2="250" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- L2 not sure -->
+  <rect x="620" y="255" width="200" height="36" rx="18" fill="#8e44ad"/>
+  <text x="720" y="278" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">综合型 → Butterfly</text>
+
+  <!-- Additional L3 nodes -->
+  <line x1="130" y1="291" x2="130" y2="330" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="30" y="335" width="200" height="36" rx="18" fill="#1a5276"/>
+  <text x="130" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">开箱即用 → Butterfly</text>
+
+  <line x1="130" y1="371" x2="130" y2="410" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="30" y="415" width="200" height="36" rx="18" fill="#1a5276"/>
+  <text x="130" y="438" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">极致性能 → Redefine</text>
+
+  <!-- More content branch nodes -->
+  <line x1="280" y1="291" x2="280" y2="330" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="180" y="335" width="200" height="36" rx="18" fill="#a04000"/>
+  <text x="280" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">极简专注 → Aria</text>
+
+  <line x1="425" y1="291" x2="425" y2="330" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="325" y="335" width="200" height="36" rx="18" fill="#d35400"/>
+  <text x="425" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">三栏高效 → Icarus</text>
+
+  <line x1="570" y1="291" x2="570" y2="330" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="470" y="335" width="200" height="36" rx="18" fill="#a04000"/>
+  <text x="570" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">富内容嵌入 → Volantis</text>
+
+  <!-- More -->
+  <line x1="570" y1="371" x2="570" y2="410" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="470" y="415" width="200" height="36" rx="18" fill="#a04000"/>
+  <text x="570" y="438" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">需要知识库 → Stellar</text>
+
+  <!-- Not sure additional -->
+  <line x1="720" y1="291" x2="720" y2="330" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="620" y="335" width="200" height="36" rx="18" fill="#6c3483"/>
+  <text x="720" y="358" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">Material设计 → Fluid</text>
+
+  <line x1="720" y1="371" x2="720" y2="410" stroke="#95a5a6" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="600" y="415" width="240" height="36" rx="18" fill="#6c3483"/>
+  <text x="720" y="438" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">最稳妥 → Butterfly（推荐）</text>
+
+  <!-- Best pick highlight -->
+  <text x="130" y="500" text-anchor="middle" font-size="13" font-weight="bold" fill="#27ae60">🎯 新手首选：Butterfly</text>
+
+  <!-- Notes section -->
+  <rect x="30" y="525" width="790" height="85" rx="8" fill="#fef9e7" stroke="#f9e79f" stroke-width="1"/>
+  <text x="50" y="548" font-size="14" font-weight="bold" fill="#e67e22">📋 选型前注意</text>
+  <text x="50" y="568" font-size="13" fill="#555">· 维护活跃度：不要装超过一年没更新的主题</text>
+  <text x="50" y="588" font-size="13" fill="#555">· 文档质量：有中文文档 > 有英文文档 > 没有文档</text>
+  <text x="50" y="608" font-size="13" fill="#555">· 先装预览版跑跑看，实际效果和截图往往不一样</text>
 </svg>
