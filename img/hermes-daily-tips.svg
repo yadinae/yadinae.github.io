@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="c1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="100%" stop-color="#c23152"/>
+    </linearGradient>
+    <linearGradient id="c2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00b4d8"/>
+      <stop offset="100%" stop-color="#0077b6"/>
+    </linearGradient>
+    <linearGradient id="c3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06d6a0"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="c4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#533483"/>
+      <stop offset="100%" stop-color="#3d1f6e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="16" fill="url(#bg)"/>
+  <text x="400" y="38" text-anchor="middle" fill="#fff" font-size="22" font-weight="bold">和 Hermes 聊天的实用技巧</text>
+  <text x="400" y="60" text-anchor="middle" fill="#aaa" font-size="13">像跟朋友聊天一样，自然而然</text>
+
+  <!-- Card 1 -->
+  <rect x="30" y="85" width="360" height="130" rx="12" fill="#1e2a3e" stroke="#e94560" stroke-width="1.5"/>
+  <text x="50" y="115" fill="#e94560" font-size="16" font-weight="bold">🗣️ 想让它解释清楚</text>
+  <text fill="#ccc" font-size="12">
+    <tspan x="50" y="140">你：能说得简单点吗？</tspan>
+    <tspan x="50" y="158">你：换一种方式解释</tspan>
+    <tspan x="50" y="176">你：举个具体的例子</tspan>
+  </text>
+  <text fill="#888" font-size="11">
+    <tspan x="50" y="200">💡 不要重启话题，直接告诉它调整方式</tspan>
+  </text>
+
+  <!-- Card 2 -->
+  <rect x="410" y="85" width="360" height="130" rx="12" fill="#1e2a3e" stroke="#00b4d8" stroke-width="1.5"/>
+  <text x="430" y="115" fill="#00b4d8" font-size="16" font-weight="bold">🎯 想让它帮做决定</text>
+  <text fill="#ccc" font-size="12">
+    <tspan x="430" y="140">你：A和B我该选哪个？</tspan>
+    <tspan x="430" y="158">你：帮我分析一下利弊</tspan>
+    <tspan x="430" y="176">你：如果是你，你会怎么做？</tspan>
+  </text>
+  <text fill="#888" font-size="11">
+    <tspan x="430" y="200">💡 它会给你多维度对比，不替你做决定</tspan>
+  </text>
+
+  <!-- Card 3 -->
+  <rect x="30" y="230" width="360" height="130" rx="12" fill="#1e2a3e" stroke="#06d6a0" stroke-width="1.5"/>
+  <text x="50" y="260" fill="#06d6a0" font-size="16" font-weight="bold">✂️ 想让它精简</text>
+  <text fill="#ccc" font-size="12">
+    <tspan x="50" y="285">你：用三句话总结</tspan>
+    <tspan x="50" y="303">你：浓缩成一段短信</tspan>
+    <tspan x="50" y="321">你：列出要点就好，不要展开</tspan>
+  </text>
+  <text fill="#888" font-size="11">
+    <tspan x="50" y="345">💡 提前告诉它你的格式偏好，它会记住</tspan>
+  </text>
+
+  <!-- Card 4 -->
+  <rect x="410" y="230" width="360" height="130" rx="12" fill="#1e2a3e" stroke="#9b59b6" stroke-width="1.5"/>
+  <text x="430" y="260" fill="#dbf" font-size="16" font-weight="bold">🔄 想让它一步步来</text>
+  <text fill="#ccc" font-size="12">
+    <tspan x="430" y="285">你：先告诉我第一步</tspan>
+    <tspan x="430" y="303">你：完成一步再问下一步</tspan>
+    <tspan x="430" y="321">你：在这个过程中你可以问我</tspan>
+  </text>
+  <text fill="#888" font-size="11">
+    <tspan x="430" y="345">💡 复杂任务用这种方式效果最好</tspan>
+  </text>
+
+  <text x="400" y="388" text-anchor="middle" fill="#888" font-size="11">⭐ 黄金法则：自然说话就好，不需要特殊指令格式</text>
+</svg>

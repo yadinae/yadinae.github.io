@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" font-family="'PingFang SC','Microsoft YaHei',sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#16213e"/>
+    </linearGradient>
+    <linearGradient id="hp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e94560"/>
+      <stop offset="100%" stop-color="#c23152"/>
+    </linearGradient>
+    <linearGradient id="mp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06d6a0"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="bp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00b4d8"/>
+      <stop offset="100%" stop-color="#0077b6"/>
+    </linearGradient>
+    <linearGradient id="cp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#533483"/>
+      <stop offset="100%" stop-color="#3d1f6e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="16" fill="url(#bg)"/>
+  <text x="400" y="38" text-anchor="middle" fill="#fff" font-size="22" font-weight="bold">模型供应商选型推荐</text>
+  <text x="400" y="60" text-anchor="middle" fill="#aaa" font-size="13">按你的需求来选，一句话就能切换</text>
+
+  <!-- Header row -->
+  <rect x="30" y="80" width="130" height="32" rx="6" fill="#2a2a3e"/>
+  <text x="95" y="101" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">选型维度</text>
+  <rect x="165" y="80" width="145" height="32" rx="6" fill="url(#hp)"/>
+  <text x="237" y="101" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">🥇 省心选</text>
+  <rect x="315" y="80" width="145" height="32" rx="6" fill="url(#mp)"/>
+  <text x="387" y="101" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">🥈 性价比</text>
+  <rect x="465" y="80" width="145" height="32" rx="6" fill="url(#bp)"/>
+  <text x="537" y="101" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">🥉 性能控</text>
+  <rect x="615" y="80" width="155" height="32" rx="6" fill="url(#cp)"/>
+  <text x="692" y="101" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">🇨🇳 国内用户</text>
+
+  <!-- Row 1: 推荐供应商 -->
+  <rect x="30" y="117" width="130" height="40" rx="6" fill="#1e1e32"/>
+  <text x="95" y="142" text-anchor="middle" fill="#ddd" font-size="13">推荐供应商</text>
+  <rect x="165" y="117" width="145" height="40" rx="6" fill="#2a1e2e" stroke="#e94560" stroke-width="1"/>
+  <text x="237" y="142" text-anchor="middle" fill="#faa" font-size="13">Nous Portal</text>
+  <rect x="315" y="117" width="145" height="40" rx="6" fill="#1e2e2a" stroke="#06d6a0" stroke-width="1"/>
+  <text x="387" y="142" text-anchor="middle" fill="#afa" font-size="13">DeepSeek</text>
+  <rect x="465" y="117" width="145" height="40" rx="6" fill="#1e2e3e" stroke="#00b4d8" stroke-width="1"/>
+  <text x="537" y="142" text-anchor="middle" fill="#adf" font-size="13">OpenAI / Claude</text>
+  <rect x="615" y="117" width="155" height="40" rx="6" fill="#2a1e3e" stroke="#9b59b6" stroke-width="1"/>
+  <text x="692" y="142" text-anchor="middle" fill="#dbf" font-size="13">GLM / Qwen</text>
+
+  <!-- Row 2: 一句话理由 -->
+  <rect x="30" y="162" width="130" height="40" rx="6" fill="#1e1e32"/>
+  <text x="95" y="187" text-anchor="middle" fill="#ddd" font-size="13">一句话理由</text>
+  <rect x="165" y="162" width="145" height="40" rx="6" fill="#2a1e2e"/>
+  <text x="237" y="182" text-anchor="middle" fill="#fcc" font-size="11">一个订阅，通吃</text>
+  <text x="237" y="196" text-anchor="middle" fill="#fcc" font-size="11">300+ 模型</text>
+  <rect x="315" y="162" width="145" height="40" rx="6" fill="#1e2e2a"/>
+  <text x="387" y="182" text-anchor="middle" fill="#cfc" font-size="11">便宜好用</text>
+  <text x="387" y="196" text-anchor="middle" fill="#cfc" font-size="11">中文也强</text>
+  <rect x="465" y="162" width="145" height="40" rx="6" fill="#1e2e3e"/>
+  <text x="537" y="182" text-anchor="middle" fill="#cdf" font-size="11">综合能力最强</text>
+  <text x="537" y="196" text-anchor="middle" fill="#cdf" font-size="11">编程/创意一流</text>
+  <rect x="615" y="162" width="155" height="40" rx="6" fill="#2a1e3e"/>
+  <text x="692" y="182" text-anchor="middle" fill="#ecf" font-size="11">中文顶尖</text>
+  <text x="692" y="196" text-anchor="middle" fill="#ecf" font-size="11">国内直连</text>
+
+  <!-- Row 3: 价格 -->
+  <rect x="30" y="207" width="130" height="40" rx="6" fill="#1e1e32"/>
+  <text x="95" y="232" text-anchor="middle" fill="#ddd" font-size="13">价格</text>
+  <rect x="165" y="207" width="145" height="40" rx="6" fill="#2a1e2e"/>
+  <text x="237" y="232" text-anchor="middle" fill="#faa" font-size="13">💰 月付</text>
+  <rect x="315" y="207" width="145" height="40" rx="6" fill="#1e2e2a"/>
+  <text x="387" y="232" text-anchor="middle" fill="#afa" font-size="13">💰 极低</text>
+  <rect x="465" y="207" width="145" height="40" rx="6" fill="#1e2e3e"/>
+  <text x="537" y="232" text-anchor="middle" fill="#adf" font-size="13">💰 较高</text>
+  <rect x="615" y="207" width="155" height="40" rx="6" fill="#2a1e3e"/>
+  <text x="692" y="232" text-anchor="middle" fill="#dbf" font-size="13">💰 按量计费</text>
+
+  <!-- Row 4: 中文能力 -->
+  <rect x="30" y="252" width="130" height="40" rx="6" fill="#1e1e32"/>
+  <text x="95" y="277" text-anchor="middle" fill="#ddd" font-size="13">中文能力</text>
+  <rect x="165" y="252" width="145" height="40" rx="6" fill="#2a1e2e"/>
+  <text fill="#faa" font-size="13" text-anchor="middle">
+    <tspan x="237" y="272">⭐⭐⭐</tspan>
+    <tspan x="237" y="287" font-size="11">良好</tspan>
+  </text>
+  <rect x="315" y="252" width="145" height="40" rx="6" fill="#1e2e2a"/>
+  <text fill="#afa" font-size="13" text-anchor="middle">
+    <tspan x="387" y="272">⭐⭐⭐⭐</tspan>
+    <tspan x="387" y="287" font-size="11">优秀</tspan>
+  </text>
+  <rect x="465" y="252" width="145" height="40" rx="6" fill="#1e2e3e"/>
+  <text fill="#adf" font-size="13" text-anchor="middle">
+    <tspan x="537" y="272">⭐⭐⭐</tspan>
+    <tspan x="537" y="287" font-size="11">良好</tspan>
+  </text>
+  <rect x="615" y="252" width="155" height="40" rx="6" fill="#2a1e3e"/>
+  <text fill="#dbf" font-size="13" text-anchor="middle">
+    <tspan x="692" y="272">⭐⭐⭐⭐⭐</tspan>
+    <tspan x="692" y="287" font-size="11">顶尖</tspan>
+  </text>
+
+  <!-- Row 5: 适合谁 -->
+  <rect x="30" y="297" width="130" height="40" rx="6" fill="#1e1e32"/>
+  <text x="95" y="322" text-anchor="middle" fill="#ddd" font-size="13">适合谁</text>
+  <rect x="165" y="297" width="145" height="40" rx="6" fill="#2a1e2e"/>
+  <text x="237" y="322" text-anchor="middle" fill="#fcc" font-size="12">不想折腾的人</text>
+  <rect x="315" y="297" width="145" height="40" rx="6" fill="#1e2e2a"/>
+  <text x="387" y="322" text-anchor="middle" fill="#cfc" font-size="12">预算有限的用户</text>
+  <rect x="465" y="297" width="145" height="40" rx="6" fill="#1e2e3e"/>
+  <text x="537" y="322" text-anchor="middle" fill="#cdf" font-size="12">专业用户/程序员</text>
+  <rect x="615" y="297" width="155" height="40" rx="6" fill="#2a1e3e"/>
+  <text x="692" y="322" text-anchor="middle" fill="#ecf" font-size="12">国内用户</text>
+
+  <!-- 底部 -->
+  <text x="400" y="370" text-anchor="middle" fill="#888" font-size="12">💡 提示：用 hermes model 命令随时切换 · 可以同时配多个，让 Hermes 自动选择</text>
+</svg>
