@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340">
+  <rect width="600" height="340" fill="#f0f4f8" rx="12"/>
+  <text x="300" y="30" text-anchor="middle" font-size="14" fill="#333" font-weight="bold">Curator 技能养护</text>
+  <rect x="30" y="50" width="540" height="35" rx="6" fill="#e8f5e9" stroke="#66bb6a" stroke-width="1"/>
+  <circle cx="55" cy="68" r="8" fill="#66bb6a"/>
+  <text x="70" y="72" font-size="11" fill="#2e7d32" font-weight="bold">写邮件助手</text>
+  <text x="350" y="72" font-size="10" fill="#555">使用: 156次 | 今日</text>
+  <rect x="30" y="95" width="540" height="35" rx="6" fill="#fff8e1" stroke="#ffb74d" stroke-width="1"/>
+  <circle cx="55" cy="113" r="8" fill="#ffa726"/>
+  <text x="70" y="117" font-size="11" fill="#e65100" font-weight="bold">代码审查助手</text>
+  <text x="350" y="117" font-size="10" fill="#555">使用: 23次 | 3天前</text>
+  <rect x="30" y="140" width="540" height="35" rx="6" fill="#fce4ec" stroke="#ef5350" stroke-width="1"/>
+  <circle cx="55" cy="158" r="8" fill="#ef5350"/>
+  <text x="70" y="162" font-size="11" fill="#c62828" font-weight="bold">旧版翻译脚本</text>
+  <text x="350" y="162" font-size="10" fill="#555">使用: 5次 | 30天前</text>
+  <rect x="130" y="195" width="150" height="35" rx="17" fill="#4a90d9"/>
+  <text x="205" y="218" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">🔍 扫描技能</text>
+  <rect x="310" y="195" width="150" height="35" rx="17" fill="#66bb6a"/>
+  <text x="385" y="218" text-anchor="middle" font-size="12" fill="#fff" font-weight="bold">📦 归档旧技能</text>
+  <rect x="30" y="250" width="540" height="70" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
+  <text x="55" y="275" font-size="10" fill="#666">扫描完成: 3活跃, 2老化, 1已归档</text>
+  <text x="55" y="295" font-size="9" fill="#999">建议: "旧版翻译脚本" 超30天未用 → 归档</text>
+</svg>
