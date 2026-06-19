@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <style>
+      text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; }
+    </style>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e74c3c"/>
+    </marker>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#27ae60"/>
+    </marker>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2980b9"/>
+    </marker>
+  </defs>
+  <rect width="800" height="600" fill="#f8f9fa" rx="12"/>
+  
+  <!-- Title -->
+  <text x="400" y="45" text-anchor="middle" font-size="24" font-weight="bold" fill="#2c3e50">对抗式解题法 — 双Agent迭代流程图</text>
+
+  <!-- Solver box -->
+  <rect x="100" y="100" width="240" height="100" rx="12" fill="#3498db" opacity="0.9"/>
+  <text x="220" y="145" text-anchor="middle" font-size="20" font-weight="bold" fill="#fff">🧑‍💻 解题者 (Solver)</text>
+  <text x="220" y="175" text-anchor="middle" font-size="13" fill="#eaf2f8">生成 / 修改方案</text>
+
+  <!-- Critic box -->
+  <rect x="460" y="100" width="240" height="100" rx="12" fill="#e74c3c" opacity="0.9"/>
+  <text x="580" y="145" text-anchor="middle" font-size="20" font-weight="bold" fill="#fff">🔍 判别者 (Critic)</text>
+  <text x="580" y="175" text-anchor="middle" font-size="13" fill="#fdedec">审查 → 评分 (P0~P4)</text>
+
+  <!-- Arrow: Solver → Critic -->
+  <line x1="340" y1="130" x2="460" y2="145" stroke="#2980b9" stroke-width="3" marker-end="url(#arrowB)"/>
+  <text x="380" y="120" text-anchor="middle" font-size="13" fill="#2980b9">提交方案</text>
+
+  <!-- Arrow: Critic → Solver (loop back) -->
+  <path d="M 460 200 Q 400 280 340 200" fill="none" stroke="#e74c3c" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrowR)"/>
+  <text x="400" y="240" text-anchor="middle" font-size="13" fill="#e74c3c">返回问题 / 评分</text>
+
+  <!-- Solution iteration area -->
+  <rect x="100" y="310" width="240" height="60" rx="8" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="220" y="345" text-anchor="middle" font-size="14" fill="#7f8c8d">方案版本迭代</text>
+  
+  <rect x="460" y="310" width="240" height="60" rx="8" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="580" y="345" text-anchor="middle" font-size="14" fill="#7f8c8d">评分收敛趋势</text>
+
+  <!-- Down arrows from boxes -->
+  <line x1="220" y1="200" x2="220" y2="310" stroke="#bdc3c7" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowB)"/>
+  <line x1="580" y1="200" x2="580" y2="310" stroke="#bdc3c7" stroke-width="2" stroke-dasharray="4,4" marker-end="url(#arrowB)"/>
+
+  <!-- Pass / Done -->
+  <rect x="300" y="430" width="200" height="50" rx="25" fill="#27ae60" opacity="0.9"/>
+  <text x="400" y="461" text-anchor="middle" font-size="18" font-weight="bold" fill="#fff">✓ 通过 — 结束</text>
+
+  <line x1="400" y1="370" x2="400" y2="430" stroke="#27ae60" stroke-width="3" marker-end="url(#arrowG)"/>
+  <text x="400" y="408" text-anchor="middle" font-size="14" fill="#27ae60" font-weight="bold">全部问题 ≤ 阈值</text>
+
+  <!-- Iteration counter -->
+  <text x="400" y="520" text-anchor="middle" font-size="13" fill="#95a5a6">解题者 ↔ 判别者 循环迭代，直到判</text>
+
+  <!--  -->
+  <text x="400" y="560" text-anchor="middle" font-size="12" fill="#bdc3c7">灵感来源：GAN (生成对抗网络) — Solver 类似 Generator，Critic 类似 Discriminator</text>
+</svg>

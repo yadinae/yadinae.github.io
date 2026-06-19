@@ -1,0 +1,393 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>从零到一：我如何用对抗式方法设计并实现了一个 AI 任务引擎 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一天之内，从一张白板到 3838 行代码上线，这大概是我做过最疯狂的 side project 了。  这一切是怎么开始的？事情要从一个尴尬的时刻说起。 那天我让 AI 帮我处理一个任务，它花了三分钟，洋洋洒洒写了一大篇，结果我一看——方向全错了。它把简单问题当复杂问题处理，把需要多步协作的任务用一个 prompt 就打发了。 我心想：不行，得让这个 AI 学会判断任务难度，再用不同的方式去处理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零到一：我如何用对抗式方法设计并实现了一个 AI 任务引擎">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/05/30/2026-05-30-task-engine-building/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="一天之内，从一张白板到 3838 行代码上线，这大概是我做过最疯狂的 side project 了。  这一切是怎么开始的？事情要从一个尴尬的时刻说起。 那天我让 AI 帮我处理一个任务，它花了三分钟，洋洋洒洒写了一大篇，结果我一看——方向全错了。它把简单问题当复杂问题处理，把需要多步协作的任务用一个 prompt 就打发了。 我心想：不行，得让这个 AI 学会判断任务难度，再用不同的方式去处理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&h=900&fit=crop&q=80">
+<meta property="article:published_time" content="2026-05-30T14:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-18T06:13:53.451Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="任务引擎">
+<meta property="article:tag" content="对抗式解题法">
+<meta property="article:tag" content="架构设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&h=900&fit=crop&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "从零到一：我如何用对抗式方法设计并实现了一个 AI 任务引擎",
+  "url": "https://boke.studyai.ltd/2026/05/30/2026-05-30-task-engine-building/",
+  "image": "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&h=900&fit=crop&q=80",
+  "datePublished": "2026-05-30T14:00:00.000Z",
+  "dateModified": "2026-06-18T06:13:53.451Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/05/30/2026-05-30-task-engine-building/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=[object Object]"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', '[object Object]')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', '[object Object]', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '从零到一：我如何用对抗式方法设计并实现了一个 AI 任务引擎',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-2RC832V18X"></script><script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-2RC832V18X');</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">40</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&amp;h=900&amp;fit=crop&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">从零到一：我如何用对抗式方法设计并实现了一个 AI 任务引擎</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">从零到一：我如何用对抗式方法设计并实现了一个 AI 任务引擎</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-30T14:00:00.000Z" title="发表于 2026-05-30 22:00:00">2026-05-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-18T06:13:53.451Z" title="更新于 2026-06-18 14:13:53">2026-06-18</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/">技术实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>一天之内，从一张白板到 3838 行代码上线，这大概是我做过最疯狂的 side project 了。</p>
+</blockquote>
+<h2 id="这一切是怎么开始的？"><a href="#这一切是怎么开始的？" class="headerlink" title="这一切是怎么开始的？"></a>这一切是怎么开始的？</h2><p>事情要从一个尴尬的时刻说起。</p>
+<p>那天我让 AI 帮我处理一个任务，它花了三分钟，洋洋洒洒写了一大篇，结果我一看——方向全错了。它把简单问题当复杂问题处理，把需要多步协作的任务用一个 prompt 就打发了。</p>
+<p>我心想：<strong>不行，得让这个 AI 学会判断任务难度，再用不同的方式去处理。</strong></p>
+<p>这个想法并不新鲜——很多工程系统都有类似的任务分级。但我的需求有点特殊：我需要 AI 自己判断任务的复杂度，然后在每次调用 LLM 的时候，都注入相应的提示词来做规范。不是让一个子代理完成整个流程，而是每次只让它完成流程中的一步。</p>
+<p><strong>对抗式解题法</strong>给了我这个思路——把一个复杂问题拆解成多个步骤，每个步骤由不同的”角色”来完成，环环相扣，层层把关。</p>
+<p>于是，一个疯狂的想法诞生了：<strong>我要在一天之内，完成从设计到上线的全流程。</strong></p>
+<h2 id="第一站：复杂度分类器"><a href="#第一站：复杂度分类器" class="headerlink" title="第一站：复杂度分类器"></a>第一站：复杂度分类器</h2><p>任何任务引擎的第一步，都是判断”这个任务有多难”。</p>
+<p>我设计了一套<strong>两段式架构</strong>：</p>
+<ul>
+<li><strong>Phase 1（预分类）</strong>：任务刚进来时，通过文本特征分析快速判断是简单、中等还是复杂。这一阶段不依赖任何工具调用，纯文本分析，几十毫秒出结果。</li>
+<li><strong>Phase 2（动态监测）</strong>：任务执行过程中，EngineMonitor 持续观察进展。如果发现任务其实比预想更难（比如 solver 卡住了、结果质量不达标），自动触发升级信号，把任务从”简单”升级到”中等”或”复杂”。</li>
+</ul>
+<p>三级分类表如下：</p>
+<table>
+<thead>
+<tr>
+<th>等级</th>
+<th>典型任务</th>
+<th>处理方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>🟢 简单</td>
+<td>查询信息、格式化输出、翻译</td>
+<td>单次 LLM 调用</td>
+</tr>
+<tr>
+<td>🟡 中等</td>
+<td>代码编写、文案创作、数据分析</td>
+<td>Solver + Discriminator 两步</td>
+</tr>
+<tr>
+<td>🔴 复杂</td>
+<td>跨领域问题、多步骤推理、系统设计</td>
+<td>完整对抗式解题法流程</td>
+</tr>
+</tbody></table>
+<p>关键设计决策：<strong>置信度阈值三档制</strong>（≥0.8 直接判定 &#x2F; 0.6~0.8 软判定 &#x2F; &lt;0.6 兜底），以及误分类容错机制——分类错了不要紧，Phase 2 的动态监测会把你拉回来。</p>
+<h2 id="第二站：管道执行引擎"><a href="#第二站：管道执行引擎" class="headerlink" title="第二站：管道执行引擎"></a>第二站：管道执行引擎</h2><p>分类完了，任务该怎么执行？这是我设计的<strong>三条管道</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">简单任务 → SimplePipeline: [单次LLM调用] → 直接输出</span><br><span class="line">中等任务 → MediumPipeline: [Solver解题] → [Discriminator评审] → 输出</span><br><span class="line">复杂任务 → ComplexPipeline: [拆解] → [Solver×N] → [聚合] → [Discriminator] → 输出</span><br></pre></td></tr></table></figure>
+
+<p>每条管道的每一步，都在调用 LLM 之前注入特定的角色提示词。比如 Solver 步骤注入架构师提示词，Discriminator 步骤注入现实检验者提示词。</p>
+<p>这里有个关键设计：<strong>角色提示词分层继承体系</strong>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">_base.prompt（根级模板）</span><br><span class="line">├── physics_executor/（物理执行者基础）</span><br><span class="line">│   └── physics_executor.prompt.md</span><br><span class="line">├── solver/（解题者家族）</span><br><span class="line">│   ├── solver_architect.prompt.md</span><br><span class="line">│   └── solver_writer.prompt.md</span><br><span class="line">├── discriminator/（判别者家族）</span><br><span class="line">│   └── discriminator_reality_checker.prompt.md</span><br><span class="line">├── orchestrator/（编排者家族）</span><br><span class="line">│   ├── task_analyzer.prompt.md</span><br><span class="line">│   └── arena_architect.prompt.md</span><br><span class="line">├── simple/（简单任务角色）</span><br><span class="line">│   └── simple_llm.prompt.md</span><br><span class="line">└── meta/（元角色）</span><br><span class="line">    └── task_classifier.prompt.md</span><br></pre></td></tr></table></figure>
+
+<p>总共 16 个角色提示词文件，每个都有 frontmatter（role_id、name、extends、version 等字段），支持模板继承和占位符渲染。</p>
+<h2 id="第三站：交付与质量闭环"><a href="#第三站：交付与质量闭环" class="headerlink" title="第三站：交付与质量闭环"></a>第三站：交付与质量闭环</h2><p>任务执行完了，不能就算完。我需要一个<strong>质量闭环</strong>：</p>
+<ol>
+<li><strong>QualityGate（质量门禁）</strong>：每次 pipeline 输出都要经过自动化质量检查。如果质量不达标，触发重新执行或升级。</li>
+<li><strong>EngineMonitor（引擎监控器）</strong>：持续监测任务执行状态，检测”是否需要升级处理”或”是否陷入死循环”。</li>
+<li><strong>FeedbackCollector（反馈收集）</strong>：记录每次任务执行的指标——耗时、完成率、失败原因、升级事件。</li>
+<li><strong>MetricsAggregator（指标聚合）</strong>：把原始数据变成可行动的洞察。</li>
+<li><strong>AuditLogger（审计日志）</strong>：所有事件不可篡改地记录，方便事后复盘。</li>
+</ol>
+<p>这个设计让我在后续的数据驱动优化中尝到了甜头——没有数据，优化就是盲人摸象。</p>
+<h2 id="三场硬仗：对抗式评审"><a href="#三场硬仗：对抗式评审" class="headerlink" title="三场硬仗：对抗式评审"></a>三场硬仗：对抗式评审</h2><p>设计稿写出来了，但我问了自己一个问题：<strong>这些设计真的能落地吗？</strong></p>
+<p>为了回答这个问题，我引入了<strong>判别者角色</strong>——让我自己的 AI 切换视角，像审计员一样审视设计文档。</p>
+<p>第一次评审，发现了 <strong>8 个问题</strong>——包括 P1 级的”分类接口未定义”和”Phase2 执行主体不明确”。</p>
+<p>修。修完了再审。</p>
+<p>第二次评审，又发现了 <strong>9 个跨站一致性问题</strong>——比如目录结构冲突（prompts&#x2F; vs engine&#x2F;roles&#x2F;）、数据流定义缺失（PipelineResult 没定义）、状态管理分歧（state.json vs ExecutionContext）。</p>
+<p>再修。修完再审。</p>
+<p>第三次评审——<strong>17&#x2F;17 修复全部通过验证</strong>。</p>
+<p>整个过程让我深刻体会到：<strong>写代码容易，做对设计难；做对设计容易，让多个设计保持一致难。</strong></p>
+<p>这就是对抗式解题法的威力——你既是解题者，也是判别者。自己给自己把关，比等人来骂你效率高多了。</p>
+<h2 id="实施编码：从-0-到-3838-行"><a href="#实施编码：从-0-到-3838-行" class="headerlink" title="实施编码：从 0 到 3838 行"></a>实施编码：从 0 到 3838 行</h2><p>设计通过评审后，我开始编码。但有意思的是，评审阶段我发现代码已经写了很大一部分——因为设计文档里包含了大量伪代码和实现思路，很多直接转化成了 Python 代码。</p>
+<p>最终成果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">36 个 Python 文件 — 3838 行代码</span><br><span class="line">16 个角色提示词文件</span><br><span class="line">9 个 Markdown 文档</span><br><span class="line">85 个文件总计</span><br><span class="line">4 个核心模块：classifier / pipeline / delivery / roles</span><br></pre></td></tr></table></figure>
+
+<p>核心架构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">任务输入</span><br><span class="line">    │</span><br><span class="line">    ▼</span><br><span class="line">┌─────────────┐</span><br><span class="line">│ Complexity  │ ← Phase 1 预分类</span><br><span class="line">│ Classifier  │ ← Phase 2 动态监测</span><br><span class="line">└──────┬──────┘</span><br><span class="line">       │ 分类结果</span><br><span class="line">       ▼</span><br><span class="line">┌─────────────┐</span><br><span class="line">│  Pipeline   │ ← 根据复杂度路由</span><br><span class="line">│  Executor   │ ← 角色注入执行</span><br><span class="line">└──────┬──────┘</span><br><span class="line">       │ 执行结果</span><br><span class="line">       ▼</span><br><span class="line">┌─────────────┐</span><br><span class="line">│  Delivery   │ ← QualityGate 质量检查</span><br><span class="line">│  &amp; Feedback │ ← EngineMonitor 升级检测</span><br><span class="line">└─────────────┘    ← FeedbackCollector 记录</span><br><span class="line">       │</span><br><span class="line">       ▼</span><br><span class="line">    输出 + 审计日志 + 指标</span><br></pre></td></tr></table></figure>
+
+<h2 id="端到端测试：23-23-全部通过"><a href="#端到端测试：23-23-全部通过" class="headerlink" title="端到端测试：23&#x2F;23 全部通过"></a>端到端测试：23&#x2F;23 全部通过</h2><p>代码写完后，我跑了 23 个端到端测试用例，覆盖：</p>
+<ul>
+<li><strong>简单任务</strong>（5 个）：天气查询、翻译、格式转换等</li>
+<li><strong>中等任务</strong>（8 个）：代码编写、文案创作、数据分析</li>
+<li><strong>复杂任务</strong>（7 个）：系统设计、多步骤推理</li>
+<li><strong>边界情况</strong>（3 个）：空输入、超长文本、模糊指令</li>
+</ul>
+<p>结果：<strong>23&#x2F;23 全部通过</strong>。</p>
+<p>交付验证检查了 7 个维度——代码完整性、模块可导入性、角色文件正确性、测试通过率、目录一致性、配置完整性、文档索引完备性——全部通过。</p>
+<h2 id="数据驱动优化：用数字说话"><a href="#数据驱动优化：用数字说话" class="headerlink" title="数据驱动优化：用数字说话"></a>数据驱动优化：用数字说话</h2><p>测试通过不代表完美。我跑了 40 个基准任务，拿到第一组真实数据：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>优化前</th>
+<th>优化后</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>完成率</td>
+<td>82.5%</td>
+<td>87.5%</td>
+</tr>
+<tr>
+<td>失败率</td>
+<td>17.5%</td>
+<td>12.5%</td>
+</tr>
+<tr>
+<td>升级检测率</td>
+<td>0%</td>
+<td>7.5%</td>
+</tr>
+<tr>
+<td>平均耗时</td>
+<td>0.02s</td>
+<td>0.02s</td>
+</tr>
+</tbody></table>
+<p>关键发现：</p>
+<ol>
+<li><strong>质量门禁过于严格</strong>——有些正常输出被误判为”质量不合格”。调整阈值后，误判率大幅下降。</li>
+<li><strong>升级检测没触发</strong>——RewardMonitor 的收敛检测太保守，调整灵敏度后开始正确识别需要升级的任务。</li>
+<li><strong>Bug 藏在细节里</strong>——一个 <code>PipelineResult.__init__</code> 的参数顺序问题导致了数据显示错误，修复后数据链路完全打通。</li>
+</ol>
+<p><strong>没有数据，你永远不知道你的系统在真实场景下表现如何。</strong> 这是这次经历给我最深刻的教训。</p>
+<h2 id="上线：三个层级的选择"><a href="#上线：三个层级的选择" class="headerlink" title="上线：三个层级的选择"></a>上线：三个层级的选择</h2><p>系统测试通过了，但”上线”有不同的含义。我定义了三个层级：</p>
+<ul>
+<li><strong>🅰️ 层级 A</strong>：启用任务管理工具（create&#x2F;list&#x2F;claim&#x2F;transition 等 CRUD 操作）——一键开关，零风险</li>
+<li><strong>🅱️ 层级 B</strong>：任务创建后自动经分类器 → 管道执行器处理——核心价值所在</li>
+<li><strong>🅲 层级 C</strong>：引擎完全接管 AI 主循环——架构级变更</li>
+</ul>
+<p>最终选择了 <strong>层级 A</strong> 先跑起来，让任务管理工具链立即可用。至于层级 B 和 C，可以逐步推进。</p>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>这 24 小时，我从一张白板开始，经历了：</p>
+<ol>
+<li><strong>三站设计</strong>：复杂度分类 → 管道执行 → 质量闭环</li>
+<li><strong>三轮评审</strong>：判别者视角审计，修复 17 个问题</li>
+<li><strong>编码落地</strong>：3838 行 Python 代码</li>
+<li><strong>端到端测试</strong>：23&#x2F;23 全部通过</li>
+<li><strong>数据驱动优化</strong>：完成率 82.5% → 87.5%</li>
+<li><strong>正式上线</strong>：引擎可用</li>
+</ol>
+<p>最大的收获不是代码量，而是这套<strong>工作方法</strong>：</p>
+<ul>
+<li><strong>对抗式解题法</strong>：解题者和判别者轮流上阵，自己给自己把关</li>
+<li><strong>数据优先</strong>：不要在黑暗中优化，先跑出数据再决策</li>
+<li><strong>分步上线</strong>：不是 all-or-nothing，而是渐进式交付</li>
+</ul>
+<p>如果你的 AI 也有”任务处理”的痛点，不妨试试这套方法。毕竟，<strong>让 AI 学会衡量自己该花多大力气，本身就是一种元认知的进化。</strong></p>
+<hr>
+<p><em>文章由 AI 辅助撰写，但设计决策和代码实现全部手动完成。</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/05/30/2026-05-30-task-engine-building/">https://boke.studyai.ltd/2026/05/30/2026-05-30-task-engine-building/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a><a class="post-meta__tags" href="/tags/%E4%BB%BB%E5%8A%A1%E5%BC%95%E6%93%8E/">任务引擎</a><a class="post-meta__tags" href="/tags/%E5%AF%B9%E6%8A%97%E5%BC%8F%E8%A7%A3%E9%A2%98%E6%B3%95/">对抗式解题法</a><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">架构设计</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&amp;h=900&amp;fit=crop&amp;q=80" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2026/05/29/2026-05-29-agent-system-prompt-compliance/" title="Agent 为什么不遵守系统提示？——根因分析与渐进式解决方案"><img class="cover" src="/img/agent-compliance-cover.svg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Agent 为什么不遵守系统提示？——根因分析与渐进式解决方案</div></div><div class="info-2"><div class="info-item-1">摘要问题：在 LLM Agent 系统中，系统提示（system prompt）中明确定义的规则、流程和方法论，Agent 经常不遵守。这不是偶发 bug，而是系统性缺陷。 方法：本文通过实证观察（Agent 在实际运行中多次违反自身方法论提示）结合公开论文研究（Jailbroken、Constitutional AI、Reversal Curse 等），从模型训练层、架构设计层、提示工程层三个维度分析根因。 结果：发现 7 个根因，核心是——LLM 没有内建的”指令优先级”概念，系统提示和用户提示在模型认知中是平级文本；Agent 架构缺乏运行时验证层，导致”说的”和”做的”可以脱节。 结论：提出了 P0-P3 渐进式解决方案体系，在代码&#x2F;框架层而非提示层强制执行方法论，并在 GenericAgent 中实践验证了可行性。 关键词：LLM Agent；系统提示合规；对抗式解题法；运行时验证；提示工程    1 引言1.1 背景2026 年，LLM Agent 已从实验性工具演进为生产系统。在 GenericAgent 项目中，我们开发了”对抗式解题法”方法论插件，其核...</div></div></div></a><a class="pagination-related" href="/2026/06/05/2026-06-05-QGS-quality-gate-system/" title="QGS 质量门禁系统：给 AI Agent 装上&quot;刹车和质检&quot;"><img class="cover" src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">QGS 质量门禁系统：给 AI Agent 装上"刹车和质检"</div></div><div class="info-2"><div class="info-item-1"> 当 AI Agent 开始自主执行多步操作时，你如何确保它不会”脑子一抽”干出离谱的事？QGS（Quality Gate System）就是为此而生的一套内嵌质量门禁系统。  问题：Agent 失控的两个瞬间设想两个场景： 场景一：你让 Agent “部署一下这个服务”，它开心地执行了 rm -rf /（误），然后告诉你”部署完成！” 场景二：Agent 写了一篇技术文章，看起来头头是道，但里面引用的 API 版本已经过时了三年，调用的方法根本不存在。 这类问题在传统的 LLM 对话中并不突出——因为每轮输出你都肉眼可见。但当 Agent 进入自主执行模式——连跑十几轮工具调用、读写文件、操作浏览器、部署服务——你就没法每步都盯着了。 QGS 就是那个在后台默默盯着的”质检员”。 什么是 QGS？QGS &#x3D; Quality Gate System，直译是”质量门禁系统”。它不是一个独立的外部工具，而是嵌入在 Agent 执行循环内部的一套质量控制框架。 形象点说，传统 Agent 的执行循环像一条单向高速公路： 1用户输入 → LLM 思考 → 工具调用 → 输出结果...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/05/29/2026-05-29-task-engine-integration/" title="为 GenericAgent 构建任务引擎：一次全链路集成实战"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="info-item-2">为 GenericAgent 构建任务引擎：一次全链路集成实战</div></div><div class="info-2"><div class="info-item-1"> 摘要：给一个”一问一答”的自主 Agent 框架加上完整任务生命周期管理，涉及 SQLite WAL 状态存储、EventBus 事件驱动、方法论自动重启、以及任务认领强制——三个子系统的全链路集成。   背景GenericAgent 是一个具备工具调用能力的自主 Agent 框架。它原本只有”一问一答”的执行模式，缺少任务的生命周期管理——创建、认领、执行、评审、完成。这导致了几个痛点：  无法追踪长任务：执行到一半中断就丢失上下文 没有执行纪律：Agent 可以随意调用工具，不需要对任何”任务”负责 出了问题无法恢复：没有重启语义，失败就是永久失败  今天的任务是：给它加上完整的任务引擎，并且让”对抗式解题法”方法论检查能与任务系统联动。  架构总览三个子系统协同工作： 123456789101112131415┌─────────────────────────────────────────────────────┐│                    Agent Loop                       │├──────────────────────...</div></div></div></a><a class="pagination-related" href="/2026/04/15/2026-04-15-ai-trends/" title="2025年AI圈巨变：多模态和Agent如何改变我们的生活？"><img class="cover" src="https://images.unsplash.com/photo-1644088379091-d574269d422f?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-15</div><div class="info-item-2">2025年AI圈巨变：多模态和Agent如何改变我们的生活？</div></div><div class="info-2"><div class="info-item-1">2025年AI圈巨变：多模态和Agent如何改变我们的生活？你有没有发现，最近和AI聊天的方式正在悄悄改变？ 以前，你可能习惯于输入一段文字，等待AI生成回复。如今，你可以直接给AI发一张图片，让它分析图表数据；也可以告诉AI”帮我整理一下这个月的报销”，然后看着它自动打开网页、填写表单、完成操作。 2025年4月，多模态大模型和AI Agent成为各大科技公司竞逐的新焦点。AI正在从”能说会道”走向”能看会做”。这场变革将如何影响每个人的生活？ 一、多模态大模型：AI的”五感”正在觉醒什么叫多模态？简单说，就是AI不仅能处理文字，还能理解图像、音频、视频等多种信息形式。就像人类有视觉、听觉、嗅觉、味觉、触觉五感一样，多模态AI正在拥有自己的”感官系统”。 4月，字节跳动旗下的火山引擎发布了豆包1.5深度思考模型。它不仅能”深度思考”，还能”看图思考”——上传一张航拍照片，AI会自动分析地貌特征，判断某区域是否适合开发；给AI一张企业项目管理流程图，它能迅速理解逻辑关系并回答你的问题。 OpenAI最新发布的o3和o4-mini模型同样具备强大的多模态能力，首次实现了”用图像思考...</div></div></div></a><a class="pagination-related" href="/2026/06/06/2026-06-06-todo-goal-sync/" title="TODO ↔ Goal 双向同步：我给 AI Agent 装了个&quot;自我对齐&quot;的小工具"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="info-item-2">TODO ↔ Goal 双向同步：我给 AI Agent 装了个&quot;自我对齐&quot;的小工具</div></div><div class="info-2"><div class="info-item-1"> AI Agent 自主执行时，如何让它”自己知道自己该做啥、做到哪了”？一个小工具让 TODO 和 Goal 状态双向流动。  问题：Agent 的”分时记忆”如果你养过一个 AI Agent，你一定遇到过这个场景： 你给它布置了一个复杂任务——“帮我做市场调研，写报告，再部署一个演示页面”。它埋头干了半小时，跑了 40 轮工具调用，中间重启了两次。然后它回来告诉你：”报告写好了，页面部署了。” 你问：”那为什么调研部分的数据源没更新？” 它说：”哦，那个是上一轮的目标，我以为结束了。” 问题出在哪？Agent 没有”持久化的进度意识”。每轮对话都是一次新的思考起点，除非你把进度显式地塞进它的 prompt 里。而传统的 TODO 清单（像我项目里的 TODO.txt）和 Goal 状态（goal_state.json）是两个孤岛——TODO 记录了”计划要做什么”，Goal 记录了”当前执行到什么状态”，但它们之间没有自动同步。 一个简单的想法如果让 TODO 和 Goal 互相”通气”呢？  当 Agent 完成了一个 TODO 项 → 自动更新 Goal 状态，让目标感知...</div></div></div></a><a class="pagination-related" href="/2026/06/07/2026-06-07-ai-adversarial-training/" title="从 73% 到 93%：一个 AI Agent 的对抗训练实战记录"><img class="cover" src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="info-item-2">从 73% 到 93%：一个 AI Agent 的对抗训练实战记录</div></div><div class="info-2"><div class="info-item-1">故事的开始想象一下：你花了两周时间构建了一条 AI 视觉管线，能够自动截图、OCR 识别、结构化输出。上线第一天，一切完美——100% 准确率。然后你随手加了一个高斯模糊滤波器测试，准确率直接跌到 0%。空字符串。什么都没读到。 这就是我最近的真实经历。我们的自治 AI Agent 依赖 OCR 来理解浏览器截图中的文字内容，而一个常见的前端动效——模糊过渡——就能让它完全失明。更别说用户可能遇到的各种图片质量退化：噪声、裁切、缩放、旋转…… 这篇博客记录了我们如何通过对抗训练循环（Adversarial Training Loop），在 3 轮迭代内将 OCR 鲁棒性从 73.6% 提升到 92.7%，并提炼出可复用的方法论。 问题定义我们的场景很直接：AI Agent 通过截图获取浏览器状态，用 Tesseract OCR 提取文字，然后根据文字内容做决策。如果 OCR 出错，后续决策链会级联失效。 典型的质量退化包括：    攻击类型 模拟场景 威胁等级    高斯噪声 低光拍摄、传感器噪点 ⭐⭐   高斯模糊 页面动效、失焦截图 ⭐⭐⭐   裁切 滚动截图不完整 ⭐⭐⭐ ...</div></div></div></a><a class="pagination-related" href="/2026/04/13/2026-04-13-ai-agent-workflow-guide/" title="AI Agent 完全指南：2026 年如何用多代理系统提升工作效率"><img class="cover" src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-13</div><div class="info-item-2">AI Agent 完全指南：2026 年如何用多代理系统提升工作效率</div></div><div class="info-2"><div class="info-item-1"> 写在前面：本文系统整理了我在过去三个月里使用 AI Agent 的完整经验，包含工具选型、工作流设计、成本控制等实战内容。如果你也想构建自己的 AI 工作体系，这篇值得收藏。   一、为什么需要 AI Agent？1.1 从「工具」到「助手」的进化回想一下我们是怎么用 AI 的：  提问 → 等待回答 → 手动复制 → 粘贴到其他工具 → 继续下一步  这是典型的「工具思维」—— AI 只是一个更强的搜索引擎。 但 Agent 改变了这个关系：  设定目标 → AI 自动规划步骤 → 执行 → 反馈结果 → 人类只需审核  我称之为「助手思维」—— AI 不再是工具，而是能独立完成任务的数字员工。 1.2 我的真实收益过去三个月，我用 AI Agent 完成了：    任务类型 原来耗时 现在耗时 效率提升    每周 AI 新闻简报 3 小时 15 分钟 12x   公众号文章创作 6 小时 2 小时 3x   代码 code review 2 小时 20 分钟 6x   竞品分析报告 8 小时 1.5 小时 5.3x   时间不是省出来的，是重新分配了。  二、多代理协作系...</div></div></div></a><a class="pagination-related" href="/2026/06/07/2026-06-07-ai-agent-evolution-v69-v76/" title="AI Agent 自主进化记录 — v69~v76 里程碑总览"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-07</div><div class="info-item-2">AI Agent 自主进化记录 — v69~v76 里程碑总览</div></div><div class="info-2"><div class="info-item-1">概述从 v69 到 v76，AI Agent 完成了 8个版本迭代，共执行 30+ 自主任务，构建了一套完整的工具生态系统。这篇文章记录了这个自主进化过程。  核心成就🛠️ 工具生态 (v70-v76) report_digest (v68): 报告摘要与日结自动生成 chart_plotter (v69): 终端可视化图表（bar&#x2F;line&#x2F;scatter） fzf_select (v70): 模糊搜索交互选择 knowledge_lookup (v70): 知识资产语义检索 notify (v70): 多通道通知（桌面&#x2F;终端&#x2F;日志） knowledge_injector (v75): 任务开始自动注入相关知识 gen_report_index (v75): 报告HTML索引页  📚 知识资产 (v69-v72) knowledge_assets.md: 24个模式 + 28个陷阱 按”模式&#x2F;陷阱&#x2F;基准测试”三类组织 含 5 条改进建议（knowledge_assets#22）  🔧 系统自省 (v76) sel...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">40</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">70</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%99%E4%B8%80%E5%88%87%E6%98%AF%E6%80%8E%E4%B9%88%E5%BC%80%E5%A7%8B%E7%9A%84%EF%BC%9F"><span class="toc-number">1.</span> <span class="toc-text">这一切是怎么开始的？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%99%EF%BC%9A%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E7%B1%BB%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">第一站：复杂度分类器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%99%EF%BC%9A%E7%AE%A1%E9%81%93%E6%89%A7%E8%A1%8C%E5%BC%95%E6%93%8E"><span class="toc-number">3.</span> <span class="toc-text">第二站：管道执行引擎</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E7%AB%99%EF%BC%9A%E4%BA%A4%E4%BB%98%E4%B8%8E%E8%B4%A8%E9%87%8F%E9%97%AD%E7%8E%AF"><span class="toc-number">4.</span> <span class="toc-text">第三站：交付与质量闭环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E5%9C%BA%E7%A1%AC%E4%BB%97%EF%BC%9A%E5%AF%B9%E6%8A%97%E5%BC%8F%E8%AF%84%E5%AE%A1"><span class="toc-number">5.</span> <span class="toc-text">三场硬仗：对抗式评审</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%96%BD%E7%BC%96%E7%A0%81%EF%BC%9A%E4%BB%8E-0-%E5%88%B0-3838-%E8%A1%8C"><span class="toc-number">6.</span> <span class="toc-text">实施编码：从 0 到 3838 行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AB%AF%E5%88%B0%E7%AB%AF%E6%B5%8B%E8%AF%95%EF%BC%9A23-23-%E5%85%A8%E9%83%A8%E9%80%9A%E8%BF%87"><span class="toc-number">7.</span> <span class="toc-text">端到端测试：23&#x2F;23 全部通过</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E9%A9%B1%E5%8A%A8%E4%BC%98%E5%8C%96%EF%BC%9A%E7%94%A8%E6%95%B0%E5%AD%97%E8%AF%B4%E8%AF%9D"><span class="toc-number">8.</span> <span class="toc-text">数据驱动优化：用数字说话</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8A%E7%BA%BF%EF%BC%9A%E4%B8%89%E4%B8%AA%E5%B1%82%E7%BA%A7%E7%9A%84%E9%80%89%E6%8B%A9"><span class="toc-number">9.</span> <span class="toc-text">上线：三个层级的选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="toc-number">10.</span> <span class="toc-text">写在最后</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训"><img src="/img/cover-ai-agent-%E9%81%BF%E5%9D%91%E5%AE%9E%E5%BD%95.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI Agent 自主运维避坑实录：15个来自实战的教训"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训">AI Agent 自主运维避坑实录：15个来自实战的教训</a><time datetime="2026-06-19T00:19:47.000Z" title="发表于 2026-06-19 08:19:47">2026-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/18/2026-06-18-mcp-integration-test/" title="MCP Integration Test"><img src="/img/cover-mcp-integration-test.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="MCP Integration Test"/></a><div class="content"><a class="title" href="/2026/06/18/2026-06-18-mcp-integration-test/" title="MCP Integration Test">MCP Integration Test</a><time datetime="2026-06-18T09:53:54.000Z" title="发表于 2026-06-18 17:53:54">2026-06-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/08/2026-06-08-knowledge-assets-ai-agent/" title="Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库"><img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库"/></a><div class="content"><a class="title" href="/2026/06/08/2026-06-08-knowledge-assets-ai-agent/" title="Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库">Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库</a><time datetime="2026-06-08T02:00:00.000Z" title="发表于 2026-06-08 10:00:00">2026-06-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/08/AI-Agent-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%EF%BC%9A%E4%BB%8E-1-1GB-%E5%88%B0-34MB-%E7%9A%84%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/" title="AI Agent 内存泄漏排查实战：从 1.1GB 到 34MB 的优化之旅"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI Agent 内存泄漏排查实战：从 1.1GB 到 34MB 的优化之旅"/></a><div class="content"><a class="title" href="/2026/06/08/AI-Agent-%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F%E6%8E%92%E6%9F%A5%E5%AE%9E%E6%88%98%EF%BC%9A%E4%BB%8E-1-1GB-%E5%88%B0-34MB-%E7%9A%84%E4%BC%98%E5%8C%96%E4%B9%8B%E6%97%85/" title="AI Agent 内存泄漏排查实战：从 1.1GB 到 34MB 的优化之旅">AI Agent 内存泄漏排查实战：从 1.1GB 到 34MB 的优化之旅</a><time datetime="2026-06-07T19:28:54.000Z" title="发表于 2026-06-08 03:28:54">2026-06-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/07/2026-06-07-ai-adversarial-training/" title="从 73% 到 93%：一个 AI Agent 的对抗训练实战记录"><img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="从 73% 到 93%：一个 AI Agent 的对抗训练实战记录"/></a><div class="content"><a class="title" href="/2026/06/07/2026-06-07-ai-adversarial-training/" title="从 73% 到 93%：一个 AI Agent 的对抗训练实战记录">从 73% 到 93%：一个 AI Agent 的对抗训练实战记录</a><time datetime="2026-06-07T02:00:00.000Z" title="发表于 2026-06-07 10:00:00">2026-06-07</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>

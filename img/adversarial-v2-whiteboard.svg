@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="560" viewBox="0 0 800 560">
+  <defs>
+    <style>
+      text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; }
+    </style>
+    <marker id="arrowG" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#27ae60"/>
+    </marker>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2980b9"/>
+    </marker>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e74c3c"/>
+    </marker>
+    <marker id="arrowO" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#e67e22"/>
+    </marker>
+  </defs>
+  <rect width="800" height="560" fill="#f8f9fa" rx="12"/>
+
+  <!-- Title -->
+  <text x="400" y="38" text-anchor="middle" font-size="22" font-weight="bold" fill="#2c3e50">白板通讯协议 — 协作流程图</text>
+  <text x="400" y="58" text-anchor="middle" font-size="13" fill="#7f8c8d">所有代理通过共享 WHITEBOARD.md 协作，Arena 扫一眼状态就知道一切</text>
+
+  <!-- Arena box -->
+  <rect x="275" y="80" width="250" height="46" rx="10" fill="#2980b9" opacity="0.9"/>
+  <text x="400" y="107" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">🧠 Arena（总经理）</text>
+
+  <!-- Arrow: Arena → Whiteboard 1 -->
+  <line x1="350" y1="126" x2="250" y2="165" stroke="#2980b9" stroke-width="2.5" marker-end="url(#arrowB)"/>
+  <text x="285" y="145" text-anchor="end" font-size="11" fill="#2980b9">写入任务要求</text>
+
+  <!-- Arrow: Arena → Whiteboard 4 -->
+  <line x1="450" y1="126" x2="550" y2="165" stroke="#2980b9" stroke-width="2.5" marker-end="url(#arrowB)"/>
+  <text x="525" y="145" text-anchor="start" font-size="11" fill="#2980b9">更新收敛状态</text>
+
+  <!-- Whiteboard center -->
+  <rect x="175" y="170" width="450" height="120" rx="10" fill="#fff" stroke="#bdc3c7" stroke-width="2"/>
+  <text x="400" y="195" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">📋 WHITEBOARD.md</text>
+
+  <!-- Four sections of whiteboard -->
+  <rect x="185" y="210" width="100" height="30" rx="4" fill="#ebf5fb" stroke="#3498db" stroke-width="1"/>
+  <text x="235" y="230" text-anchor="middle" font-size="11" fill="#2980b9">1️⃣ 任务要求区</text>
+
+  <rect x="295" y="210" width="100" height="30" rx="4" fill="#fdedec" stroke="#e74c3c" stroke-width="1"/>
+  <text x="345" y="230" text-anchor="middle" font-size="11" fill="#e74c3c">2️⃣ 解题者区</text>
+
+  <rect x="405" y="210" width="100" height="30" rx="4" fill="#fef9e7" stroke="#f39c12" stroke-width="1"/>
+  <text x="455" y="230" text-anchor="middle" font-size="11" fill="#e67e22">3️⃣ 判别者区</text>
+
+  <rect x="515" y="210" width="100" height="30" rx="4" fill="#e8f8f5" stroke="#27ae60" stroke-width="1"/>
+  <text x="565" y="230" text-anchor="middle" font-size="11" fill="#27ae60">4️⃣ 决策区</text>
+
+  <text x="400" y="270" text-anchor="middle" font-size="11" fill="#95a5a6">状态字段 · 进度日志 · 交付物 · 评审结果 · 收敛判断</text>
+
+  <!-- Arrow: Whiteboard → Solver -->
+  <line x1="275" y1="290" x2="130" y2="340" stroke="#3498db" stroke-width="2.5" marker-end="url(#arrowB)"/>
+  <text x="195" y="320" text-anchor="end" font-size="11" fill="#2980b9">读任务</text>
+
+  <!-- Solver box -->
+  <rect x="30" y="345" width="200" height="50" rx="10" fill="#3498db" opacity="0.9"/>
+  <text x="130" y="375" text-anchor="middle" font-size="15" font-weight="bold" fill="#fff">👷 解题者</text>
+
+  <!-- Arrow: Solver → Whiteboard -->
+  <line x1="230" y1="370" x2="285" y2="370" stroke="#27ae60" stroke-width="2.5" marker-end="url(#arrowG)"/>
+  <text x="260" y="362" text-anchor="middle" font-size="10" fill="#27ae60">写进度/交付</text>
+
+  <!-- Arrow: Whiteboard → Discriminator -->
+  <line x1="525" y1="290" x2="670" y2="340" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#arrowR)"/>
+  <text x="610" y="320" text-anchor="start" font-size="11" fill="#e74c3c">读方案</text>
+
+  <!-- Discriminator box -->
+  <rect x="570" y="345" width="200" height="50" rx="10" fill="#e74c3c" opacity="0.9"/>
+  <text x="670" y="375" text-anchor="middle" font-size="15" font-weight="bold" fill="#fff">🔍 判别者</text>
+
+  <!-- Arrow: Discriminator → Whiteboard -->
+  <line x1="570" y1="370" x2="515" y2="370" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#arrowR)"/>
+  <text x="540" y="362" text-anchor="middle" font-size="10" fill="#e74c3c">写评审结果</text>
+
+  <!-- Loop back arrows -->
+  <path d="M 130 395 Q 130 450 400 450 Q 670 450 670 395" fill="none" stroke="#e67e22" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowO)"/>
+  <text x="400" y="440" text-anchor="middle" font-size="12" fill="#e67e22" font-weight="bold">🔁 迭代循环：未收敛 → 解题者修复 → 判别者再审</text>
+
+  <!-- Bottom status monitor -->
+  <rect x="175" y="475" width="450" height="40" rx="8" fill="#ecf0f1" stroke="#bdc3c7" stroke-width="1"/>
+  <text x="230" y="500" text-anchor="middle" font-size="13" fill="#7f8c8d">Arena 扫一眼白板：</text>
+  <rect x="340" y="483" width="70" height="24" rx="4" fill="#27ae60"/>
+  <text x="375" y="500" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">✅ 进行中</text>
+  <rect x="420" y="483" width="70" height="24" rx="4" fill="#f39c12"/>
+  <text x="455" y="500" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">🟡 执行中</text>
+  <rect x="500" y="483" width="70" height="24" rx="4" fill="#e74c3c"/>
+  <text x="535" y="500" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">🔴 阻塞中</text>
+
+  <text x="400" y="542" text-anchor="middle" font-size="11" fill="#95a5a6">告别轮询 output.txt — 白板让协作透明化、可观察、可追溯</text>
+</svg>
