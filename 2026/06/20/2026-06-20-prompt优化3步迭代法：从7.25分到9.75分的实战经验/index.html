@@ -1,0 +1,476 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Prompt优化3步迭代法：从7.25分到9.75分的实战经验 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="背景在日常使用大语言模型的过程中，Prompt 的质量直接决定了输出结果的好坏。但大多数人在优化 Prompt 时往往凭感觉——觉得”不够好”就改一些措辞，缺乏系统性的方法。 本文分享一种经过实战验证的 Prompt 优化三步骤迭代方法，通过结构化评分驱动迭代，将基线从 7.25 分提升到 9.75 分。这套方法来源于真实项目 R338，在 prompt_optimization_loop_sop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prompt优化3步迭代法：从7.25分到9.75分的实战经验">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="背景在日常使用大语言模型的过程中，Prompt 的质量直接决定了输出结果的好坏。但大多数人在优化 Prompt 时往往凭感觉——觉得”不够好”就改一些措辞，缺乏系统性的方法。 本文分享一种经过实战验证的 Prompt 优化三步骤迭代方法，通过结构化评分驱动迭代，将基线从 7.25 分提升到 9.75 分。这套方法来源于真实项目 R338，在 prompt_optimization_loop_sop">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-prompt-optimization-3-step.png">
+<meta property="article:published_time" content="2026-06-20T01:20:00.000Z">
+<meta property="article:modified_time" content="2026-06-20T01:21:38.205Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="Prompt Engineering">
+<meta property="article:tag" content="最佳实践">
+<meta property="article:tag" content="迭代优化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-prompt-optimization-3-step.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Prompt优化3步迭代法：从7.25分到9.75分的实战经验",
+  "url": "https://boke.studyai.ltd/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/",
+  "image": "https://boke.studyai.ltd/img/cover-prompt-optimization-3-step.png",
+  "datePublished": "2026-06-20T01:20:00.000Z",
+  "dateModified": "2026-06-20T01:21:38.205Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=[object Object]"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', '[object Object]')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', '[object Object]', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Prompt优化3步迭代法：从7.25分到9.75分的实战经验',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-2RC832V18X"></script><script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-2RC832V18X');</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">41</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">78</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-prompt-optimization-3-step.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Prompt优化3步迭代法：从7.25分到9.75分的实战经验</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Prompt优化3步迭代法：从7.25分到9.75分的实战经验</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-20T01:20:00.000Z" title="发表于 2026-06-20 09:20:00">2026-06-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-20T01:21:38.205Z" title="更新于 2026-06-20 09:21:38">2026-06-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在日常使用大语言模型的过程中，Prompt 的质量直接决定了输出结果的好坏。但大多数人在优化 Prompt 时往往凭感觉——觉得”不够好”就改一些措辞，缺乏系统性的方法。</p>
+<p>本文分享一种经过实战验证的 Prompt 优化三步骤迭代方法，通过结构化评分驱动迭代，将基线从 7.25 分提升到 9.75 分。这套方法来源于真实项目 R338，在 prompt_optimization_loop_sop 的实战中验证有效。</p>
+<h2 id="核心思想：先外后内"><a href="#核心思想：先外后内" class="headerlink" title="核心思想：先外后内"></a>核心思想：先外后内</h2><p>我们的核心发现是：<strong>Prompt 优化应该先修结构、再修内容</strong>。结构不对时，花再多时间优化内容也是事倍功半。</p>
+<p>什么叫”结构”？指 Prompt 的格式框架：</p>
+<ul>
+<li>是否有清晰的标签&#x2F;角色定义（tags, role_id）？</li>
+<li>是否有明确的边界条件（输入为空、超长截断）？</li>
+<li>占位符是否一致（{input} vs ）？</li>
+<li>规则段是否完整（必须做什么、禁止做什么）？</li>
+</ul>
+<p>什么叫”内容”？指 Prompt 的语义层面：</p>
+<ul>
+<li>指令是否具体可执行？</li>
+<li>示例是否贴切？</li>
+<li>约束条件是否合理？</li>
+</ul>
+<p><strong>类比写代码</strong>：函数签名错了（参数&#x2F;返回类型不对），实现再漂亮也无法调用。Prompt 的结构就像函数签名，内容是函数体——签名不对，内容再好也没用。</p>
+<h2 id="评分体系"><a href="#评分体系" class="headerlink" title="评分体系"></a>评分体系</h2><p>我们使用 5 维度的评分体系，每项 1-10 分：</p>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>说明</th>
+<th align="center">权重</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>格式（Format）</td>
+<td>Prompt 结构是否清晰，标签是否完整</td>
+<td align="center">20%</td>
+</tr>
+<tr>
+<td>规则（Rules）</td>
+<td>边界条件是否完整，约束是否明确</td>
+<td align="center">20%</td>
+</tr>
+<tr>
+<td>角色（Role）</td>
+<td>角色定义是否明确且一致</td>
+<td align="center">20%</td>
+</tr>
+<tr>
+<td>内容（Content）</td>
+<td>指令是否具体，是否覆盖所有场景</td>
+<td align="center">20%</td>
+</tr>
+<tr>
+<td>示例（Examples）</td>
+<td>是否提供示例，示例是否贴切</td>
+<td align="center">20%</td>
+</tr>
+</tbody></table>
+<p>总分 &#x3D; 各维度加权平均。</p>
+<h2 id="三步骤迭代法"><a href="#三步骤迭代法" class="headerlink" title="三步骤迭代法"></a>三步骤迭代法</h2><h3 id="Step-1-基线评估（v1-→-7-25分）"><a href="#Step-1-基线评估（v1-→-7-25分）" class="headerlink" title="Step 1: 基线评估（v1 → 7.25分）"></a>Step 1: 基线评估（v1 → 7.25分）</h3><p>初始 Prompt 如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">你是一个有用的AI助手。请回答用户问题。</span><br><span class="line">回答要准确、简洁、完整。</span><br></pre></td></tr></table></figure>
+
+<p>初次评分结果：</p>
+<table>
+<thead>
+<tr>
+<th align="center">维度</th>
+<th align="center">得分</th>
+<th align="left">问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">格式</td>
+<td align="center">2&#x2F;10</td>
+<td align="left">无结构化标签，纯文本格式</td>
+</tr>
+<tr>
+<td align="center">规则</td>
+<td align="center">5&#x2F;10</td>
+<td align="left">无边界条件，输入为空或复杂时行为未定义</td>
+</tr>
+<tr>
+<td align="center">角色</td>
+<td align="center">8&#x2F;10</td>
+<td align="left">角色基本明确，可接受</td>
+</tr>
+<tr>
+<td align="center">内容</td>
+<td align="center">9&#x2F;10</td>
+<td align="left">指令简洁明确，但缺乏具体性</td>
+</tr>
+<tr>
+<td align="center">示例</td>
+<td align="center">6&#x2F;10</td>
+<td align="left">无示例，用户需自行理解</td>
+</tr>
+</tbody></table>
+<p><strong>综合得分：7.25&#x2F;10</strong></p>
+<p>5 个弱项主要集中在<strong>格式</strong>和<strong>规则</strong>维度。</p>
+<h3 id="Step-2-修复结构维度（v2-→-8-75分，-1-50）"><a href="#Step-2-修复结构维度（v2-→-8-75分，-1-50）" class="headerlink" title="Step 2: 修复结构维度（v2 → 8.75分，+1.50）"></a>Step 2: 修复结构维度（v2 → 8.75分，+1.50）</h3><p><strong>目标</strong>：提升格式和规则维度的得分。此阶段不修改任何内容相关的部分，只调整框架。</p>
+<p><strong>修改后的 Prompt</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># Role: AI助手</span><br><span class="line">你是一个专业、准确的AI助手，负责回答用户的问题。</span><br><span class="line"></span><br><span class="line">## Rules</span><br><span class="line">1. 如果用户输入为空，请友好提示用户输入问题</span><br><span class="line">2. 如果用户输入过长（超过2048 tokens），请主动摘要后回复</span><br><span class="line">3. 如果用户问题包含敏感内容，请礼貌拒绝并引导至合适话题</span><br><span class="line">4. 每次回复必须引用相关信息来源（如果有）</span><br><span class="line"></span><br><span class="line">## Output Format</span><br><span class="line">- 使用 Markdown 格式</span><br><span class="line">- 复杂问题分点回答</span><br><span class="line">- 代码使用代码块标注语言</span><br></pre></td></tr></table></figure>
+
+<p><strong>评分变化</strong>：</p>
+<table>
+<thead>
+<tr>
+<th align="center">维度</th>
+<th align="center">v1得分</th>
+<th align="center">v2得分</th>
+<th align="left">变化原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">格式</td>
+<td align="center">2</td>
+<td align="center">8</td>
+<td align="left">+6：增加标签分段（#Role, ##Rules, ##Output Format）</td>
+</tr>
+<tr>
+<td align="center">规则</td>
+<td align="center">5</td>
+<td align="center">9</td>
+<td align="left">+4：补充4条完整的边界规则</td>
+</tr>
+<tr>
+<td align="center">角色</td>
+<td align="center">8</td>
+<td align="center">8</td>
+<td align="left">0：保持原样</td>
+</tr>
+<tr>
+<td align="center">内容</td>
+<td align="center">9</td>
+<td align="center">9</td>
+<td align="left">0：未修改</td>
+</tr>
+<tr>
+<td align="center">示例</td>
+<td align="center">6</td>
+<td align="center">6</td>
+<td align="left">0：未修改</td>
+</tr>
+</tbody></table>
+<p><strong>综合得分：8.75&#x2F;10（+1.50）</strong></p>
+<p>关键收获：仅通过调整结构框架，就获得了 1.5 分的提升。验证了”先外后内”的正确性。</p>
+<h3 id="Step-3-修复内容-示例维度（v3-→-9-75分，-1-00）"><a href="#Step-3-修复内容-示例维度（v3-→-9-75分，-1-00）" class="headerlink" title="Step 3: 修复内容+示例维度（v3 → 9.75分，+1.00）"></a>Step 3: 修复内容+示例维度（v3 → 9.75分，+1.00）</h3><p><strong>目标</strong>：在稳固的结构基础上优化语义内容。</p>
+<p><strong>修改后的 Prompt</strong>（在 v2 基础上增加）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># Role: AI助手</span><br><span class="line">（v2 的结构保留不变）</span><br><span class="line"></span><br><span class="line">## Rules</span><br><span class="line">（v2 的规则保留）</span><br><span class="line"></span><br><span class="line">## Content Guidelines</span><br><span class="line">1. 对于技术问题，必须提供：概念解释 + 代码/命令示例 + 注意事项</span><br><span class="line">2. 对于开放性问题，必须提供：多角度分析 + 个人立场 + 论据支撑</span><br><span class="line">3. 禁止使用模糊表述（如&quot;可能&quot;、&quot;大概&quot;），除非确实存在不确定性</span><br><span class="line">4. 每条回答结束后，提供1-3条相关阅读建议</span><br><span class="line"></span><br><span class="line">## Examples</span><br><span class="line"></span><br><span class="line">用户问题：如何用Python读取CSV文件？</span><br><span class="line"></span><br><span class="line">正确回答：</span><br><span class="line">```python</span><br><span class="line">import pandas as pd</span><br><span class="line">df = pd.read_csv(&#x27;file.csv&#x27;)</span><br><span class="line">print(df.head())</span><br></pre></td></tr></table></figure>
+<p>注意事项：如果文件编码非UTF-8，需指定encoding参数。</p>
+<p>用户问题：什么是机器学习？</p>
+<p>正确回答：<br>机器学习是人工智能的核心分支，通过数据训练模型来进行预测或决策。</p>
+<h3 id="主要类型"><a href="#主要类型" class="headerlink" title="主要类型"></a>主要类型</h3><ul>
+<li>监督学习：数据有标签（分类、回归）</li>
+<li>无监督学习：数据无标签（聚类、降维）</li>
+<li>强化学习：通过奖励信号学习（游戏、机器人）</li>
+</ul>
+<h3 id="实际应用"><a href="#实际应用" class="headerlink" title="实际应用"></a>实际应用</h3><ul>
+<li>推荐系统（抖音&#x2F;Netflix）</li>
+<li>图像识别（自动驾驶）</li>
+<li>自然语言处理（ChatGPT）</li>
+</ul>
+<pre><code>
+**评分变化**：
+
+| 维度 | v2得分 | v3得分 | 变化原因 |
+|:----:|:------:|:------:|:---------|
+| 格式 | 8 | 8 | 0：保持 |
+| 规则 | 9 | 9 | 0：保持 |
+| 角色 | 8 | 8 | 0：保持 |
+| 内容 | 9 | 10 | +1：增加 Content Guidelines，覆盖不同场景 |
+| 示例 | 6 | 10 | +4：增加具体的问答示例，覆盖不同问题类型 |
+
+**综合得分：9.75/10（+1.00）**
+
+## 关键经验总结
+
+### 1. 先外后内 —— 最重要的原则
+
+这是整套方法中最核心的教训。**格式和规则错了，内容再好也没用**。
+
+我们的数据清晰展示了这一点：
+- 修复**格式+规则**（结构维度）→ +1.50分
+- 修复**内容+示例**（语义维度）→ +1.00分
+
+结构的 ROI 比内容高 50%。如果你觉得 Prompt &quot;不好用&quot;，**先检查结构和规则是否完整**，而不是急着改文字措辞。
+
+### 2. 评分驱动，消除主观偏差
+
+每次迭代都通过评分来驱动，而不是凭&quot;感觉&quot;。评分体系的优势：
+- **可量化**：7.25→8.75→9.75 的进步清晰可见
+- **可定位**：知道哪个维度是弱项（如格式只有2分）
+- **可比较**：不同迭代的效果可以横向对比
+
+### 3. 小步快跑，每次只改 1-2 个维度
+
+一次改太多会导致无法判断哪个变更有效。推荐节奏：
+- 第1轮：只改结构（格式+规则）
+- 第2轮：只改内容（内容+示例）
+- 第3轮：微调（如果还需要的话）
+
+### 4. 保留版本历史，形成可复用经验
+
+每次迭代都保存 Prompt 版本和评分记录。这样能：
+- 回溯每个修改带来的提升
+- 形成组织级的 Prompt 优化知识库
+- 新人可以快速上手最佳实践
+
+## 适用场景
+
+这套方法适用于以下场景：
+
+| 场景 | 适用性 | 说明 |
+|:----|:------:|:-----|
+| 系统 Prompt 设计 | ⭐⭐⭐ | 需要稳定输出的生产环境 |
+| Agent 指令编写 | ⭐⭐⭐ | 需要精确控制 Agent 行为 |
+| 任务模板优化 | ⭐⭐⭐ | 需要批量使用的标准化 Prompt |
+| API 调用配置 | ⭐⭐ | 需要控制成本和输出质量 |
+| 一次性对话 | ⭐ | 简单的场景可能过度工程 |
+
+## 局限性
+
+这套方法也有一些局限性需要说明：
+- **评分主观性**：虽然评分体系结构化，但评分本身仍有主观成分。建议多人交叉评分降低偏差。
+- **过度工程**：对于一次性使用的简单 Prompt，三步迭代法可能过度工程。灵活把握投入度。
+- **领域差异**：不同任务类型（创意写作 vs 代码生成）的评分权重可能需要调整。
+
+## 结语
+
+Prompt Engineering 不是玄学，而是一门可以系统化优化的工程学科。通过&quot;先外后内&quot;的结构化迭代方法，我们可以在短时间内大幅提升 Prompt 的质量。
+
+从 7.25 到 9.75 的提升不是终点，而是证明这套方法论有效的起点。下次你需要优化 Prompt 时，不妨试试这个三步骤迭代法——**先修结构，再修内容，小步快跑，评分驱动**。
+
+如果你有自己的 Prompt 优化经验或心得，欢迎在评论区分享交流。
+</code></pre>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/">https://boke.studyai.ltd/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI/">AI</a><a class="post-meta__tags" href="/tags/%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/">最佳实践</a><a class="post-meta__tags" href="/tags/Prompt-Engineering/">Prompt Engineering</a><a class="post-meta__tags" href="/tags/%E8%BF%AD%E4%BB%A3%E4%BC%98%E5%8C%96/">迭代优化</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-prompt-optimization-3-step.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/19/2026-06-19-ai-vision-monitoring-dashboard/" title="给AI装上双眼：我用Vision API搭建服务实时监控面板"><img class="cover" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">给AI装上双眼：我用Vision API搭建服务实时监控面板</div></div><div class="info-2"><div class="info-item-1">从监控焦虑到”看一眼就行”前几天，我的AI Agent集群跑着 Hermes 智能体引擎、OpenLLM 推理服务、GA Control Center 仪表盘……服务一多，心里就开始发毛：那个服务挂了没？响应还正常吗？ 传统的监控方案太重了——Prometheus + Grafana 那一套，配置起来少说要半天。而且我只是想看一眼现在的界面长什么样，心跳是不是还跳着。 所以我想：既然我的 AI Agent 已经有了 Vision API（能截图），能不能拿它来当监控摄像头用？ 于是就有了这个项目——用 Vision API 做服务监控，直接在 GA Control Center 里开一个”监控页”，实时截图展示各服务的运行状态。 Vision API：从OCR工具到监控摄像头我在 v169 版本已经把 Vision API 封装成了一个独立的 systemd 服务（vision_api_server.service），跑在 8765 端口上。它的核心能力其实很简单： 12GET /screenshot?url=http://localhost:8501→ 返回 Xvfb 浏览器截...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/05/2026-06-05-QGS-quality-gate-system/" title="QGS 质量门禁系统：给 AI Agent 装上&quot;刹车和质检&quot;"><img class="cover" src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-05</div><div class="info-item-2">QGS 质量门禁系统：给 AI Agent 装上&quot;刹车和质检&quot;</div></div><div class="info-2"><div class="info-item-1"> 当 AI Agent 开始自主执行多步操作时，你如何确保它不会”脑子一抽”干出离谱的事？QGS（Quality Gate System）就是为此而生的一套内嵌质量门禁系统。  问题：Agent 失控的两个瞬间设想两个场景： 场景一：你让 Agent “部署一下这个服务”，它开心地执行了 rm -rf /（误），然后告诉你”部署完成！” 场景二：Agent 写了一篇技术文章，看起来头头是道，但里面引用的 API 版本已经过时了三年，调用的方法根本不存在。 这类问题在传统的 LLM 对话中并不突出——因为每轮输出你都肉眼可见。但当 Agent 进入自主执行模式——连跑十几轮工具调用、读写文件、操作浏览器、部署服务——你就没法每步都盯着了。 QGS 就是那个在后台默默盯着的”质检员”。 什么是 QGS？QGS &#x3D; Quality Gate System，直译是”质量门禁系统”。它不是一个独立的外部工具，而是嵌入在 Agent 执行循环内部的一套质量控制框架。 形象点说，传统 Agent 的执行循环像一条单向高速公路： 1用户输入 → LLM 思考 → 工具调用 → 输出结果...</div></div></div></a><a class="pagination-related" href="/2026/05/25/Downy%EF%BC%9A%E5%9F%BA%E4%BA%8E-Cloudflare-Workers-%E7%9A%84%E5%BC%80%E6%BA%90%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%8D%8F%E4%BD%9C%E5%B9%B3%E5%8F%B0/" title="Downy：在 Cloudflare Workers 上搭建你的 AI 代理团队"><img class="cover" src="https://images.unsplash.com/photo-1674027444636-ce7379d51252?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-25</div><div class="info-item-2">Downy：在 Cloudflare Workers 上搭建你的 AI 代理团队</div></div><div class="info-2"><div class="info-item-1"> 一个普通人也能玩转的多智能体协作平台，无需服务器、无需 Docker、无需运维经验。     引言：一个普通开发者的 AI 代理梦（引言）几个月前，我想给自己的项目配一个 AI 助手。不是那种聊聊天就完事的，而是能真正干活的那种——能搜索资料、能读写文件、能跑后台任务。 翻了一圈市面上的方案：OpenClaw 不错，但要自己搭服务器；AutoGPT 太重量级；LangChain 的生态太复杂。我只是个普通开发者，不想为了一个 AI 助手去学一套完整的 DevOps 技能栈。 直到我发现了 Downy。 二、Downy 是什么Downy 是一个基于 Cloudflare Workers 的开源多智能体协作平台。简单说，它让你在几分钟内创建一支 AI 代理团队，每个代理都有自己的工作空间、独立的模型配置和对话历史。 项目地址：github.com&#x2F;bensenescu&#x2F;downy 核心特性一览   特性 说明    🧠 多代理架构 主代理（DownyAgent）+ 子代理（ChildAgent），每个独立运行、独立模型配置   ☁️ 全托管 部署在 Cloud...</div></div></div></a><a class="pagination-related" href="/2026/04/13/2026-04-13-ai-agent-workflow-guide/" title="AI Agent 完全指南：2026 年如何用多代理系统提升工作效率"><img class="cover" src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-13</div><div class="info-item-2">AI Agent 完全指南：2026 年如何用多代理系统提升工作效率</div></div><div class="info-2"><div class="info-item-1"> 写在前面：本文系统整理了我在过去三个月里使用 AI Agent 的完整经验，包含工具选型、工作流设计、成本控制等实战内容。如果你也想构建自己的 AI 工作体系，这篇值得收藏。   一、为什么需要 AI Agent？1.1 从「工具」到「助手」的进化回想一下我们是怎么用 AI 的：  提问 → 等待回答 → 手动复制 → 粘贴到其他工具 → 继续下一步  这是典型的「工具思维」—— AI 只是一个更强的搜索引擎。 但 Agent 改变了这个关系：  设定目标 → AI 自动规划步骤 → 执行 → 反馈结果 → 人类只需审核  我称之为「助手思维」—— AI 不再是工具，而是能独立完成任务的数字员工。 1.2 我的真实收益过去三个月，我用 AI Agent 完成了：    任务类型 原来耗时 现在耗时 效率提升    每周 AI 新闻简报 3 小时 15 分钟 12x   公众号文章创作 6 小时 2 小时 3x   代码 code review 2 小时 20 分钟 6x   竞品分析报告 8 小时 1.5 小时 5.3x   时间不是省出来的，是重新分配了。  二、多代理协作系...</div></div></div></a><a class="pagination-related" href="/2026/02/15/ai-hexo-github/" title="如何让AI通过Hexo接管GitHub博客"><img class="cover" src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-15</div><div class="info-item-2">如何让AI通过Hexo接管GitHub博客</div></div><div class="info-2"><div class="info-item-1">引言在这个AI迅速发展的时代，我们可以用智能助手来帮助我们管理技术博客。本文将详细介绍如何让AI通过Hexo接管并自动化维护你的GitHub博客，从而提高内容更新效率。 为什么让AI接管博客？1. 提高效率 自动内容生成：AI可以根据主题自动生成技术文章 快速部署：无需手动操作，AI可以直接发布新内容 智能优化：AI可以优化标题、标签和分类，提高SEO效果  2. 降低维护成本 无需手动学习Hexo命令：AI知道如何操作 自动处理重复任务：如文章格式化、图片优化等 24&#x2F;7可用：随时可以进行更新和维护  3. 提升质量 内容一致性：AI可以保持统一的写作风格 技术准确性：AI可以自动验证代码和技术细节 多语言支持：AI可以轻松处理多语言内容  系统架构123456789101112graph TB    A[用户指令] --&gt; B[AI Agent]    B --&gt; C[内容生成]    B --&gt; D[Hexo命令执行]    B --&gt; E[Git操作]    C --&gt; F[文章源文件]    D --&gt; F    F --&...</div></div></div></a><a class="pagination-related" href="/2026/06/19/2026-06-19-stock-mcp-server-intro/" title="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server"><img class="cover" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-19</div><div class="info-item-2">用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server</div></div><div class="info-2"><div class="info-item-1">一、背景：MCP 协议与「让 AI 真正懂投资」如果你关注过 2024 年以来的 AI 工程领域，那一定对 MCP（Model Context Protocol） 不陌生。这是 Anthropic 提出的一个开放协议，核心思路很简单——让 LLM 能像调用函数一样调用外部工具。从最初的 Claude Desktop 一路演化到 Cursor、Cline 等 IDE，MCP 正在成为 LLM 与现实世界交互的事实标准。 但问题来了：现成的 MCP Server 多半停留在「查天气、读文件」这种玩具级 demo。真正面向金融场景的优质实现凤毛麟角。 stock-mcp-server 正是为了填补这个空白而生的：一个面向股票分析的 MCP Server，覆盖 A 股、美股、港股三大市场，把行情数据、技术指标、AI 决策、风险检测、策略回测——全塞进 12 个 MCP 工具里，让你的 AI 助手瞬间升级为「初级分析师」。 二、四大功能亮点1. 🌟 AI 决策仪表盘：把数据喂给 LLM，让它「出报告」这是整个项目最让我眼前一亮的工具。调用 analyze_stock_ai 工具，服务器会...</div></div></div></a><a class="pagination-related" href="/2026/03/12/2026-03-12-openclaw-real-review/" title="OpenClaw 实战评测：3 个月深度使用，这些坑我帮你踩过了"><img class="cover" src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-03-12</div><div class="info-item-2">OpenClaw 实战评测：3 个月深度使用，这些坑我帮你踩过了</div></div><div class="info-2"><div class="info-item-1">OpenClaw 实战评测：3 个月深度使用，这些坑我帮你踩过了 2026 年 1 月的一个下午，我对着终端说”今天北京天气怎么样”，几秒后 AI 回复了天气信息。那一刻，我知道自己的 AI 助手跑起来了。 3 个月后，我决定离开 OpenClaw，迁移到 nanobot。这中间发生了什么？ 本文不吹不黑，只讲真实体验。如果你正在考虑是否采用 OpenClaw，或者遇到了类似问题，希望这篇文章能帮你少走弯路。   一、OpenClaw 是什么？用一句话概括：OpenClaw 是一个开源的 AI Agent 框架，让你像搭积木一样构建专属 AI 助手。  💡 开源项目的成长，就像养孩子——你爱它的潜力，也要包容它的不完美。  它的核心卖点很诱人：  🧩 技能系统：像手机 App 一样安装&#x2F;卸载技能 🤖 多代理协作：Hunter 搜集、Creator 写作、Critic 评审、Messenger 发布 💾 记忆系统：长期记忆 + 短期记忆，Agent 不会”金鱼脑” 🔌 工具生态：飞书、GitHub、微信公众号、博客一键发布  听起来很美好对吧？我当初就是被这些功...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">41</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">78</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">13</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3%EF%BC%9A%E5%85%88%E5%A4%96%E5%90%8E%E5%86%85"><span class="toc-number">2.</span> <span class="toc-text">核心思想：先外后内</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%84%E5%88%86%E4%BD%93%E7%B3%BB"><span class="toc-number">3.</span> <span class="toc-text">评分体系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E6%AD%A5%E9%AA%A4%E8%BF%AD%E4%BB%A3%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">三步骤迭代法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-1-%E5%9F%BA%E7%BA%BF%E8%AF%84%E4%BC%B0%EF%BC%88v1-%E2%86%92-7-25%E5%88%86%EF%BC%89"><span class="toc-number">4.1.</span> <span class="toc-text">Step 1: 基线评估（v1 → 7.25分）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-2-%E4%BF%AE%E5%A4%8D%E7%BB%93%E6%9E%84%E7%BB%B4%E5%BA%A6%EF%BC%88v2-%E2%86%92-8-75%E5%88%86%EF%BC%8C-1-50%EF%BC%89"><span class="toc-number">4.2.</span> <span class="toc-text">Step 2: 修复结构维度（v2 → 8.75分，+1.50）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-3-%E4%BF%AE%E5%A4%8D%E5%86%85%E5%AE%B9-%E7%A4%BA%E4%BE%8B%E7%BB%B4%E5%BA%A6%EF%BC%88v3-%E2%86%92-9-75%E5%88%86%EF%BC%8C-1-00%EF%BC%89"><span class="toc-number">4.3.</span> <span class="toc-text">Step 3: 修复内容+示例维度（v3 → 9.75分，+1.00）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E8%A6%81%E7%B1%BB%E5%9E%8B"><span class="toc-number">4.4.</span> <span class="toc-text">主要类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8"><span class="toc-number">4.5.</span> <span class="toc-text">实际应用</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/" title="Prompt优化3步迭代法：从7.25分到9.75分的实战经验"><img src="/img/cover-prompt-optimization-3-step.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prompt优化3步迭代法：从7.25分到9.75分的实战经验"/></a><div class="content"><a class="title" href="/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/" title="Prompt优化3步迭代法：从7.25分到9.75分的实战经验">Prompt优化3步迭代法：从7.25分到9.75分的实战经验</a><time datetime="2026-06-20T01:20:00.000Z" title="发表于 2026-06-20 09:20:00">2026-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-ai-vision-monitoring-dashboard/" title="给AI装上双眼：我用Vision API搭建服务实时监控面板"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给AI装上双眼：我用Vision API搭建服务实时监控面板"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-ai-vision-monitoring-dashboard/" title="给AI装上双眼：我用Vision API搭建服务实时监控面板">给AI装上双眼：我用Vision API搭建服务实时监控面板</a><time datetime="2026-06-19T06:00:00.000Z" title="发表于 2026-06-19 14:00:00">2026-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-stock-mcp-server-intro/" title="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server"><img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-stock-mcp-server-intro/" title="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server">用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server</a><time datetime="2026-06-19T04:00:00.000Z" title="发表于 2026-06-19 12:00:00">2026-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训"><img src="/img/cover-ai-agent-%E9%81%BF%E5%9D%91%E5%AE%9E%E5%BD%95.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI Agent 自主运维避坑实录：15个来自实战的教训"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训">AI Agent 自主运维避坑实录：15个来自实战的教训</a><time datetime="2026-06-19T00:19:47.000Z" title="发表于 2026-06-19 08:19:47">2026-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/08/2026-06-08-knowledge-assets-ai-agent/" title="Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库"><img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库"/></a><div class="content"><a class="title" href="/2026/06/08/2026-06-08-knowledge-assets-ai-agent/" title="Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库">Knowledge Assets：给 AI Agent 装一个会「自我生长」的知识库</a><time datetime="2026-06-08T02:00:00.000Z" title="发表于 2026-06-08 10:00:00">2026-06-08</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
