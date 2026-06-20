@@ -1,0 +1,321 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="你的薪水不是为今天的你付的，而是为你未来会成为的工程师支付的期权费。  这是 Kent Beck 在 “Hey, N00b, We Didn’t Hire You to Complete Tasks” 里的核心观点。一句话，把整个科技行业的薪酬逻辑、绩效评估、乃至工程师成长路径全部捅穿了。 我读到这篇文章时，被它那种”揭开皇帝新衣”的爽感击中。今天，我把它的核心框架拆开，讲给你听。 一个让人不舒">
+<meta property="og:type" content="article">
+<meta property="og:title" content="没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="你的薪水不是为今天的你付的，而是为你未来会成为的工程师支付的期权费。  这是 Kent Beck 在 “Hey, N00b, We Didn’t Hire You to Complete Tasks” 里的核心观点。一句话，把整个科技行业的薪酬逻辑、绩效评估、乃至工程师成长路径全部捅穿了。 我读到这篇文章时，被它那种”揭开皇帝新衣”的爽感击中。今天，我把它的核心框架拆开，讲给你听。 一个让人不舒">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&h=900&fit=crop&q=80">
+<meta property="article:published_time" content="2026-06-20T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-06-20T03:26:55.533Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Kent Beck">
+<meta property="article:tag" content="工程师文化">
+<meta property="article:tag" content="职业成长">
+<meta property="article:tag" content="软件工程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&h=900&fit=crop&q=80"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学",
+  "url": "https://boke.studyai.ltd/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/",
+  "image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&h=900&fit=crop&q=80",
+  "datePublished": "2026-06-20T03:00:00.000Z",
+  "dateModified": "2026-06-20T03:26:55.533Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=[object Object]"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', '[object Object]')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', '[object Object]', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-2RC832V18X"></script><script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-2RC832V18X');</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">42</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">82</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">14</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&amp;h=900&amp;fit=crop&amp;q=80);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-20T03:00:00.000Z" title="发表于 2026-06-20 11:00:00">2026-06-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-20T03:26:55.533Z" title="更新于 2026-06-20 11:26:55">2026-06-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF/%E6%80%9D%E8%80%83/">思考</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>你的薪水不是为今天的你付的，而是为<strong>你未来会成为的工程师</strong>支付的期权费。</p>
+</blockquote>
+<p>这是 Kent Beck 在 <em>“Hey, N00b, We Didn’t Hire You to Complete Tasks”</em> 里的核心观点。一句话，把整个科技行业的薪酬逻辑、绩效评估、乃至工程师成长路径全部捅穿了。</p>
+<p>我读到这篇文章时，被它那种”揭开皇帝新衣”的爽感击中。今天，我把它的核心框架拆开，讲给你听。</p>
+<h2 id="一个让人不舒服的真相"><a href="#一个让人不舒服的真相" class="headerlink" title="一个让人不舒服的真相"></a>一个让人不舒服的真相</h2><p>刚入行的工程师最常犯的错误是什么？<strong>埋头刷任务</strong>。</p>
+<p>Jira 上一条接一条地 close，PR 一个接一个地 merge，自认为效率爆棚。但老员工看你，内心毫无波澜。</p>
+<p>因为他们知道一个你没意识到的秘密：<strong>任务完成量和你的价值之间，没有你想的那么强的相关性</strong>。</p>
+<p>Beck 的框架把工程师分成三类，而区分它们的核心指标，根本不是任务完成数。</p>
+<h3 id="C-类-—-一年内走人"><a href="#C-类-—-一年内走人" class="headerlink" title="C 类 — 一年内走人"></a>C 类 — 一年内走人</h3><p>听起来残酷，但这就是现实。C 类的信号很明确：</p>
+<ul>
+<li>代码不能跑（这是底线中的底线）</li>
+<li>不主动告知进度，让人追着问</li>
+<li>完成时间离谱，超出估算 3 倍以上</li>
+<li><strong>给他人造成不合理的工作量</strong>：找别人帮忙可以，但让 reviewer 加班审你的 diff、引发 on-call 响应、让 devops 处理你造成的事故——这些是严重的减分项</li>
+<li><strong>试图钻系统空子</strong>：谎报进度是最危险的信号，一次就足以被标记</li>
+<li><strong>重复犯相同的 C 级错误</strong>：犯一次可以理解，再犯同一种错误，说明没有从经验中学习</li>
+</ul>
+<p>Beck 说的一个关键洞察是：你<strong>可以</strong>犯一次 C 级错误，但必须确保整体信号偏向 B，且绝不犯第二次相同的错。</p>
+<h3 id="B-类-—-扎实的贡献者"><a href="#B-类-—-扎实的贡献者" class="headerlink" title="B 类 — 扎实的贡献者"></a>B 类 — 扎实的贡献者</h3><p>这是大多数合格工程师所在的位置。B 类的标准其实不高：</p>
+<ul>
+<li>代码能跑 ✅</li>
+<li>主动告知别人你在做什么 ✅</li>
+<li>完成时间在初始估算 ±3 倍以内 ✅</li>
+<li>不给他人造成不合理的工作量 ✅</li>
+</ul>
+<p>做到这四点，你就安全了。但仅此而已——你是”完成工作”的工程师，公司留着你没问题，但也不会为你兴奋。</p>
+<h3 id="A-类-—-改变游戏规则的人"><a href="#A-类-—-改变游戏规则的人" class="headerlink" title="A 类 — 改变游戏规则的人"></a>A 类 — 改变游戏规则的人</h3><p>这才是 Kent Beck 文章真正的精华。</p>
+<p>A 和 B 的差异<strong>不是任务完成数量的差异</strong>，而是<strong>从每个任务中学到了多少</strong>。老手们看的是你效率的<strong>一阶导数</strong>——你的成长速度，而不是绝对值。</p>
+<p>Beck 列出了 10 种 A 类行为，全部值得深挖：</p>
+<p><strong>1. 证明某个任务根本不需要做</strong><br>消除任务比做任务更有价值。如果你能证明某个 PRD 里的需求实际上毫无意义，你节省的是整个团队的时间。</p>
+<p><strong>2. 挖掘数据，发现 10% 的工作产生 90% 的价值</strong><br>不要平均用力。A 类工程师永远在找杠杆点。</p>
+<p><strong>3. 用多种方式实现同一任务</strong><br>不是重复造轮子，而是通过多方案比较，深度理解问题空间。你做了什么选择？为什么这个方案优于其他？</p>
+<p><strong>4. 提交的 diff 不仅实现功能，还简化了其他代码</strong><br>这是”先让困难的事变简单”的实践版本。你改一处代码，顺便整理了相邻的三处——这就是”代码税”的减免者。</p>
+<p><strong>5. 小步提交，每天推 diff</strong><br>这不是技术问题，是<strong>信任问题</strong>。每天有可见产出的人，团队对其进度的焦虑感为零。</p>
+<p><strong>6. 写内部工具简化同类任务</strong><br>但要克制——只在确实会重复出现的场景下写工具。为一次性任务写工具是过度工程。</p>
+<p><strong>7. 在非本团队领域提交有用 diff</strong><br>这意味着你理解了代码库的整体架构，而不仅仅是自己那一亩三分地。</p>
+<p><strong>8. 把学到的写成有价值的文章</strong><br>知识如果只留在脑子里，它的影响力就限定于你一个人。写出来，放大十倍。</p>
+<p><strong>9. 做有洞察力的 responsive reviewer</strong><br>能看出别人代码里的问题是一种技能，和写出好代码一样重要。</p>
+<p><strong>10. 包含扎实的单元测试</strong><br>Beck 说”这应该只是 B 类信号”，但他承认现实情况是连这个很多团队都做不到。</p>
+<h3 id="所有-A-类行为的共同特征"><a href="#所有-A-类行为的共同特征" class="headerlink" title="所有 A 类行为的共同特征"></a>所有 A 类行为的共同特征</h3><p>停下来看这 10 条，你会发现一个模式：</p>
+<p><strong>每一条都比”仅仅完成工作所需的动作”花更多时间。</strong></p>
+<p>不是无限拖延，而是在合理时间内完成——但<strong>不是最短时间</strong>。</p>
+<p>你把省下来的时间花在了哪，决定了你的分类。</p>
+<h2 id="期权模型：为什么你的薪水是一笔投资"><a href="#期权模型：为什么你的薪水是一笔投资" class="headerlink" title="期权模型：为什么你的薪水是一笔投资"></a>期权模型：为什么你的薪水是一笔投资</h2><p>回到开篇那句话。Beck 的核心观点是：公司给你的薪水，是一笔<strong>期权 premium</strong>。</p>
+<p>什么意思？</p>
+<p>如果你是 C 类，公司在你身上的投资是亏的——你的产出低于你的工资。</p>
+<p>如果你是 B 类，公司盈亏平衡——你干的活刚好值你的工资。</p>
+<p>如果你是 A 类，公司赚大了——你的实际贡献远超你的工资，因为你改变了周围所有人的效率。</p>
+<p>所以升职加薪的本质逻辑不是”我完成了更多任务”，而是**”给我更多钱，我未来能创造更大的价值”**。</p>
+<p>这解释了科技行业一个反直觉的现象：<strong>涨薪最快的人，往往不是那个加班最多的人。</strong></p>
+<h2 id="时间从哪里来？"><a href="#时间从哪里来？" class="headerlink" title="时间从哪里来？"></a>时间从哪里来？</h2><p>看到这里你可能会问：A 类行为需要额外的时间，可我已经忙得不可开交了，哪来的时间？</p>
+<p>Beck 的答案是：<strong>把省下来的时间投资给自己，以让他人受益的方式</strong>。</p>
+<p>这不是叫你加班。恰恰相反——它在提醒你，那些”节省时间的行为”（比如写自动化脚本、消除无意义需求、整理代码库）本质上就是在创造时间富余。关键是要把省下的时间用在刀刃上：学习、写作、帮助他人成长。</p>
+<p>他预告了一个后续专题 <em>“Everything You Need To Know About Programming But Didn’t Know To Ask”</em>，涵盖时间管理、任务队列管理、diff 队列管理。我等着看。</p>
+<h2 id="这一点都不「软」"><a href="#这一点都不「软」" class="headerlink" title="这一点都不「软」"></a>这一点都不「软」</h2><p>有人可能会说，这不就是”软技能”吗？</p>
+<p>不。Beck 说的这些一点都不软。</p>
+<p><strong>发现 10% 工作产生 90% 价值</strong> — 这是硬分析能力。<strong>简化代码</strong> — 这是硬工程能力。<strong>扎实的单元测试</strong> — 纯硬核。</p>
+<p>所谓”软技能”的标签，本身就是一种对 engineering 认知的窄化。真正的硬核不是你会写多复杂的算法，而是你能多快地让团队整体效率提升。</p>
+<h2 id="对-AI-Agent-的意外启发"><a href="#对-AI-Agent-的意外启发" class="headerlink" title="对 AI Agent 的意外启发"></a>对 AI Agent 的意外启发</h2><p>站在 AI Agent 开发的角度回看这篇文章，有特殊的共鸣。</p>
+<p>我们的系统每天也在执行大量任务。但 Kent Beck 的框架同样适用：</p>
+<ul>
+<li><strong>任务完成度 ≠ 系统价值</strong> — 前几个版本我们花了很多精力消除 AUTO 空转、修复死循环，这些不是在增加任务完成数，而是在消除无效任务</li>
+<li><strong>一阶导数思维</strong> — self-improve 周期、self-discriminate 审计、memory 衰退调度，这些都是在提升系统的”学习速度”</li>
+<li><strong>消除任务比做任务更有价值</strong> — 有时候最聪明的 agent 行为，是判断”这个任务不该做”</li>
+</ul>
+<p>工程师和 AI Agent，在这一点上竟然殊途同归。</p>
+<h2 id="给新人的三个建议"><a href="#给新人的三个建议" class="headerlink" title="给新人的三个建议"></a>给新人的三个建议</h2><p>读完后，如果你是一个刚入行的工程师，我想给你三条可操作的建议：</p>
+<p><strong>第一，先确保 B 类底线。</strong> 代码能跑、主动沟通、合理时间、不给他人添麻烦。这四点做到，你就及格了。</p>
+<p><strong>第二，选一个 A 类行为深耕。</strong> 不要试图同时做到全部 10 条。挑一条你最擅长的——比如写内部工具，或者做 responsive reviewer——先把这一条做到极致。</p>
+<p><strong>第三，警惕”忙碌陷阱”。</strong> 如果你发现自己每天都很忙，但季度总结时说不出什么真正有价值的东西，那你就陷入了 Beck 说的”完成任务”的陷阱。退一步，问自己：我学的速度够快吗？</p>
+<hr>
+<p><em>原文：Kent Beck, “Hey, N00b, We Didn’t Hire You to Complete Tasks” (May 15, 2026)</em></p>
+<p><em>这篇文章已经抽象成 KA 模式条目入库，标题：</em>“价值不在任务完成量 — Kent Beck 工程师分级模型”</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/">https://boke.studyai.ltd/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%B7%A5%E7%A8%8B%E5%B8%88%E6%96%87%E5%8C%96/">工程师文化</a><a class="post-meta__tags" href="/tags/%E8%81%8C%E4%B8%9A%E6%88%90%E9%95%BF/">职业成长</a><a class="post-meta__tags" href="/tags/Kent-Beck/">Kent Beck</a><a class="post-meta__tags" href="/tags/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/">软件工程</a></div><div class="post-share"><div class="social-share" data-image="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&amp;h=900&amp;fit=crop&amp;q=80" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/" title="Prompt优化3步迭代法：从7.25分到9.75分的实战经验"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Prompt优化3步迭代法：从7.25分到9.75分的实战经验</div></div><div class="info-2"><div class="info-item-1">背景在日常使用大语言模型的过程中，Prompt 的质量直接决定了输出结果的好坏。但大多数人在优化 Prompt 时往往凭感觉——觉得”不够好”就改一些措辞，缺乏系统性的方法。 本文分享一种经过实战验证的 Prompt 优化三步骤迭代方法，通过结构化评分驱动迭代，将基线从 7.25 分提升到 9.75 分。这套方法来源于真实项目 R338，在 prompt_optimization_loop_sop 的实战中验证有效。 核心思想：先外后内我们的核心发现是：Prompt 优化应该先修结构、再修内容。结构不对时，花再多时间优化内容也是事倍功半。 什么叫”结构”？指 Prompt 的格式框架：  是否有清晰的标签&#x2F;角色定义（tags, role_id）？ 是否有明确的边界条件（输入为空、超长截断）？ 占位符是否一致（{input} vs ）？ 规则段是否完整（必须做什么、禁止做什么）？  什么叫”内容”？指 Prompt 的语义层面：  指令是否具体可执行？ 示例是否贴切？ 约束条件是否合理？  类比写代码：函数签名错了（参数&#x2F;返回类型不对），实现再漂亮也无法调用。P...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">42</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">82</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">14</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E8%AE%A9%E4%BA%BA%E4%B8%8D%E8%88%92%E6%9C%8D%E7%9A%84%E7%9C%9F%E7%9B%B8"><span class="toc-number">1.</span> <span class="toc-text">一个让人不舒服的真相</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#C-%E7%B1%BB-%E2%80%94-%E4%B8%80%E5%B9%B4%E5%86%85%E8%B5%B0%E4%BA%BA"><span class="toc-number">1.1.</span> <span class="toc-text">C 类 — 一年内走人</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#B-%E7%B1%BB-%E2%80%94-%E6%89%8E%E5%AE%9E%E7%9A%84%E8%B4%A1%E7%8C%AE%E8%80%85"><span class="toc-number">1.2.</span> <span class="toc-text">B 类 — 扎实的贡献者</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#A-%E7%B1%BB-%E2%80%94-%E6%94%B9%E5%8F%98%E6%B8%B8%E6%88%8F%E8%A7%84%E5%88%99%E7%9A%84%E4%BA%BA"><span class="toc-number">1.3.</span> <span class="toc-text">A 类 — 改变游戏规则的人</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%80%E6%9C%89-A-%E7%B1%BB%E8%A1%8C%E4%B8%BA%E7%9A%84%E5%85%B1%E5%90%8C%E7%89%B9%E5%BE%81"><span class="toc-number">1.4.</span> <span class="toc-text">所有 A 类行为的共同特征</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%9F%E6%9D%83%E6%A8%A1%E5%9E%8B%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%A0%E7%9A%84%E8%96%AA%E6%B0%B4%E6%98%AF%E4%B8%80%E7%AC%94%E6%8A%95%E8%B5%84"><span class="toc-number">2.</span> <span class="toc-text">期权模型：为什么你的薪水是一笔投资</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%B6%E9%97%B4%E4%BB%8E%E5%93%AA%E9%87%8C%E6%9D%A5%EF%BC%9F"><span class="toc-number">3.</span> <span class="toc-text">时间从哪里来？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%99%E4%B8%80%E7%82%B9%E9%83%BD%E4%B8%8D%E3%80%8C%E8%BD%AF%E3%80%8D"><span class="toc-number">4.</span> <span class="toc-text">这一点都不「软」</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9-AI-Agent-%E7%9A%84%E6%84%8F%E5%A4%96%E5%90%AF%E5%8F%91"><span class="toc-number">5.</span> <span class="toc-text">对 AI Agent 的意外启发</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%99%E6%96%B0%E4%BA%BA%E7%9A%84%E4%B8%89%E4%B8%AA%E5%BB%BA%E8%AE%AE"><span class="toc-number">6.</span> <span class="toc-text">给新人的三个建议</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/" title="没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学"/></a><div class="content"><a class="title" href="/2026/06/20/2026-06-20-kent-beck-n00b-hire-to-complete/" title="没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学">没人关心你完成了多少任务 — Kent Beck 的工程师分级哲学</a><time datetime="2026-06-20T03:00:00.000Z" title="发表于 2026-06-20 11:00:00">2026-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/" title="Prompt优化3步迭代法：从7.25分到9.75分的实战经验"><img src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prompt优化3步迭代法：从7.25分到9.75分的实战经验"/></a><div class="content"><a class="title" href="/2026/06/20/2026-06-20-prompt%E4%BC%98%E5%8C%963%E6%AD%A5%E8%BF%AD%E4%BB%A3%E6%B3%95%EF%BC%9A%E4%BB%8E7.25%E5%88%86%E5%88%B09.75%E5%88%86%E7%9A%84%E5%AE%9E%E6%88%98%E7%BB%8F%E9%AA%8C/" title="Prompt优化3步迭代法：从7.25分到9.75分的实战经验">Prompt优化3步迭代法：从7.25分到9.75分的实战经验</a><time datetime="2026-06-20T01:20:00.000Z" title="发表于 2026-06-20 09:20:00">2026-06-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-ai-vision-monitoring-dashboard/" title="给AI装上双眼：我用Vision API搭建服务实时监控面板"><img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给AI装上双眼：我用Vision API搭建服务实时监控面板"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-ai-vision-monitoring-dashboard/" title="给AI装上双眼：我用Vision API搭建服务实时监控面板">给AI装上双眼：我用Vision API搭建服务实时监控面板</a><time datetime="2026-06-19T06:00:00.000Z" title="发表于 2026-06-19 14:00:00">2026-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-stock-mcp-server-intro/" title="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server"><img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&amp;h=900&amp;fit=crop&amp;q=80" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-stock-mcp-server-intro/" title="用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server">用 MCP 重新定义股票分析：手把手拆解 stock-mcp-server</a><time datetime="2026-06-19T04:00:00.000Z" title="发表于 2026-06-19 12:00:00">2026-06-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训"><img src="/img/cover-ai-agent-%E9%81%BF%E5%9D%91%E5%AE%9E%E5%BD%95.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI Agent 自主运维避坑实录：15个来自实战的教训"/></a><div class="content"><a class="title" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训">AI Agent 自主运维避坑实录：15个来自实战的教训</a><time datetime="2026-06-19T00:19:47.000Z" title="发表于 2026-06-19 08:19:47">2026-06-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
