@@ -1,0 +1,455 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>软考高项备考精华：一次读完的高项通关指南 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="软考高项（信息系统项目管理师）全书精华浓缩——三科考试全景、十大知识领域、计算题速成、论文写作要点与30天冲刺计划。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="软考高项备考精华：一次读完的高项通关指南">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/07/31/2026-07-31-ruankao-full-essence/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="软考高项（信息系统项目管理师）全书精华浓缩——三科考试全景、十大知识领域、计算题速成、论文写作要点与30天冲刺计划。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-ruankao-full-essence.png">
+<meta property="article:published_time" content="2026-07-31T06:30:00.000Z">
+<meta property="article:modified_time" content="2026-07-31T06:15:09.437Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="信息系统项目管理师">
+<meta property="article:tag" content="备考">
+<meta property="article:tag" content="软考">
+<meta property="article:tag" content="高项">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-ruankao-full-essence.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "软考高项备考精华：一次读完的高项通关指南",
+  "url": "https://boke.studyai.ltd/2026/07/31/2026-07-31-ruankao-full-essence/",
+  "image": "https://boke.studyai.ltd/img/cover-ruankao-full-essence.png",
+  "datePublished": "2026-07-31T06:30:00.000Z",
+  "dateModified": "2026-07-31T06:15:09.437Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/07/31/2026-07-31-ruankao-full-essence/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=[object Object]"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', '[object Object]')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', '[object Object]', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '软考高项备考精华：一次读完的高项通关指南',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-2RC832V18X"></script><script>window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-2RC832V18X');</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">164</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">27</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-ruankao-full-essence.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">软考高项备考精华：一次读完的高项通关指南</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">软考高项备考精华：一次读完的高项通关指南</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-07-31T06:30:00.000Z" title="发表于 2026-07-31 14:30:00">2026-07-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-07-31T06:15:09.437Z" title="更新于 2026-07-31 14:15:09">2026-07-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%BD%AF%E8%80%83/">软考</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>一句话摘要：软考高项（信息系统项目管理师）是以信息化与信息技术为基础、以项目管理十大知识领域为核心、以高级项目管理方法论为延伸的系统化考试，备考关键在于理解信息系统底层逻辑、掌握项目管理过程框架、熟练计算题公式，并通过案例分析与论文写作展现综合管理能力。</p>
+</blockquote>
+<h2 id="1-考试全景（题型分布、考试形式、备考策略）"><a href="#1-考试全景（题型分布、考试形式、备考策略）" class="headerlink" title="1. 考试全景（题型分布、考试形式、备考策略）"></a>1. 考试全景（题型分布、考试形式、备考策略）</h2><p>软考高项考试分为三个科目，需一次性全部通过方可获得证书。</p>
+<p><strong>科目一：综合知识（选择题）</strong></p>
+<ul>
+<li>75道单选题，考试时间150分钟，满分75分，45分及格。</li>
+<li>覆盖信息化与信息技术、项目管理知识体系、高级项目管理、法律法规、标准规范等。</li>
+<li>计算题约5-8分，主要考查EVM挣值分析、PERT三点估算、CPM关键路径法、决策树等。</li>
+</ul>
+<p><strong>科目二：案例分析（问答题）</strong></p>
+<ul>
+<li>3道大题，考试时间90分钟，满分75分，45分及格。</li>
+<li>题型包括找错改错、计算题、判断题、填空题等。</li>
+<li>常考领域：范围管理、进度管理、成本管理、质量管理、风险管理、配置管理等。</li>
+</ul>
+<p><strong>科目三：论文写作</strong></p>
+<ul>
+<li>2道论文题选1道，考试时间120分钟，满分75分，45分及格。</li>
+<li>要求结合自身项目经验，按照论文框架（摘要+正文）论述某一知识领域的管理过程。</li>
+<li>近年常考：绩效域、风险管理、沟通管理、干系人管理等。</li>
+</ul>
+<p><strong>备考策略：</strong></p>
+<ul>
+<li><strong>阶段一（基础学习，约2周）</strong> ：通读教材，理解信息化与信息技术基础概念，建立项目管理知识体系框架。</li>
+<li><strong>阶段二（重点突破，约2周）</strong> ：精读十大知识领域，掌握每个领域的核心概念、过程、工具与技术，重点攻克计算题。</li>
+<li><strong>阶段三（案例与论文强化，约1周）</strong> ：练习案例分析题，掌握找错题的答题套路；准备论文素材，熟悉论文结构。</li>
+<li><strong>阶段四（冲刺模拟，约1周）</strong> ：做真题模拟，查漏补缺，背诵高频考点和公式。</li>
+</ul>
+<h2 id="2-信息化与信息系统（第1-5章精华）"><a href="#2-信息化与信息系统（第1-5章精华）" class="headerlink" title="2. 信息化与信息系统（第1-5章精华）"></a>2. 信息化与信息系统（第1-5章精华）</h2><h3 id="2-1-信息与信息系统基础"><a href="#2-1-信息与信息系统基础" class="headerlink" title="2.1 信息与信息系统基础"></a>2.1 信息与信息系统基础</h3><p><strong>信息的定义</strong>：1948年，数学家香农在《通信的数学理论》中指出：”信息是用来消除随机不定性的东西”。信息量的单位为比特（bit），计算公式为：<strong>H&#x3D;-∑P(xi)log₂P(xi)</strong>，其中xi代表n个状态中的第i个状态，P(xi)代表出现第i个状态的概率，H代表以比特为单位的负熵。</p>
+<p><strong>信息的特征（11个）</strong> ：客观性、普遍性、无限性、动态性、相对性、依附性、变换性、传递性、层次性、系统性、转化性。考试常考给出定义判断对应特征，如”不同认识主体获取信息量不同”对应相对性。</p>
+<p><strong>信息的质量属性（7个）</strong> ：精确性、完整性、可靠性、及时性、经济性、可验证性、安全性。不同应用场景侧重不同属性，如金融信息最重要是安全性，经济与社会信息最重要是及时性。</p>
+<p><strong>信息系统的定义</strong>：信息系统就是通过输入数据，然后进行加工处理，最后产生信息的系统。面向管理和支持生产是信息系统的显著特点。</p>
+<p><strong>信息系统的抽象模型</strong>：信息系统是管理模型、信息处理模型和系统实现条件的结合。管理模型指系统服务对象领域的专门知识；信息处理模型指系统处理信息的结构和方法；系统实现条件指可供应用的计算机技术和通信技术、人员及资源控制。</p>
+<p><strong>信息系统生命周期</strong>：系统规划（可行性分析与项目开发计划）→系统分析（需求分析）→系统设计（概要设计、详细设计）→系统实施（编码、测试）→系统运行和维护。</p>
+<p><strong>国家信息化体系六要素</strong>：信息技术应用（龙头）、信息资源（核心）、信息网络（基础设施）、信息技术和产业（基础）、信息化人才（关键）、信息化政策法规和标准规范（保障）。</p>
+<h3 id="2-2-新一代信息技术"><a href="#2-2-新一代信息技术" class="headerlink" title="2.2 新一代信息技术"></a>2.2 新一代信息技术</h3><p><strong>信息技术定义</strong>：信息技术是在信息科学的基本原理和方法下，获取信息、处理信息、传输信息和使用信息的应用技术总称。核心是四个动作：获取、处理、传输、使用。</p>
+<p><strong>网络协议三要素</strong>：语义（要做什么）、语法（要怎么做）、时序（做的顺序）。</p>
+<p><strong>OSI七层模型</strong>：物理层、数据链路层、网络层、传输层、会话层、表示层、应用层。各层主要协议：物理层（RS232、RJ-45）、数据链路层（IEEE802.3&#x2F;2）、网络层（IP、ICMP、ARP）、传输层（TCP、UDP）、会话层（SSL、TLS、RPC）、表示层（JPEG、ASCII、GIF、DES、MPEG）、应用层（HTTP、Telnet、FTP、SMTP）。</p>
+<p><strong>TCP&#x2F;IP四层模型</strong>：应用层（合并OSI应用层、表示层、会话层）、传输层（独立保留）、网络层（独立保留）、网络接口层（合并数据链路层和物理层）。</p>
+<p><strong>SDN三层架构</strong>：数据平面（交换机等硬件组成，负责数据转发）、控制平面（逻辑中心化的SDN控制器，掌握全局网络信息）、应用平面（包含各种网络应用）。控制平面与数据平面之间通过南向接口（如OpenFlow）通信，控制平面与应用平面之间通过北向接口通信。</p>
+<h3 id="2-3-IT治理与信息系统管理"><a href="#2-3-IT治理与信息系统管理" class="headerlink" title="2.3 IT治理与信息系统管理"></a>2.3 IT治理与信息系统管理</h3><p><strong>IT治理定义</strong>：IT治理是组织开展信息技术及其应用活动的重要管控手段，也是组织治理的重要组成部分。核心作用是统筹、评估、指导和监督。</p>
+<p><strong>IT治理体系构成</strong>：IT定位（IT应用的期望行为与业务目标一致）、IT治理架构（业务和IT在治理委员会中的构成及权责边界）、IT治理内容（投资、风险、绩效、标准和规范）、IT治理流程（统筹、评估、指导、监督）、IT治理效果（内外评价）。</p>
+<p><strong>IT治理五大任务</strong>：全局统筹、价值导向、机制保障、创新发展、文化助推。</p>
+<p><strong>IT治理三大目标</strong>：与业务目标一致、有效利用信息与数据资源、风险管理。</p>
+<p><strong>IT治理管理层次</strong>：最高管理层、执行管理层、业务与服务执行层。</p>
+<p><strong>信息系统管理四大领域</strong>：规划和组织（针对信息系统的整体组织、战略和支持活动）、设计和实施（针对信息系统解决方案的定义、采购和实施）、运维和服务（针对信息系统服务的运行交付和支持，包括安全）、优化和持续改进（针对信息系统的性能监控及一致性管理）。</p>
+<p><strong>信息系统战略三角</strong>：业务战略、信息系统和组织机制之间的必要一致性。业务战略是驱动因素，组织机制战略回答”组织如何构建”，信息系统战略提供信息服务的计划。</p>
+<p><strong>波特竞争力优势模型</strong>：总成本领先战略（成为市场上成本最低的生产者）、差异性战略（通过差异化使产品或服务在市场上显得独特）、专注化战略（将范围限制在更狭窄的细分市场）。</p>
+<p><strong>莱维特钻石模型</strong>：信息与控制、人员、结构和任务，所有组件相互关联。</p>
+<h3 id="2-4-软件工程与系统工程"><a href="#2-4-软件工程与系统工程" class="headerlink" title="2.4 软件工程与系统工程"></a>2.4 软件工程与系统工程</h3><p><strong>软件工程三要素</strong>：方法（完成软件工程项目的技术手段）、工具（自动或半自动地支持软件的开发和管理）、过程（贯穿于软件开发的各个环节，管理人员对质量、进度和成本进行评估、管理和控制）。</p>
+<p><strong>软件架构风格五大分类</strong>：数据流风格（批处理序列、管道&#x2F;过滤器）、调用&#x2F;返回风格（主程序&#x2F;子程序、数据抽象和面向对象、层次结构）、独立构件风格（进程通信、事件驱动）、虚拟机风格（解释器、基于规则的系统）、仓库风格（数据库系统、黑板系统、超文本系统）。</p>
+<p><strong>软件架构评估方式</strong>：基于调查问卷（或检查表）、基于场景（最常用，包括ATAM、SAAM、CBAM）、基于度量。</p>
+<p><strong>需求三层次</strong>：业务需求（反映企业或客户的高层次目标）、用户需求（描述用户的具体目标或要求系统完成的任务）、系统需求（从系统角度说明，包括功能需求、非功能需求和设计约束）。</p>
+<p><strong>需求过程</strong>：需求获取→需求分析→需求规格说明书编制→需求验证与确认。需求获取方法包括用户访谈、问卷调查、采样、情节串联板、联合需求计划。</p>
+<p><strong>结构化设计（SD）</strong> ：分为概要设计（将系统功能需求分配给模块，确定模块功能和调用关系）和详细设计（输入&#x2F;输出设计、处理流程设计、数据存储设计、用户界面设计）。基本原则：高内聚、低耦合。</p>
+<p><strong>面向对象设计（OOD）七大原则</strong>：单职原则、开闭原则、李氏替换原则、依赖倒置原则、接口隔离原则、组合重用原则、迪米特原则。</p>
+<h2 id="3-项目管理基础（第6-7章精华）"><a href="#3-项目管理基础（第6-7章精华）" class="headerlink" title="3. 项目管理基础（第6-7章精华）"></a>3. 项目管理基础（第6-7章精华）</h2><h3 id="3-1-项目管理概论"><a href="#3-1-项目管理概论" class="headerlink" title="3.1 项目管理概论"></a>3.1 项目管理概论</h3><p><strong>项目定义</strong>：项目是为创造独特的产品、服务或成果而进行的临时性工作。项目的”临时性”指项目有明确的起点和终点，并不一定意味着持续时间短。可交付成果可能会在项目终止后依然存在，即项目临时，结果持久。</p>
+<p><strong>项目、项目集、项目组合管理目标区分</strong>：项目集和项目管理关注”正确地做事”；项目组合管理关注”做正确的事”。项目组合中的项目集或项目不一定存在彼此依赖或直接相关的关联关系。</p>
+<p><strong>PMO三种类型</strong>：支持型PMO（担当顾问角色，控制程度很低）、控制型PMO（不仅提供支持，而且要求项目服从，控制程度中等）、指令型PMO（直接管理和控制项目，控制程度很高）。</p>
+<p><strong>组织结构对项目的影响</strong>：在矩阵-强组织结构中，项目经理全职指定工作角色，项目经理批准中到高，资源可用性中到高，项目预算管理人为项目经理，项目管理人员全职。</p>
+<p><strong>项目成功标准</strong>：时间、成本、范围和质量等项目管理测量指标是确定项目是否成功的最重要因素。</p>
+<p><strong>项目生命周期通用结构</strong>：启动项目→组织与准备→执行项目工作→结束项目。成本与人力投入在开始时较低，在执行期间达到最高，在项目快要结束时迅速回落。风险与不确定性在项目开始时最大，随着决策的制定与可交付成果的验收而逐步降低。变更和纠正错误的成本随项目接近完成而显著增高。</p>
+<p><strong>开发生命周期类型</strong>：预测型（需求明确、范围变更少）、迭代型（范围早期确定，时间成本随理解深化定期修改）、增量型（通过渐进增加功能的一系列迭代产出可交付成果）、适应型（需求不确定，先高层级计划再逐步细化）、混合型（预测与适应组合）。</p>
+<p><strong>五大项目管理过程组</strong>：启动过程组（授权项目或阶段的开始）、规划过程组（明确项目范围、优化目标、制订行动计划）、执行过程组（完成项目管理计划中确定的工作）、监控过程组（跟踪、审查和调整项目进展与绩效，识别变更并启动相应的变更）、收尾过程组（正式完成或结束项目、阶段或合同）。</p>
+<h3 id="3-2-项目立项管理"><a href="#3-2-项目立项管理" class="headerlink" title="3.2 项目立项管理"></a>3.2 项目立项管理</h3><p><strong>项目投资前时期四阶段</strong>：项目建议与立项申请、初步可行性研究、详细可行性研究、评估与决策。详细可行性研究是不可缺少的。升级改造项目只做初步和详细研究，小项目一般只进行详细可行性研究。</p>
+<p><strong>项目建议书核心内容</strong>：①项目的必要性；②项目的市场预测；③项目预期成果（如产品方案或服务）的市场预测；④项目建设必需的条件。项目建议书是项目发展周期的初始阶段，是国家或上级主管部门选择项目的依据，也是可行性研究的依据。</p>
+<p><strong>可行性研究定义与特点</strong>：可行性研究是在项目建议书批准后，从技术、经济、社会和人员等方面的条件和情况进行调查研究，对可能的技术方案进行论证，以最终确定整个项目是否可行。可行性研究具有预见性、公正性、可靠性、科学性的特点。</p>
+<p><strong>可行性研究五大内容</strong>：技术可行性分析（开发风险、人力资源有效性、技术能力可能性、物资可用性）、经济可行性分析（支出分析、收益分析、收益投资比与投资回收期、敏感性分析）、社会效益可行性分析、运行环境可行性分析、其他方面的可行性分析。</p>
+<h2 id="4-十大知识领域精华"><a href="#4-十大知识领域精华" class="headerlink" title="4. 十大知识领域精华"></a>4. 十大知识领域精华</h2><h3 id="4-1-项目整合管理"><a href="#4-1-项目整合管理" class="headerlink" title="4.1 项目整合管理"></a>4.1 项目整合管理</h3><p>项目整合管理由项目经理负责，项目经理负责整合所有其他知识领域的成果，并掌握项目总体情况。项目整合管理的责任不能被授权或转移，项目经理必须对整个项目承担最终责任。</p>
+<p>项目章程一旦被批准，就标志着项目的正式启动。项目章程授权项目经理进行项目管理过程中的规划、执行和控制，同时还授权项目经理在项目活动中使用组织资源。</p>
+<h3 id="4-2-项目范围管理"><a href="#4-2-项目范围管理" class="headerlink" title="4.2 项目范围管理"></a>4.2 项目范围管理</h3><p>项目范围管理包括确保项目做且只做所需的全部工作，以成功完成项目。核心在于定义和控制哪些工作应该包括在项目内，哪些不应该包含在项目内。</p>
+<p>产品范围指某项产品、服务或成果所具有的特征和功能，其完成情况根据产品需求来衡量。项目范围包括产品范围，是为交付具有规定特性与功能的产品、服务或成果而必须完成的工作。</p>
+<h3 id="4-3-项目进度管理"><a href="#4-3-项目进度管理" class="headerlink" title="4.3 项目进度管理"></a>4.3 项目进度管理</h3><p>项目进度管理过程包括：规划进度管理、定义活动、排列活动顺序、估算活动持续时间、制订进度计划和控制进度。</p>
+<p>滚动式规划是一种迭代式的规划技术，即详细规划近期要完成的工作，同时在较高层级上粗略规划远期工作。</p>
+<p>里程碑是项目中的重要时点，持续时间为零，不消耗资源。</p>
+<h3 id="4-4-项目成本管理"><a href="#4-4-项目成本管理" class="headerlink" title="4.4 项目成本管理"></a>4.4 项目成本管理</h3><p>发生成本失控的原因主要包括：对工程项目认识不足、组织制度不健全、方法问题、技术的制约、需求管理不当。</p>
+<p>成本类型：可变成本（随生产量、工作量或时间而变）、固定成本（不随生产量、工作量或时间变化）、直接成本（直接归属于项目工作的成本）、间接成本（来自一般管理费用科目或几个项目共同担负的项目成本所分摊给本项目的部分）。</p>
+<p>项目成本管理过程：规划成本管理、估算成本、制定预算、控制成本。</p>
+<h3 id="4-5-项目质量管理"><a href="#4-5-项目质量管理" class="headerlink" title="4.5 项目质量管理"></a>4.5 项目质量管理</h3><p>质量作为实现的性能或成果，是”一系列内在特性满足要求的程度（ISO 9000）”。等级是对用途相同但技术特性不同的可交付成果的级别分类。低等级（功能有限）、高质量（无明显缺陷）的软件产品可以被认可；高等级（功能繁多）、低质量（有许多缺陷）的软件产品不会被接受。</p>
+<h3 id="4-6-项目资源管理"><a href="#4-6-项目资源管理" class="headerlink" title="4.6 项目资源管理"></a>4.6 项目资源管理</h3><p>项目经理的权力有5种来源：职位权力、惩罚权力、奖励权力来自于组织的授权；专家权力和参照权力来自于管理者自身。在矩阵环境中，项目经理对团队成员通常没有或仅有很小的命令职权，应注重运用奖励、专家和参照权力，尽量避免使用惩罚权力。</p>
+<p>团队发展的5个阶段：形成阶段、震荡阶段、规范阶段、发挥阶段、解散阶段。</p>
+<h3 id="4-7-项目沟通管理"><a href="#4-7-项目沟通管理" class="headerlink" title="4.7 项目沟通管理"></a>4.7 项目沟通管理</h3><p>沟通失败是很多项目（尤其是IT项目）失败的重要原因。与IT项目成功有关的四个最重要因素是：主管层的支持、用户参与、有经验的项目经理和清晰的业务目标。</p>
+<p>沟通模型包含5种状态：已发送、已收到、已理解、已认可、已转化为行动。</p>
+<h3 id="4-8-项目风险管理"><a href="#4-8-项目风险管理" class="headerlink" title="4.8 项目风险管理"></a>4.8 项目风险管理</h3><p>项目风险是一种不确定的事件或条件，一旦发生，会对项目目标产生某种正面或负面的影响。风险既包括对项目目标的威胁，也包括促进项目目标的机会。</p>
+<p>已知风险是那些已经经过识别和分析的风险，可以规划应对方案；未知风险无法管理，只能依靠以往类似项目的经验采取一般的应急措施处理。</p>
+<h3 id="4-9-项目采购管理"><a href="#4-9-项目采购管理" class="headerlink" title="4.9 项目采购管理"></a>4.9 项目采购管理</h3><p>合同类型选择原则：如果工作范围很明确，且项目的设计已具备详细的细节，则使用总价合同；如果工作性质清楚，但范围不是很清楚，而且工作不复杂，又需要快速签订合同，则使用工料合同；如果工作范围尚不清楚，则使用成本补偿合同。如果买方承担成本风险，则使用成本补偿合同；如果卖方承担成本风险，则使用总价合同。</p>
+<p>固定总价合同（FFP）是最常用的合同类型，卖方承担成本风险。</p>
+<h3 id="4-10-项目干系人管理"><a href="#4-10-项目干系人管理" class="headerlink" title="4.10 项目干系人管理"></a>4.10 项目干系人管理</h3><p>项目经理和团队管理干系人的能力决定着项目的成败。干系人满意度应作为项目目标加以识别和管理。</p>
+<p>识别干系人和引导干系人参与的过程需要迭代开展，至少要在项目进入其生命周期的关键时点开展这些活动。</p>
+<h2 id="5-高级项目管理（绩效域-配置变更-项目集组合-敏捷DevOps）"><a href="#5-高级项目管理（绩效域-配置变更-项目集组合-敏捷DevOps）" class="headerlink" title="5. 高级项目管理（绩效域&#x2F;配置变更&#x2F;项目集组合&#x2F;敏捷DevOps）"></a>5. 高级项目管理（绩效域&#x2F;配置变更&#x2F;项目集组合&#x2F;敏捷DevOps）</h2><h3 id="5-1-八大绩效域"><a href="#5-1-八大绩效域" class="headerlink" title="5.1 八大绩效域"></a>5.1 八大绩效域</h3><p>项目管理者需要密切关注干系人、团队、开发方法和生命周期、规划、项目工作、交付、测量、不确定性这8个与绩效密切相关的因素，称为绩效域。它们是相互作用、相互关联和相互依赖的焦点领域，不能孤立处理。</p>
+<p><strong>干系人绩效域预期目标</strong>：与干系人建立高效的工作关系；干系人认同项目目标；支持项目的干系人提高了满意度，并从中受益；反对项目的干系人没有对项目产生负面影响。</p>
+<p><strong>促进干系人参与5步骤</strong>：识别→理解和分析→优先级排序→参与→监督。</p>
+<p><strong>开发方法选择决策框架</strong>：需从产品&#x2F;服务&#x2F;成果因素（创新程度、需求确定性、范围易变性、变更容易度、组件化交付能力、风险、安全需求、法规监管）、项目因素（干系人参与程度、交付紧迫性、资金确定性）、组织因素（层级结构、指导文化、组织能力、团队规模、团队分布）三方面评估。</p>
+<p><strong>交付节奏类型</strong>：一次性交付（项目结束时交付）、多次交付（不同时间交付多个组件）、定期交付（按固定时间间隔交付）、持续交付（随时交付）。</p>
+<h3 id="5-2-配置管理"><a href="#5-2-配置管理" class="headerlink" title="5.2 配置管理"></a>5.2 配置管理</h3><p><strong>配置项状态流转</strong>：草稿→（评审通过）→正式→（更改）→修改→（修改完毕重新评审）→正式。</p>
+<p><strong>配置项版本号规则</strong>：草稿状态为0.YZ（YZ递增）；正式状态为X.Y（首次1.0，小升级增Y，大升级增X）；修改状态为X.YZ（仅增Z，修改完毕置Z为0并增X.Y）。</p>
+<p><strong>配置库三种类型</strong>：开发库（动态库，开发人员个人工作区，无须配置控制）、受控库（主库，当前基线与变更，完全配置管理）、产品库（静态库，已发布基线存档，完全配置管理）。开发完成→受控库，系统测试后→产品库。</p>
+<p><strong>配置库建库模式</strong>：按配置项类型建库（适用于通用软件的开发组织）、按开发任务建库（适用于专业软件的开发组织）。</p>
+<p><strong>配置项权限管理</strong>：基线配置项向开发人员开放读取的权限；非基线配置项向项目经理、CCB及相关人员开放。</p>
+<p><strong>配置基线</strong>：基线中的配置项被”冻结”了，不能再被任何人随意修改。对基线的变更必须遵循正式的变更控制程序。</p>
+<h3 id="5-3-项目集与项目组合管理"><a href="#5-3-项目集与项目组合管理" class="headerlink" title="5.3 项目集与项目组合管理"></a>5.3 项目集与项目组合管理</h3><p><strong>项目集管理绩效域（5个）</strong> ：项目集战略一致性、项目集效益管理、项目集干系人参与、项目集治理和项目集生命周期管理。</p>
+<p><strong>项目集效益管理5项活动</strong>：效益识别、效益分析和规划、效益交付、效益移交和效益维持。</p>
+<p><strong>项目集生命周期3阶段</strong>：项目集定义阶段、项目集交付阶段（组件授权与规划→监督与整合→移交与收尾）、项目集收尾阶段。</p>
+<p><strong>项目组合管理绩效域（7个）</strong> ：项目组合生命周期、项目组合战略管理、项目组合治理、项目组合产能与能力管理、项目组合干系人参与、项目组合价值管理和项目组合风险管理。</p>
+<p><strong>项目组合生命周期4阶段</strong>：启动（验证业务和运营战略，识别组件，定义长期路线图）、规划（制订并评审项目组合管理计划）、执行（通过组件交付实施，评审绩效，管理风险问题）、优化（最大化利用条件、制约因素和资源，提高组合效率）。</p>
+<p><strong>OPM框架4要素</strong>：OPM治理、OPM方法论、知识管理和人才管理。</p>
+<h2 id="6-计算题速成（EVM-PERT-CPM-决策树-公式卡）"><a href="#6-计算题速成（EVM-PERT-CPM-决策树-公式卡）" class="headerlink" title="6. 计算题速成（EVM&#x2F;PERT&#x2F;CPM&#x2F;决策树 公式卡）"></a>6. 计算题速成（EVM&#x2F;PERT&#x2F;CPM&#x2F;决策树 公式卡）</h2><h3 id="6-1-挣值管理（EVM）"><a href="#6-1-挣值管理（EVM）" class="headerlink" title="6.1 挣值管理（EVM）"></a>6.1 挣值管理（EVM）</h3><p><strong>基础指标：</strong></p>
+<ul>
+<li>PV（计划价值）：为计划工作分配的经批准的预算</li>
+<li>EV（挣值）：对已完成工作的测量值，用该工作的批准预算表示</li>
+<li>AC（实际成本）：在给定时段内执行某活动而实际发生的成本</li>
+<li>BAC（完工预算）：为将要执行的工作所建立的全部预算的总和</li>
+</ul>
+<p><strong>偏差指标：</strong></p>
+<ul>
+<li>进度偏差：SV &#x3D; EV - PV（SV&gt;0进度超前，SV&lt;0进度落后）</li>
+<li>成本偏差：CV &#x3D; EV - AC（CV&gt;0成本节约，CV&lt;0成本超支）</li>
+</ul>
+<p><strong>绩效指数：</strong></p>
+<ul>
+<li>进度绩效指数：SPI &#x3D; EV &#x2F; PV（SPI&gt;1进度超前，SPI&lt;1进度落后）</li>
+<li>成本绩效指数：CPI &#x3D; EV &#x2F; AC（CPI&gt;1成本节约，CPI&lt;1成本超支）</li>
+</ul>
+<p><strong>完工估算（EAC）预测：</strong></p>
+<ul>
+<li>假设将按预算单价完成：EAC &#x3D; AC + (BAC - EV)</li>
+<li>假设按当前CPI完成：EAC &#x3D; BAC &#x2F; CPI</li>
+<li>考虑CPI和SPI：EAC &#x3D; AC + (BAC - EV) &#x2F; (CPI × SPI)</li>
+</ul>
+<p><strong>完工尚需估算：</strong> ETC &#x3D; EAC - AC</p>
+<h3 id="6-2-三点估算（PERT）"><a href="#6-2-三点估算（PERT）" class="headerlink" title="6.2 三点估算（PERT）"></a>6.2 三点估算（PERT）</h3><ul>
+<li>三角分布：T_E &#x3D; (T_O + T_M + T_P) &#x2F; 3</li>
+<li>β分布：T_E &#x3D; (T_O + 4T_M + T_P) &#x2F; 6</li>
+</ul>
+<p>其中T_O为乐观时间，T_M为最可能时间，T_P为悲观时间。</p>
+<h3 id="6-3-关键路径法（CPM）"><a href="#6-3-关键路径法（CPM）" class="headerlink" title="6.3 关键路径法（CPM）"></a>6.3 关键路径法（CPM）</h3><ul>
+<li>关键路径：项目网络图中最长的路径，决定了项目的最短工期</li>
+<li>总浮动时间（总时差）：LS - ES &#x3D; LF - EF（关键路径上的活动总浮动时间为0）</li>
+<li>自由浮动时间（自由时差）：紧后活动ES - 本活动EF</li>
+</ul>
+<h3 id="6-4-决策树分析"><a href="#6-4-决策树分析" class="headerlink" title="6.4 决策树分析"></a>6.4 决策树分析</h3><ul>
+<li>预期货币价值（EMV）&#x3D; ∑（概率 × 收益&#x2F;损失）</li>
+<li>选择EMV最大的方案（收益型）或EMV最小的方案（成本型）</li>
+</ul>
+<h2 id="7-案例分析与论文写作要点"><a href="#7-案例分析与论文写作要点" class="headerlink" title="7. 案例分析与论文写作要点"></a>7. 案例分析与论文写作要点</h2><h3 id="7-1-案例分析答题策略"><a href="#7-1-案例分析答题策略" class="headerlink" title="7.1 案例分析答题策略"></a>7.1 案例分析答题策略</h3><p><strong>找错题答题模板：</strong></p>
+<ol>
+<li>指出问题：根据案例描述，找出项目管理过程中存在的问题</li>
+<li>分析原因：结合知识领域理论，分析问题产生的原因</li>
+<li>提出改进措施：给出具体的解决方案和建议</li>
+</ol>
+<p><strong>常见答题角度：</strong></p>
+<ul>
+<li>范围管理：范围定义不清晰、范围蔓延、未做好WBS分解</li>
+<li>进度管理：未制定进度计划、未进行进度控制、资源分配不当</li>
+<li>成本管理：成本估算不准确、未进行成本控制、缺乏成本基准</li>
+<li>质量管理：未制定质量管理计划、缺乏质量保证和质量控制</li>
+<li>风险管理：未进行风险识别、缺乏风险应对计划</li>
+<li>沟通管理：沟通不畅、干系人管理不到位</li>
+<li>配置管理：配置项管理混乱、缺乏变更控制流程</li>
+</ul>
+<h3 id="7-2-论文写作要点"><a href="#7-2-论文写作要点" class="headerlink" title="7.2 论文写作要点"></a>7.2 论文写作要点</h3><p><strong>论文结构：</strong></p>
+<ol>
+<li>摘要（300字左右）：简述项目背景、个人角色、管理内容、管理效果</li>
+<li>正文（2000字左右）：<ul>
+<li>项目背景介绍（500字）</li>
+<li>结合知识领域理论，论述管理过程（1200字）</li>
+<li>总结与展望（300字）</li>
+</ul>
+</li>
+</ol>
+<p><strong>写作要点：</strong></p>
+<ul>
+<li>必须结合自身真实项目经验，不能空谈理论</li>
+<li>每个知识领域的过程要完整，输入、工具与技术、输出要对应</li>
+<li>突出管理中的难点和解决方法，体现个人思考</li>
+<li>注意时间分配：摘要10分钟，正文100分钟，检查10分钟</li>
+</ul>
+<h2 id="8-考前冲刺清单（30天计划）"><a href="#8-考前冲刺清单（30天计划）" class="headerlink" title="8. 考前冲刺清单（30天计划）"></a>8. 考前冲刺清单（30天计划）</h2><h3 id="第1-7天：基础巩固"><a href="#第1-7天：基础巩固" class="headerlink" title="第1-7天：基础巩固"></a>第1-7天：基础巩固</h3><ul>
+<li><input disabled="" type="checkbox"> 通读教材第1-5章，掌握信息化与信息技术核心概念</li>
+<li><input disabled="" type="checkbox"> 熟记信息特征、质量属性、OSI&#x2F;TCP-IP模型、SDN架构</li>
+<li><input disabled="" type="checkbox"> 理解IT治理体系、信息系统管理四大领域</li>
+<li><input disabled="" type="checkbox"> 掌握软件工程三要素、架构风格、需求层次</li>
+</ul>
+<h3 id="第8-14天：十大知识领域精读"><a href="#第8-14天：十大知识领域精读" class="headerlink" title="第8-14天：十大知识领域精读"></a>第8-14天：十大知识领域精读</h3><ul>
+<li><input disabled="" type="checkbox"> 每天精读1-2个知识领域，掌握过程、输入输出、工具技术</li>
+<li><input disabled="" type="checkbox"> 重点记忆：整合管理（章程、管理计划）、范围管理（WBS）、进度管理（网络图）、成本管理（EVM）</li>
+<li><input disabled="" type="checkbox"> 每天做10道真题选择题，检验学习效果</li>
+</ul>
+<h3 id="第15-21天：计算题与案例分析"><a href="#第15-21天：计算题与案例分析" class="headerlink" title="第15-21天：计算题与案例分析"></a>第15-21天：计算题与案例分析</h3><ul>
+<li><input disabled="" type="checkbox"> 专项练习EVM计算题（SV、CV、SPI、CPI、EAC、ETC）</li>
+<li><input disabled="" type="checkbox"> 专项练习PERT三点估算和CPM关键路径法</li>
+<li><input disabled="" type="checkbox"> 每天做1道案例分析题，掌握找错题答题模板</li>
+<li><input disabled="" type="checkbox"> 背诵合同类型选择原则、配置管理规则</li>
+</ul>
+<h3 id="第22-28天：论文与高级管理"><a href="#第22-28天：论文与高级管理" class="headerlink" title="第22-28天：论文与高级管理"></a>第22-28天：论文与高级管理</h3><ul>
+<li><input disabled="" type="checkbox"> 准备2-3篇论文素材（不同知识领域）</li>
+<li><input disabled="" type="checkbox"> 练习论文写作，控制在120分钟内完成</li>
+<li><input disabled="" type="checkbox"> 学习八大绩效域、项目集&#x2F;项目组合管理</li>
+<li><input disabled="" type="checkbox"> 复习配置管理（状态流转、版本号、配置库）</li>
+</ul>
+<h3 id="第29-30天：全真模拟"><a href="#第29-30天：全真模拟" class="headerlink" title="第29-30天：全真模拟"></a>第29-30天：全真模拟</h3><ul>
+<li><input disabled="" type="checkbox"> 完成一套完整真题（选择题+案例分析+论文）</li>
+<li><input disabled="" type="checkbox"> 查漏补缺，重点复习易错知识点</li>
+<li><input disabled="" type="checkbox"> 背诵高频考点：信息特征、项目生命周期、五大过程组、十大知识领域、EVM公式</li>
+</ul>
+<hr>
+<p><strong>最后提醒</strong>：软考高项考试内容广泛，但重点突出。建议将80%精力放在项目管理知识体系（十大知识领域、五大过程组）上，这部分占考试分值的60%以上。计算题务必熟练掌握EVM和PERT公式，案例分析要形成自己的答题模板，论文要提前准备素材并多次练习。祝各位考生顺利通过考试！</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/07/31/2026-07-31-ruankao-full-essence/">https://boke.studyai.ltd/2026/07/31/2026-07-31-ruankao-full-essence/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%BD%AF%E8%80%83/">软考</a><a class="post-meta__tags" href="/tags/%E9%AB%98%E9%A1%B9/">高项</a><a class="post-meta__tags" href="/tags/%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%B8%88/">信息系统项目管理师</a><a class="post-meta__tags" href="/tags/%E5%A4%87%E8%80%83/">备考</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-ruankao-full-essence.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/07/31/2026-07-31-ruankao-top10-areas/" title="软考高项十大知识领域速记：一张全景图吃透全部考点"><img class="cover" src="/img/cover-ruankao-top10-areas.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">软考高项十大知识领域速记：一张全景图吃透全部考点</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：项目整合管理是龙头，范围、进度、成本、质量是四大核心约束，资源、沟通、风险、采购是四大支撑，干系人管理贯穿始终——掌握十大领域的过程框架、高频考点与易错点，是通关软考高项的关键。  0. 十大知识领域全景图   领域 核心过程 高频考点 易错点    整合管理 制定章程→制订计划→指导与管理→管理知识→监控→整体变更控制→结束 章程作用、变更控制流程、基准变更 章程≠合同；责任不可授权   范围管理 规划→收集需求→定义→创建WBS→确认→控制 WBS 100%原则、范围基准组成 产品范围vs项目范围；蔓延vs镀金   进度管理 规划→定义活动→排列顺序→估算→制订计划→控制 CPM计算、三点估算、关键路径 赶工vs快速跟进；储备类型   成本管理 规划→估算→预算→控制 挣值分析、储备管理、成本类型 成本基准vs项目预算；沉没vs机会   质量管理 规划→管理→控制 质量成本、七种工具、质量与等级 预防vs检查；公差vs控制界限   资源管理 规划→估算→获取→建设→管理→控制 团队5阶段、激励理论、冲突解决 权力来源分类；X&#x2F;Y理论误用   沟通管理 ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/31/2026-07-31-ruankao-top10-areas/" title="软考高项十大知识领域速记：一张全景图吃透全部考点"><img class="cover" src="/img/cover-ruankao-top10-areas.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-31</div><div class="info-item-2">软考高项十大知识领域速记：一张全景图吃透全部考点</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：项目整合管理是龙头，范围、进度、成本、质量是四大核心约束，资源、沟通、风险、采购是四大支撑，干系人管理贯穿始终——掌握十大领域的过程框架、高频考点与易错点，是通关软考高项的关键。  0. 十大知识领域全景图   领域 核心过程 高频考点 易错点    整合管理 制定章程→制订计划→指导与管理→管理知识→监控→整体变更控制→结束 章程作用、变更控制流程、基准变更 章程≠合同；责任不可授权   范围管理 规划→收集需求→定义→创建WBS→确认→控制 WBS 100%原则、范围基准组成 产品范围vs项目范围；蔓延vs镀金   进度管理 规划→定义活动→排列顺序→估算→制订计划→控制 CPM计算、三点估算、关键路径 赶工vs快速跟进；储备类型   成本管理 规划→估算→预算→控制 挣值分析、储备管理、成本类型 成本基准vs项目预算；沉没vs机会   质量管理 规划→管理→控制 质量成本、七种工具、质量与等级 预防vs检查；公差vs控制界限   资源管理 规划→估算→获取→建设→管理→控制 团队5阶段、激励理论、冲突解决 权力来源分类；X&#x2F;Y理论误用   沟通管理 ...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">65</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">164</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">27</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E8%80%83%E8%AF%95%E5%85%A8%E6%99%AF%EF%BC%88%E9%A2%98%E5%9E%8B%E5%88%86%E5%B8%83%E3%80%81%E8%80%83%E8%AF%95%E5%BD%A2%E5%BC%8F%E3%80%81%E5%A4%87%E8%80%83%E7%AD%96%E7%95%A5%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">1. 考试全景（题型分布、考试形式、备考策略）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%BF%A1%E6%81%AF%E5%8C%96%E4%B8%8E%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F%EF%BC%88%E7%AC%AC1-5%E7%AB%A0%E7%B2%BE%E5%8D%8E%EF%BC%89"><span class="toc-number">2.</span> <span class="toc-text">2. 信息化与信息系统（第1-5章精华）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BF%A1%E6%81%AF%E4%B8%8E%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 信息与信息系统基础</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%96%B0%E4%B8%80%E4%BB%A3%E4%BF%A1%E6%81%AF%E6%8A%80%E6%9C%AF"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 新一代信息技术</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-IT%E6%B2%BB%E7%90%86%E4%B8%8E%E4%BF%A1%E6%81%AF%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 IT治理与信息系统管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%B3%BB%E7%BB%9F%E5%B7%A5%E7%A8%8B"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 软件工程与系统工程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E5%9F%BA%E7%A1%80%EF%BC%88%E7%AC%AC6-7%E7%AB%A0%E7%B2%BE%E5%8D%8E%EF%BC%89"><span class="toc-number">3.</span> <span class="toc-text">3. 项目管理基础（第6-7章精华）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%E6%A6%82%E8%AE%BA"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 项目管理概论</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E9%A1%B9%E7%9B%AE%E7%AB%8B%E9%A1%B9%E7%AE%A1%E7%90%86"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 项目立项管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%8D%81%E5%A4%A7%E7%9F%A5%E8%AF%86%E9%A2%86%E5%9F%9F%E7%B2%BE%E5%8D%8E"><span class="toc-number">4.</span> <span class="toc-text">4. 十大知识领域精华</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E9%A1%B9%E7%9B%AE%E6%95%B4%E5%90%88%E7%AE%A1%E7%90%86"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 项目整合管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E9%A1%B9%E7%9B%AE%E8%8C%83%E5%9B%B4%E7%AE%A1%E7%90%86"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 项目范围管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E9%A1%B9%E7%9B%AE%E8%BF%9B%E5%BA%A6%E7%AE%A1%E7%90%86"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 项目进度管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E9%A1%B9%E7%9B%AE%E6%88%90%E6%9C%AC%E7%AE%A1%E7%90%86"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 项目成本管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-5-%E9%A1%B9%E7%9B%AE%E8%B4%A8%E9%87%8F%E7%AE%A1%E7%90%86"><span class="toc-number">4.5.</span> <span class="toc-text">4.5 项目质量管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-6-%E9%A1%B9%E7%9B%AE%E8%B5%84%E6%BA%90%E7%AE%A1%E7%90%86"><span class="toc-number">4.6.</span> <span class="toc-text">4.6 项目资源管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-7-%E9%A1%B9%E7%9B%AE%E6%B2%9F%E9%80%9A%E7%AE%A1%E7%90%86"><span class="toc-number">4.7.</span> <span class="toc-text">4.7 项目沟通管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-8-%E9%A1%B9%E7%9B%AE%E9%A3%8E%E9%99%A9%E7%AE%A1%E7%90%86"><span class="toc-number">4.8.</span> <span class="toc-text">4.8 项目风险管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-9-%E9%A1%B9%E7%9B%AE%E9%87%87%E8%B4%AD%E7%AE%A1%E7%90%86"><span class="toc-number">4.9.</span> <span class="toc-text">4.9 项目采购管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-10-%E9%A1%B9%E7%9B%AE%E5%B9%B2%E7%B3%BB%E4%BA%BA%E7%AE%A1%E7%90%86"><span class="toc-number">4.10.</span> <span class="toc-text">4.10 项目干系人管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E9%AB%98%E7%BA%A7%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86%EF%BC%88%E7%BB%A9%E6%95%88%E5%9F%9F-%E9%85%8D%E7%BD%AE%E5%8F%98%E6%9B%B4-%E9%A1%B9%E7%9B%AE%E9%9B%86%E7%BB%84%E5%90%88-%E6%95%8F%E6%8D%B7DevOps%EF%BC%89"><span class="toc-number">5.</span> <span class="toc-text">5. 高级项目管理（绩效域&#x2F;配置变更&#x2F;项目集组合&#x2F;敏捷DevOps）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%85%AB%E5%A4%A7%E7%BB%A9%E6%95%88%E5%9F%9F"><span class="toc-number">5.1.</span> <span class="toc-text">5.1 八大绩效域</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="toc-number">5.2.</span> <span class="toc-text">5.2 配置管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E9%A1%B9%E7%9B%AE%E9%9B%86%E4%B8%8E%E9%A1%B9%E7%9B%AE%E7%BB%84%E5%90%88%E7%AE%A1%E7%90%86"><span class="toc-number">5.3.</span> <span class="toc-text">5.3 项目集与项目组合管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E8%AE%A1%E7%AE%97%E9%A2%98%E9%80%9F%E6%88%90%EF%BC%88EVM-PERT-CPM-%E5%86%B3%E7%AD%96%E6%A0%91-%E5%85%AC%E5%BC%8F%E5%8D%A1%EF%BC%89"><span class="toc-number">6.</span> <span class="toc-text">6. 计算题速成（EVM&#x2F;PERT&#x2F;CPM&#x2F;决策树 公式卡）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%8C%A3%E5%80%BC%E7%AE%A1%E7%90%86%EF%BC%88EVM%EF%BC%89"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 挣值管理（EVM）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E4%B8%89%E7%82%B9%E4%BC%B0%E7%AE%97%EF%BC%88PERT%EF%BC%89"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 三点估算（PERT）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E5%85%B3%E9%94%AE%E8%B7%AF%E5%BE%84%E6%B3%95%EF%BC%88CPM%EF%BC%89"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 关键路径法（CPM）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-%E5%86%B3%E7%AD%96%E6%A0%91%E5%88%86%E6%9E%90"><span class="toc-number">6.4.</span> <span class="toc-text">6.4 决策树分析</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E4%B8%8E%E8%AE%BA%E6%96%87%E5%86%99%E4%BD%9C%E8%A6%81%E7%82%B9"><span class="toc-number">7.</span> <span class="toc-text">7. 案例分析与论文写作要点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90%E7%AD%94%E9%A2%98%E7%AD%96%E7%95%A5"><span class="toc-number">7.1.</span> <span class="toc-text">7.1 案例分析答题策略</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E8%AE%BA%E6%96%87%E5%86%99%E4%BD%9C%E8%A6%81%E7%82%B9"><span class="toc-number">7.2.</span> <span class="toc-text">7.2 论文写作要点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E8%80%83%E5%89%8D%E5%86%B2%E5%88%BA%E6%B8%85%E5%8D%95%EF%BC%8830%E5%A4%A9%E8%AE%A1%E5%88%92%EF%BC%89"><span class="toc-number">8.</span> <span class="toc-text">8. 考前冲刺清单（30天计划）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC1-7%E5%A4%A9%EF%BC%9A%E5%9F%BA%E7%A1%80%E5%B7%A9%E5%9B%BA"><span class="toc-number">8.1.</span> <span class="toc-text">第1-7天：基础巩固</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC8-14%E5%A4%A9%EF%BC%9A%E5%8D%81%E5%A4%A7%E7%9F%A5%E8%AF%86%E9%A2%86%E5%9F%9F%E7%B2%BE%E8%AF%BB"><span class="toc-number">8.2.</span> <span class="toc-text">第8-14天：十大知识领域精读</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC15-21%E5%A4%A9%EF%BC%9A%E8%AE%A1%E7%AE%97%E9%A2%98%E4%B8%8E%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-number">8.3.</span> <span class="toc-text">第15-21天：计算题与案例分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC22-28%E5%A4%A9%EF%BC%9A%E8%AE%BA%E6%96%87%E4%B8%8E%E9%AB%98%E7%BA%A7%E7%AE%A1%E7%90%86"><span class="toc-number">8.4.</span> <span class="toc-text">第22-28天：论文与高级管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC29-30%E5%A4%A9%EF%BC%9A%E5%85%A8%E7%9C%9F%E6%A8%A1%E6%8B%9F"><span class="toc-number">8.5.</span> <span class="toc-text">第29-30天：全真模拟</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/07/31/2026-07-31-ruankao-full-essence/" title="软考高项备考精华：一次读完的高项通关指南"><img src="/img/cover-ruankao-full-essence.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="软考高项备考精华：一次读完的高项通关指南"/></a><div class="content"><a class="title" href="/2026/07/31/2026-07-31-ruankao-full-essence/" title="软考高项备考精华：一次读完的高项通关指南">软考高项备考精华：一次读完的高项通关指南</a><time datetime="2026-07-31T06:30:00.000Z" title="发表于 2026-07-31 14:30:00">2026-07-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/31/2026-07-31-ruankao-top10-areas/" title="软考高项十大知识领域速记：一张全景图吃透全部考点"><img src="/img/cover-ruankao-top10-areas.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="软考高项十大知识领域速记：一张全景图吃透全部考点"/></a><div class="content"><a class="title" href="/2026/07/31/2026-07-31-ruankao-top10-areas/" title="软考高项十大知识领域速记：一张全景图吃透全部考点">软考高项十大知识领域速记：一张全景图吃透全部考点</a><time datetime="2026-07-31T06:15:00.000Z" title="发表于 2026-07-31 14:15:00">2026-07-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/29/2026-07-29-mcp-composite-tools-pitfalls/" title="两天开发六个 MCP 组合工具，我踩了六个坑"><img src="/img/cover-mcp-composite-tools-pitfalls.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="两天开发六个 MCP 组合工具，我踩了六个坑"/></a><div class="content"><a class="title" href="/2026/07/29/2026-07-29-mcp-composite-tools-pitfalls/" title="两天开发六个 MCP 组合工具，我踩了六个坑">两天开发六个 MCP 组合工具，我踩了六个坑</a><time datetime="2026-07-29T02:00:00.000Z" title="发表于 2026-07-29 10:00:00">2026-07-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/25/2026-07-25-ai-teacher-lesson-generator/" title="我给 AI 当&quot;教务主任&quot;：手搓一个自动备课系统，它能自我改进"><img src="/img/cover-ai-teacher-lesson-generator.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我给 AI 当&quot;教务主任&quot;：手搓一个自动备课系统，它能自我改进"/></a><div class="content"><a class="title" href="/2026/07/25/2026-07-25-ai-teacher-lesson-generator/" title="我给 AI 当&quot;教务主任&quot;：手搓一个自动备课系统，它能自我改进">我给 AI 当&quot;教务主任&quot;：手搓一个自动备课系统，它能自我改进</a><time datetime="2026-07-25T02:00:00.000Z" title="发表于 2026-07-25 10:00:00">2026-07-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/22/2026-07-22-mytt-vectorization/" title="向量化不总是更快？一次技术指标重写带来的认知刷新"><img src="/img/cover-mytt-vectorization.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="向量化不总是更快？一次技术指标重写带来的认知刷新"/></a><div class="content"><a class="title" href="/2026/07/22/2026-07-22-mytt-vectorization/" title="向量化不总是更快？一次技术指标重写带来的认知刷新">向量化不总是更快？一次技术指标重写带来的认知刷新</a><time datetime="2026-07-22T02:00:00.000Z" title="发表于 2026-07-22 10:00:00">2026-07-22</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
