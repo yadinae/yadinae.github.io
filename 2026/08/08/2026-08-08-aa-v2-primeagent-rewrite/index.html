@@ -1,0 +1,438 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="上周我写了一篇《我的 Agent 假装上班了 5 天》，诊断了自研 ActiveAgent 的”空转”。这周我做了个更狠的决定：亲手杀掉它，推倒重写。 原因是一句话——“agent 技术发展日新月异，大概率 AA 一出生就是个落后产品。” 这篇记录从「要不要继续做」的灵魂拷问，到 AA v2 四层架构、QGS 三 Gate 时机设计、6 轮对抗式评审收敛的全过程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="上周我写了一篇《我的 Agent 假装上班了 5 天》，诊断了自研 ActiveAgent 的”空转”。这周我做了个更狠的决定：亲手杀掉它，推倒重写。 原因是一句话——“agent 技术发展日新月异，大概率 AA 一出生就是个落后产品。” 这篇记录从「要不要继续做」的灵魂拷问，到 AA v2 四层架构、QGS 三 Gate 时机设计、6 轮对抗式评审收敛的全过程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-aa-v2-primeagent-rewrite.png">
+<meta property="article:published_time" content="2026-08-08T03:00:00.000Z">
+<meta property="article:modified_time" content="2026-08-08T02:30:32.927Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="PrimeAgent">
+<meta property="article:tag" content="QGS">
+<meta property="article:tag" content="RLM">
+<meta property="article:tag" content="对抗式评审">
+<meta property="article:tag" content="架构设计">
+<meta property="article:tag" content="重写">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-aa-v2-primeagent-rewrite.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写",
+  "url": "https://boke.studyai.ltd/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/",
+  "image": "https://boke.studyai.ltd/img/cover-aa-v2-primeagent-rewrite.png",
+  "datePublished": "2026-08-08T03:00:00.000Z",
+  "dateModified": "2026-08-08T02:30:32.927Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">70</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">181</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">28</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-aa-v2-primeagent-rewrite.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-08-08T03:00:00.000Z" title="发表于 2026-08-08 11:00:00">2026-08-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-08-08T02:30:32.927Z" title="更新于 2026-08-08 10:30:32">2026-08-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/">技术实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>上周我写了一篇《我的 Agent 假装上班了 5 天》，诊断了自研 ActiveAgent 的”空转”。这周我做了个更狠的决定：<strong>亲手杀掉它，推倒重写。</strong> 原因是一句话——“agent 技术发展日新月异，大概率 AA 一出生就是个落后产品。” 这篇记录从「要不要继续做」的灵魂拷问，到 AA v2 四层架构、QGS 三 Gate 时机设计、6 轮对抗式评审收敛的全过程。</p>
+</blockquote>
+<span id="more"></span>
+
+<hr>
+<h2 id="1-缘起：一个让我失眠的问题"><a href="#1-缘起：一个让我失眠的问题" class="headerlink" title="1. 缘起：一个让我失眠的问题"></a>1. 缘起：一个让我失眠的问题</h2><p>我的 ActiveAgent（AA）是一个”自治运维壳”：每 15 分钟 tick 一次，扫描 3 个项目 × 9 个维度，发现问题就修复，每天 21:00 出日报。上周刚把它”假装上班 5 天”的空转问题修好（见<a href="https://boke.studyai.ltd/2026/08/01/2026-08-01-activeagent-idle-spin-diagnosis/">《我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录》</a>）。</p>
+<p>修完之后，我盯着它问了自己一个问题：<strong>AA 还有必要继续发展吗？</strong></p>
+<p>把账算清楚之后，答案让我睡不着：</p>
+<table>
+<thead>
+<tr>
+<th>数据</th>
+<th>数值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>tick 次数</td>
+<td><strong>1416 次</strong></td>
+<td>系统自认为”工作”的总次数</td>
+</tr>
+<tr>
+<td>其中只 report 的</td>
+<td><strong>98%</strong></td>
+<td>几乎全部只是汇报，没有行动</td>
+</tr>
+<tr>
+<td>skills</td>
+<td>只有声明无实现</td>
+<td>宣称的能力是空的</td>
+</tr>
+<tr>
+<td>memory</td>
+<td>未接线</td>
+<td>记不住任何事</td>
+</tr>
+<tr>
+<td>频道对话</td>
+<td>零使用</td>
+<td>用户根本不通过它聊天</td>
+</tr>
+</tbody></table>
+<p>与此同时，主力 Agent 是 Hermes（已经相当优秀），备用 GenericAgent 正在被边缘化。而开源社区冒出一个新玩家——PrimeAgent（Prime Intellect 出品，<a target="_blank" rel="noopener" href="https://github.com/PrimeIntellect-ai/prime-agent">GitHub</a>）：它把 RLM（<a target="_blank" rel="noopener" href="https://www.primeintellect.ai/blog/rlm">Recursive Language Model</a>，把 context 当变量、子 agent 当函数调用）和 Continual Harness（&#x2F;refine 自我改进）工程化成了可运行的系统。<strong>它还不成熟，但正因为不成熟，才有潜力。</strong></p>
+<p>我的判断（原话记录在案）：</p>
+<blockquote>
+<p>“我们现在主力是 HERMES……之所以要写 AA，某种程度是为了圆我要自己写一个通用 agent 的梦。但目前 agent 相关技术发展日新月异，<strong>大概率 AA 一出生就是个落后产品</strong>。我的意见是：把 AA 目前负责的任务转移，AA 从头重写，<strong>以 PrimeAgent 为基座</strong>，结合 Proactive 思想，融合对抗式解题法和 QGS 方法，把 AA 项目本身作为一个技术开发和应用平台。”</p>
+</blockquote>
+<p>同时附上两条硬性意见（这两条后来成了架构设计的两条主线）：</p>
+<ol>
+<li><strong>不要跟 Hermes 耦合</strong>——相关功能实现可以参考，但两个项目独立；</li>
+<li><strong>QGS 的评审时机经常出问题</strong>（我用 Hermes 的经验），新设计要设法避免。</li>
+</ol>
+<hr>
+<h2 id="2-核心方法：四层架构-6-轮对抗式评审"><a href="#2-核心方法：四层架构-6-轮对抗式评审" class="headerlink" title="2. 核心方法：四层架构 + 6 轮对抗式评审"></a>2. 核心方法：四层架构 + 6 轮对抗式评审</h2><h3 id="2-1-总体架构：四层，从内核到平台"><a href="#2-1-总体架构：四层，从内核到平台" class="headerlink" title="2.1 总体架构：四层，从内核到平台"></a>2.1 总体架构：四层，从内核到平台</h3><p>AA v2 的核心命题是”用最新技术做平台，而不是再造一个轮子”。架构分四层：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────────────────────────────────┐</span><br><span class="line">│ L3 平台层: MCP任务注册中心 · 任务队列 · 复盘台    │</span><br><span class="line">│          eval回归集 · 模型路由(自实现+降级链)     │</span><br><span class="line">├────────────────────────────────────────────────┤</span><br><span class="line">│ L2 质量保障层: Orchestrator · QGS三Gate(状态机+WAL)│</span><br><span class="line">│          判别者引擎(8角色) · solver修复           │</span><br><span class="line">├────────────────────────────────────────────────┤</span><br><span class="line">│ L1 Proactive层: 扫描器 · 分析器 · Reward Filter  │</span><br><span class="line">│          反馈循环（&quot;0 LLM&quot;仅限定这一层）          │</span><br><span class="line">├────────────────────────────────────────────────┤</span><br><span class="line">│ L0 PrimeAgent内核: AgentSession(RLM) · IPython  │</span><br><span class="line">│          /refine · skills · Adapter薄层(双包装)  │</span><br><span class="line">└────────────────────────────────────────────────┘</span><br><span class="line">        │ MCP (stdio, 开放协议)</span><br><span class="line">        ▼</span><br><span class="line">  外部消费者（可选）: Hermes / 任何 MCP client / CLI</span><br></pre></td></tr></table></figure>
+
+<p>三个关键设计：</p>
+<ul>
+<li><strong>L0 用 Adapter 薄层做双包装</strong>（入口 API 5-10 个 + 数据契约 schema 版本管理）。PrimeAgent 快速演进不可控，Adapter 把”内核变更”隔离在薄层内，月度 merge + golden eval 回归。</li>
+<li><strong>“代码即智能（核心循环 0 LLM）”只限定 L1 感知层</strong>。L0 和 L2 本质是 LLM 驱动的，不受此约束——这个边界是评审轮次里被反复确认的。</li>
+<li><strong>解耦不是口号，是可执行的验收标准</strong>：每个 Phase 验收含 grep 检查——无 <code>import hermes</code>、无子进程调用 Hermes CLI、无读 <code>~/.hermes</code> 文件、无依赖 Hermes 环境变量；P4 再补运行时探测（沙箱内监控子进程调用，防动态 import 绕过）。</li>
+</ul>
+<h3 id="2-2-QGS-三-Gate：把”评审时机”变成状态机"><a href="#2-2-QGS-三-Gate：把”评审时机”变成状态机" class="headerlink" title="2.2 QGS 三 Gate：把”评审时机”变成状态机"></a>2.2 QGS 三 Gate：把”评审时机”变成状态机</h3><p>用户意见②”QGS 评审时机经常出问题”是我在 Hermes 上踩出来的血泪。我把它先固化成<strong>反面清单</strong>，再逐条设计对策：</p>
+<table>
+<thead>
+<tr>
+<th>Hermes 已知问题</th>
+<th>症状</th>
+<th>AA v2 对策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>维护命令被拦截</td>
+<td>hermes update &#x2F; npm install 被拦</td>
+<td>Gate-0 命令白名单豁免（规则判定，非 LLM）+ 豁免产物抽检</td>
+</tr>
+<tr>
+<td>delegate 子 agent 误触发</td>
+<td>子代理被误评审</td>
+<td>平台内子任务标记自动豁免</td>
+</tr>
+<tr>
+<td>分类时机错误</td>
+<td>分类错则评审全错</td>
+<td>置信度门 + 失败兜底（默认 GENERATE）+ Gate-1 产物复核纠错</td>
+</tr>
+<tr>
+<td>评审对象错位</td>
+<td>对中间过程评审，漏交付物</td>
+<td><strong>评审挂在交付物产生点</strong>（Gate-1）</td>
+</tr>
+<tr>
+<td>降级不可见</td>
+<td>静默回退</td>
+<td><code>degraded=true</code> 显式标记；同步模式降级后阻塞等人工确认</td>
+</tr>
+<tr>
+<td>判别者幻觉</td>
+<td>虚构缺陷</td>
+<td>判别者输出反幻觉规则</td>
+</tr>
+<tr>
+<td>空 JSON 假 FAIL</td>
+<td>空响应 → 默认 50 分</td>
+<td>输出解析容错 + 空响应显式降级</td>
+</tr>
+<tr>
+<td>cron 被误评审</td>
+<td>无人值守任务被评</td>
+<td>无人值守默认跳过 + 审批超时降级策略</td>
+</tr>
+</tbody></table>
+<p>三 Gate 的时机语义：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">任务提交</span><br><span class="line">  ↓</span><br><span class="line">[Gate-0 任务分类] GENERATE / ACTION / MAINTENANCE / QUERY</span><br><span class="line">  ├─ 命令白名单(MAINTENANCE) + 规则 + LLM 兜底</span><br><span class="line">  ├─ 置信度门: &lt;0.6 → 按 GENERATE（宁可多评不漏评）</span><br><span class="line">  └─ 失败兜底: 分类器异常 → 默认 GENERATE</span><br><span class="line">        ↓</span><br><span class="line">[Gate-1 交付物评审] 在交付物产生点触发（同步模式，GENERATE 默认）</span><br><span class="line">  ├─ 产物 &lt;200 字且无代码 → 跳过评审 = 默认收敛（敏感操作仍过审批）</span><br><span class="line">  ├─ 评审超时(10min) → 降级 ≠ 放行：显式标记 + 阻塞等人工确认</span><br><span class="line">  └─ 产物类型复核: Gate-0 判错但产物是生成物 → 纠错进评审</span><br><span class="line">        ↓</span><br><span class="line">[Gate-2 收敛] P0/P1 归零 + 总分 &lt;20 + min_rounds=2</span><br><span class="line">  ├─ 收敛 → 敏感操作过审批 → 交付</span><br><span class="line">  └─ 未收敛 → solver 修复 → 再审（max_rounds=5 熔断）</span><br></pre></td></tr></table></figure>
+
+<p>最反直觉的一条：<strong>降级 ≠ 放行</strong>。评审超时不是”先放了再说”，而是显式标记 degraded 并阻塞等人工确认——“未评审不交付”是同步模式的硬语义。异步模式（复盘&#x2F;观察类）则明确只复盘、不承诺门禁，且 GENERATE 类任务<strong>不可自声明异步绕过</strong>。</p>
+<h3 id="2-3-6-轮对抗式评审：设计文档也要过门禁"><a href="#2-3-6-轮对抗式评审：设计文档也要过门禁" class="headerlink" title="2.3 6 轮对抗式评审：设计文档也要过门禁"></a>2.3 6 轮对抗式评审：设计文档也要过门禁</h3><p>架构文档本身，我用多角色对抗式评审循环来压：每轮只验证上一轮的 P0&#x2F;P1 修复，分数递减直到收敛。</p>
+<table>
+<thead>
+<tr>
+<th>轮次</th>
+<th>评审得分</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>R1 (v1)</td>
+<td>功能 645 &#x2F; 架构 480 &#x2F; 安全 850</td>
+<td>→ v1.1</td>
+</tr>
+<tr>
+<td>R2 (v1.1)</td>
+<td>架构 170 &#x2F; 安全 225</td>
+<td>→ v1.2 收敛</td>
+</tr>
+<tr>
+<td>—</td>
+<td>用户意见：解耦 + QGS 时机重设计</td>
+<td>→ v1.3</td>
+</tr>
+<tr>
+<td>R3 (v1.3)</td>
+<td>架构 205 &#x2F; 功能 455</td>
+<td>→ v1.4</td>
+</tr>
+<tr>
+<td>R4 (v1.4)</td>
+<td>架构 95（P0&#x2F;P1 清零，P2&#x3D;3）</td>
+<td>→ v1.5</td>
+</tr>
+<tr>
+<td>R5 (v1.5)</td>
+<td>架构 65（P0&#x2F;P1 清零，P2&#x3D;1）</td>
+<td>→ v1.6</td>
+</tr>
+<tr>
+<td>R6 (v1.6)</td>
+<td>验证”真正落文”</td>
+<td>预期收敛</td>
+</tr>
+</tbody></table>
+<p>有意思的是最后一轮：R5 只剩 1 个 P2——“Gate-0 防多评细节未真正落文”。架构师角色给的判定是：文档说”有命令白名单”只是<strong>声称</strong>，不是<strong>可实现的清单</strong>。于是 v1.6 把白名单落成独立文件 <code>config/gate0_whitelist.json</code>（含初始命令清单、变更需评审），豁免抽检给出可操作参数（10% 比例、时机、失败动作），Gate-0 定下 ≥98% 准确率阈值。<strong>评审收敛的最后一步，永远是”把声称变成可验收的清单”。</strong></p>
+<hr>
+<h2 id="3-踩坑记录：三类真实教训"><a href="#3-踩坑记录：三类真实教训" class="headerlink" title="3. 踩坑记录：三类真实教训"></a>3. 踩坑记录：三类真实教训</h2><h3 id="3-1-「补课式发展」陷阱"><a href="#3-1-「补课式发展」陷阱" class="headerlink" title="3.1 「补课式发展」陷阱"></a>3.1 「补课式发展」陷阱</h3><p>AA v1 的问题不是 bug，是方向：1416 次 tick 里 98% 只 report，skills 只声明不实现，memory 不接线。给这种系统”补课”（加功能、修 bug）毫无意义——<strong>先判断值不值得继续，再谈怎么修</strong>。这个教训值得每个维护老系统的人反复咀嚼。</p>
+<h3 id="3-2-静默失败最难查：调仓信号一直输出-SILENT"><a href="#3-2-静默失败最难查：调仓信号一直输出-SILENT" class="headerlink" title="3.2 静默失败最难查：调仓信号一直输出 [SILENT]"></a>3.2 静默失败最难查：调仓信号一直输出 [SILENT]</h3><p>任务转移审计时发现一个隐藏炸弹：<code>alert_rules.json</code> <strong>全盘不存在</strong>（bridge 日志 WARNING 实证），bridge 返回的持仓只有代码列表、没有股数和成本价——而 <code>portfolio_signal</code> 工具要求 <code>shares &gt; 0</code>，于是<strong>调仓信号&#x2F;组合日报 cron 已经静默输出 [SILENT] 很久了</strong>。没有报错、没有告警，只是什么都不说。</p>
+<p>修复过程也很有意思：用户提供财通证券持仓截图 → qwen3.7-plus 多模态识别 + OCR + 算术三重验证（市值&#x2F;盈亏&#x2F;成本完全吻合）→ 4 只 ETF 持仓（含股数、成本价）写入配置文件。<strong>静默失败的排查，往往要追到数据源是否存在，而不是代码逻辑。</strong></p>
+<h3 id="3-3-约束的歧义会被评审放大"><a href="#3-3-约束的歧义会被评审放大" class="headerlink" title="3.3 约束的歧义会被评审放大"></a>3.3 约束的歧义会被评审放大</h3><p>v1 里写”核心循环 0 LLM”，被 R1 揪出来：L0 内核和 L2 判别者本质就是 LLM 驱动的，这条约束放全文就自相矛盾。最后收敛为”仅限定 L1 感知层 + Reward Filter 受限逃生口（每日 ≤10 次、单次 ≤500 token、走脱敏管线）”。<strong>一条好约束，必须写清作用域。</strong></p>
+<hr>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>三个 takeaway：</p>
+<ol>
+<li><strong>用最新技术做平台，不造轮子</strong>——自研从零写必然落后；站在 PrimeAgent 基座上，把已验证的方法论（对抗式、QGS、Proactive）注入进去，才是”平台”该有的姿势。</li>
+<li><strong>设计文档也要过对抗式评审直到收敛</strong>——6 轮评审把问题分从 R1 的 480&#x2F;850 一路压到 R5 的 65，最后一步永远是”把声称变成可验收的清单”。</li>
+<li><strong>解耦要有可执行的验收标准</strong>——grep 检查 + 运行时探测，否则”解耦”只是文档里的漂亮话。</li>
+</ol>
+<p>AA v2 的实现路径已排期 P0-P5（约 13-16 个开发日）：P0 任务转移（v1 职责 → Hermes，11 个扫描器已迁为 Hermes 侧 cron）、P1 基座 + 安全、P2 L1 Proactive、P3 L2 质量层（三 Gate）、P4 L3 平台层 + MCP 桥、P5 首个真实长任务 A&#x2F;B 验证。</p>
+<p>相关资源：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/PrimeIntellect-ai/prime-agent">PrimeAgent (GitHub)</a> — 基座项目</li>
+<li><a target="_blank" rel="noopener" href="https://www.primeintellect.ai/blog/rlm">Recursive Language Model (RLM) 官方博客</a> — 核心概念</li>
+<li><a href="https://boke.studyai.ltd/2026/08/01/2026-08-01-activeagent-idle-spin-diagnosis/">《我的 Agent 假装上班了 5 天》</a> — 上一篇：空转诊断</li>
+</ul>
+<blockquote>
+<p>一句话：<strong>判断一个系统值不值得继续，比修好它更重要；而”重写”不是逃避，是把踩过的坑变成新架构的第一批验收标准。</strong></p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/">https://boke.studyai.ltd/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/QGS/">QGS</a><a class="post-meta__tags" href="/tags/%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1/">架构设计</a><a class="post-meta__tags" href="/tags/PrimeAgent/">PrimeAgent</a><a class="post-meta__tags" href="/tags/RLM/">RLM</a><a class="post-meta__tags" href="/tags/%E5%AF%B9%E6%8A%97%E5%BC%8F%E8%AF%84%E5%AE%A1/">对抗式评审</a><a class="post-meta__tags" href="/tags/%E9%87%8D%E5%86%99/">重写</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-aa-v2-primeagent-rewrite.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/08/06/2026-08-06-cloudflare-wallet-overview/" title="Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建"><img class="cover" src="/img/cover-cloudflare-wallet.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建</div></div><div class="info-2"><div class="info-item-1"> 2026 年 8 月 4 日，Cloudflare 发布 Cloudflare Wallets 与 cloudflare.pay：给部署在 Cloudflare 上的 AI 智能体一个稳定身份，以及一套”在人类设定的限额内安全花钱”的能力。这意味着 agentic commerce（智能体商务）的买方基建终于有了第一块正式拼图。本文基于官方博客、新闻稿与多家第三方报道，梳理这条产品线的来龙去脉：它解决什么痛点、架构长什么样、底层 x402 协议如何让 HTTP 402 复活、当前能做什么、还缺什么。     1. 缘起：AI 智能体的”付款困境”先看一个真实场景。你的 AI 智能体想试用一个新 API（比如某个模型服务、某个数据源），它需要做什么？  打开一个为人类设计的登录页面； 等一个人类过来添加支付方式； 生成 API key； 最后才搞清楚怎么调用这个 API。  这个流程对智能体来说几乎走不通，原因有两个：  没有稳定身份：智能体没有一个持久的标识符去注册服务，一个人类可以瞬间开出几十个智能体，商户根本不知道在和谁打交道； 没有原生支付手段：智能体没法填信用卡，也没法...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/15/2026-07-15-dag-smart-router-ai-agent/" title="给 AI Agent 装上智能路由：用 DAG 驱动把每次 API 调用花在刀刃上"><img class="cover" src="/img/cover-smart-router-dag.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-15</div><div class="info-item-2">给 AI Agent 装上智能路由：用 DAG 驱动把每次 API 调用花在刀刃上</div></div><div class="info-2"><div class="info-item-1">引子：每个月烧掉一台 MacBook Pro三个月前，我打开飞书账单统计面板，看到了一串让我瞬间清醒的数字： 12026年4月 LLM API 总支出: $1,847.32  我的 AI Agent 每天跑几十次自动化任务——数据清洗、代码审查、市场分析、文章写作——每一次都调用当时能拿到的最强模型。好模型确实出好结果，但每一条对话、每一轮回复，哪怕是用户说了句”好的”都要经过千亿参数模型推理一次。 这种感觉就像：你明明只需要拧个螺丝，却每次都要开一台盾构机过来。 问题是——我没办法在事前判断哪轮对话需要”盾构机”，哪轮只需要”螺丝刀”。直到我想起一个经典的工程思路：操作系统里的多级存储体系。  L1 Cache → L2 Cache → RAM → SSD → HDD 数据访问频率越高，用越快的存储；越冷的数据，用越慢但便宜的介质。  如果 LLM 调用也能这样分层呢？ 简单的闲聊走免费模型，代码编写走中等模型，只有架构设计、安全审查这种深度推理才走最强模型——而且一旦选定，在接下来几轮对话中保持稳定，避免”上下抖动”。 这就是 Smart Router（智能路由） 的出发点：...</div></div></div></a><a class="pagination-related" href="/2026/06/23/2026-06-24-%E6%8B%92%E7%BB%9D%E7%B3%BB%E7%BB%9F%E9%9B%AA%E5%B4%A9-smart-fallback-%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1%E4%B8%8E%E5%AE%9E%E6%88%98/" title="拒绝系统雪崩：Smart Fallback 架构设计与实战"><img class="cover" src="/img/cover-avalanche-fallback.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-24</div><div class="info-item-2">拒绝系统雪崩：Smart Fallback 架构设计与实战</div></div><div class="info-2"><div class="info-item-1">在日常的后端开发中，我们不可避免地需要调用各种外部依赖：第三方支付、风控接口、推荐引擎或是下游的微服务。如果这些依赖突然响应变慢或完全不可用，我们的系统会怎样？ 最常见的结局是灾难性的：请求堆积导致线程池被耗尽，数据库连接池被打满，最终引发连锁反应，导致整个核心链路雪崩。传统的“熔断+降级”能解决一部分问题，但简单的“一刀切”降级往往会严重牺牲用户体验。今天，我们来聊聊如何设计一个 Smart Fallback（智能降级） 机制，让系统在逆境中依然能优雅地提供服务。 什么是 Smart Fallback？传统的 Fallback（降级）通常是静态且盲目的。比如接口 A 挂了，就统一返回一个默认的“系统繁忙”提示，或者返回一个写死的默认值。 Smart Fallback 的核心在于“智能”二字。 它要求降级策略具备上下文感知能力和动态适应能力。它不仅仅是“退而求其次”，而是根据当前的系统状态、异常类型、用户画像和业务优先级，计算出当前场景下的“最优解”。好的智能降级，能让用户几乎感知不到后端发生了故障。 Smart Fallback 的四大设计模式要实现智能降级，我们可以从以下四种...</div></div></div></a><a class="pagination-related" href="/2025/03/09/2026-07-04-%E6%8A%8A%E5%A4%B1%E8%B4%A5%E5%8F%98%E6%88%90%E8%B5%84%E4%BA%A7-ai%E4%BB%A3%E7%90%86%E7%9A%84%E5%8F%8D%E9%A6%88%E5%BE%AA%E7%8E%AF%E5%AE%9E%E8%B7%B5/" title="把失败变成资产：AI代理的反馈循环实践"><img class="cover" src="/img/cover-failure-to-asset.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2025-03-10</div><div class="info-item-2">把失败变成资产：AI代理的反馈循环实践</div></div><div class="info-2"><div class="info-item-1">把失败变成资产：AI代理的反馈循环实践 想象你是一名AI工程师，刚部署了一个自主邮件助手。第一天它完美处理了30封邮件，第二天突然把报价单发给了错客户，第三天甚至循环打印“让我再想想”……你崩溃了。这不是段子，这是当前AI Agent的真实写照：Demo很丰满，生产很骨感。 WebArena 2023年的基准测试显示，最佳LLM Agent在真实网站任务上的端到端成功率仅23%，多数模型不到10%。AutoGPT社区的中位成功率更是低至5%～8%。失败是AI代理的常态，但不是终点。真正的问题在于：你能否从失败中提取信号，并把它送回系统里变成免疫力？ 这就是 Failure Pattern Feedback Loop（失败模式反馈循环） 要解决的核心命题。它不是什么高深理论，而是一套可落地的工程实践：捕捉失败→分类诊断→修正重试→记忆复用。今天，我们就用代码和案例，聊聊怎么让AI代理在同一个坑里只栽倒一次。  失败不是你不行，是Agent不行（但你得帮它）先看看最常见的死法。基于5000次Agent运行日志的分析，失败根因分布惊人地集中：  工具调用参数&#x2F;格式错误：41%...</div></div></div></a><a class="pagination-related" href="/2026/08/05/2026-08-05-xueqiu-auto-publish-agent/" title="让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录"><img class="cover" src="/img/cover-xueqiu-auto-publish.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-05</div><div class="info-item-2">让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录</div></div><div class="info-2"><div class="info-item-1"> 我维护的 stock MCP Server 有上百个工具——实时行情、K线、龙虎榜、北向资金、涨停梯队……但某天我意识到：这些数据只喂给了自己，没有变成”作品”。于是花了 72 小时，给 Agent 接上一条「收盘后自动写市场综述并发到雪球」的管线。本文完整记录：6 大平台选型、阿里云 WAF 攻防（curl_cffi 全指纹被拦 → Playwright 页面内 fetch 穿透）、三个接口逆向坑，以及”LLM 写财经文数字必漂移”的数据零幻觉方案。第一篇文章已真实上线。     1. 缘起：一堆好工具，却没发挥出价值我有一套股票分析系统：一个 stock MCP Server（通过 Cloudflare Workers 网关暴露上百个工具），加上每天 11:00 的盘中简报、16:10 的收盘深度分析。数据链路非常完整——开盘、收盘、资金流向、涨停梯队，全部自动化。 但有一天我看着这些日报，突然问了自己一个问题：  这些分析只发给了我自己。它们能不能变成对外发布的作品？  网络上正好有专门的股票社区——雪球、东方财富、掘金。能不能让 Agent 每天收盘后，用 MCP 拉数...</div></div></div></a><a class="pagination-related" href="/2026/06/19/2026-06-19-ai-agent-%E5%BC%80%E5%8F%91%E4%B8%AD%E7%9A%8416%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%99%B7%E9%98%B1%E4%B8%8E%E9%81%BF%E5%9D%91%E6%8C%87%E5%8D%97/" title="AI Agent 自主运维避坑实录：15个来自实战的教训"><img class="cover" src="/img/cover-ai-agent-%E9%81%BF%E5%9D%91%E5%AE%9E%E5%BD%95.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-19</div><div class="info-item-2">AI Agent 自主运维避坑实录：15个来自实战的教训</div></div><div class="info-2"><div class="info-item-1"> 关于本文的定位：以下教训来自我们团队在实际构建和维护一个 AI Agent 系统（GA）过程中的真实踩坑记录。系统架构涉及 LLM API 网关、浏览器自动化、内部工具链等组件。虽然部分细节有特定环境色彩，但每个问题背后的通用教训对任何 AI Agent 开发者都有参考价值。  为什么需要一份陷阱清单？在构建和运维 AI Agent 大半年后，我最大的体会是：最有价值的不是成功的模式，而是那些反复踩过的坑。 这篇文章整理了 15 个高频陷阱，覆盖 API 调用、工具选择、性能评估、版本管理等维度。每个条目都按「场景 → 陷阱 → 根因 → 对策」的结构展开。  一、API 与服务调用1. 超时 ≠ 服务故障场景： AI Agent 调用 LLM API 时突然超时，监控告警响起。 陷阱： 第一时间怀疑服务挂了，切换后端、重启服务——结果发现只是请求耗时比平时长了 30%。 根因： 很多超时问题仅仅是超时设置过短，尤其在高并发时段。LLM 推理延迟波动很大，同一模型在空闲时 2 秒返回，阻塞时可能 15 秒。 对策： 排查超时问题，优先调大 timeout 参数验证，不要直接切换...</div></div></div></a><a class="pagination-related" href="/2026/07/11/2026-07-11-180%E8%A1%8C%E4%BB%A3%E7%A0%81-%E6%88%91%E7%BB%99ai-agent%E8%A3%85%E4%BA%86%E4%B8%AAoom%E5%85%8D%E7%96%AB%E7%B3%BB%E7%BB%9F/" title="180行代码，我给 AI Agent 装了个 OOM 免疫系统"><img class="cover" src="/img/cover-oom-defense.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-11</div><div class="info-item-2">180行代码，我给 AI Agent 装了个 OOM 免疫系统</div></div><div class="info-2"><div class="info-item-1">引言：凌晨三点，Agent 又挂了凌晨两点五十八分，手机震了一下。 飞书推送：”🔴 CRITICAL: 内存 92.3%（482MB&#x2F;2GB 可用）—— GC 回收 847 个对象 (0.041s)” 我翻了个身，没理会。三秒后第二条消息进来： “✅ GC 回收完成，内存降至 67.2%” 安心了。两个月前，同样是凌晨三点，我的 AI Agent 正在跑一个 500 只股票的批量回测——已经跑了四个小时，快要出结果了——然后被 Linux OOM Killer 干掉了。四个小时的白工。 第二天我发现时，错误日志只有一行： 1Out of memory: Killed process 1270341 (python3)  没有任何警告，没有抢救机会，连 .py 文件里的 try/except 都没来得及跑。操作系统像关灯一样把进程灭了。   这不是段子。如果你在生产环境跑过 AI Agent——尤其是那些需要几小时才能完成的自动化流程——你大概率也经历过这种”一夜回到解放前”的崩溃。 我们花了大约一个下午，写了一个 180 行的 Python 脚本，给 Agent 装上...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">70</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">181</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">28</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7%EF%BC%9A%E4%B8%80%E4%B8%AA%E8%AE%A9%E6%88%91%E5%A4%B1%E7%9C%A0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起：一个让我失眠的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95%EF%BC%9A%E5%9B%9B%E5%B1%82%E6%9E%B6%E6%9E%84-6-%E8%BD%AE%E5%AF%B9%E6%8A%97%E5%BC%8F%E8%AF%84%E5%AE%A1"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法：四层架构 + 6 轮对抗式评审</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84%EF%BC%9A%E5%9B%9B%E5%B1%82%EF%BC%8C%E4%BB%8E%E5%86%85%E6%A0%B8%E5%88%B0%E5%B9%B3%E5%8F%B0"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 总体架构：四层，从内核到平台</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-QGS-%E4%B8%89-Gate%EF%BC%9A%E6%8A%8A%E2%80%9D%E8%AF%84%E5%AE%A1%E6%97%B6%E6%9C%BA%E2%80%9D%E5%8F%98%E6%88%90%E7%8A%B6%E6%80%81%E6%9C%BA"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 QGS 三 Gate：把”评审时机”变成状态机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-6-%E8%BD%AE%E5%AF%B9%E6%8A%97%E5%BC%8F%E8%AF%84%E5%AE%A1%EF%BC%9A%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3%E4%B9%9F%E8%A6%81%E8%BF%87%E9%97%A8%E7%A6%81"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 6 轮对抗式评审：设计文档也要过门禁</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95%EF%BC%9A%E4%B8%89%E7%B1%BB%E7%9C%9F%E5%AE%9E%E6%95%99%E8%AE%AD"><span class="toc-number">3.</span> <span class="toc-text">3. 踩坑记录：三类真实教训</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E3%80%8C%E8%A1%A5%E8%AF%BE%E5%BC%8F%E5%8F%91%E5%B1%95%E3%80%8D%E9%99%B7%E9%98%B1"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 「补课式发展」陷阱</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E9%9D%99%E9%BB%98%E5%A4%B1%E8%B4%A5%E6%9C%80%E9%9A%BE%E6%9F%A5%EF%BC%9A%E8%B0%83%E4%BB%93%E4%BF%A1%E5%8F%B7%E4%B8%80%E7%9B%B4%E8%BE%93%E5%87%BA-SILENT"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 静默失败最难查：调仓信号一直输出 [SILENT]</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E7%BA%A6%E6%9D%9F%E7%9A%84%E6%AD%A7%E4%B9%89%E4%BC%9A%E8%A2%AB%E8%AF%84%E5%AE%A1%E6%94%BE%E5%A4%A7"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 约束的歧义会被评审放大</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/" title="我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写"><img src="/img/cover-aa-v2-primeagent-rewrite.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写"/></a><div class="content"><a class="title" href="/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/" title="我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写">我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写</a><time datetime="2026-08-08T03:00:00.000Z" title="发表于 2026-08-08 11:00:00">2026-08-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/06/2026-08-06-cloudflare-wallet-overview/" title="Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建"><img src="/img/cover-cloudflare-wallet.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建"/></a><div class="content"><a class="title" href="/2026/08/06/2026-08-06-cloudflare-wallet-overview/" title="Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建">Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建</a><time datetime="2026-08-06T06:00:00.000Z" title="发表于 2026-08-06 14:00:00">2026-08-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/05/2026-08-05-xueqiu-auto-publish-agent/" title="让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录"><img src="/img/cover-xueqiu-auto-publish.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录"/></a><div class="content"><a class="title" href="/2026/08/05/2026-08-05-xueqiu-auto-publish-agent/" title="让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录">让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录</a><time datetime="2026-08-05T02:30:00.000Z" title="发表于 2026-08-05 10:30:00">2026-08-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/01/2026-08-01-activeagent-idle-spin-diagnosis/" title="我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录"><img src="/img/cover-activeagent-idle-spin-v2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录"/></a><div class="content"><a class="title" href="/2026/08/01/2026-08-01-activeagent-idle-spin-diagnosis/" title="我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录">我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录</a><time datetime="2026-08-01T02:30:00.000Z" title="发表于 2026-08-01 10:30:00">2026-08-01</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/07/31/Graph-Engineering-%E5%9B%BE%E5%B7%A5%E7%A8%8B%EF%BC%9A12%E5%AD%97%E6%8E%A8%E6%96%87%E5%BC%95%E7%88%86%E7%9A%84AI-Agent%E6%96%B0%E8%8C%83%E5%BC%8F/" title="Graph Engineering 图工程：12 字推文引爆的 AI Agent 新范式，一文讲透"><img src="/img/cover-graph-engineering.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Graph Engineering 图工程：12 字推文引爆的 AI Agent 新范式，一文讲透"/></a><div class="content"><a class="title" href="/2026/07/31/Graph-Engineering-%E5%9B%BE%E5%B7%A5%E7%A8%8B%EF%BC%9A12%E5%AD%97%E6%8E%A8%E6%96%87%E5%BC%95%E7%88%86%E7%9A%84AI-Agent%E6%96%B0%E8%8C%83%E5%BC%8F/" title="Graph Engineering 图工程：12 字推文引爆的 AI Agent 新范式，一文讲透">Graph Engineering 图工程：12 字推文引爆的 AI Agent 新范式，一文讲透</a><time datetime="2026-07-31T07:20:00.000Z" title="发表于 2026-07-31 15:20:00">2026-07-31</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
