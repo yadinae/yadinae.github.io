@@ -1,0 +1,407 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="从数据采集到发布上链，4 个阶段 6 道闸门——这是我构建雪球自动发股评管线踩过的所有坑。  1. 缘起 — 为什么搞这个我有一套覆盖 A 股 5000+ 只股票的数据采集系统（stock-mcp-server，128 个工具、15 个数据源），每天能自动抓取实时行情、技术指标、资金流向、龙虎榜、公告、研报……数据很全，但数据不等于内容。 雪球上有大量作者每天发收盘复盘、盘前早报、个股分析。如果">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="从数据采集到发布上链，4 个阶段 6 道闸门——这是我构建雪球自动发股评管线踩过的所有坑。  1. 缘起 — 为什么搞这个我有一套覆盖 A 股 5000+ 只股票的数据采集系统（stock-mcp-server，128 个工具、15 个数据源），每天能自动抓取实时行情、技术指标、资金流向、龙虎榜、公告、研报……数据很全，但数据不等于内容。 雪球上有大量作者每天发收盘复盘、盘前早报、个股分析。如果">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-xueqiu-pipeline.png">
+<meta property="article:published_time" content="2026-09-02T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-02T02:04:44.163Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="AI Agent">
+<meta property="article:tag" content="合规">
+<meta property="article:tag" content="多Agent">
+<meta property="article:tag" content="投研">
+<meta property="article:tag" content="自动化发布">
+<meta property="article:tag" content="质量门禁">
+<meta property="article:tag" content="雪球">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-xueqiu-pipeline.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战",
+  "url": "https://boke.studyai.ltd/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/",
+  "image": "https://boke.studyai.ltd/img/cover-xueqiu-pipeline.png",
+  "datePublished": "2026-09-02T02:00:00.000Z",
+  "dateModified": "2026-09-02T02:04:44.163Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">77</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">200</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">28</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-xueqiu-pipeline.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-02T02:00:00.000Z" title="发表于 2026-09-02 10:00:00">2026-09-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-02T02:04:44.163Z" title="更新于 2026-09-02 10:04:44">2026-09-02</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/">技术实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>从数据采集到发布上链，4 个阶段 6 道闸门——这是我构建雪球自动发股评管线踩过的所有坑。</p>
+</blockquote>
+<h2 id="1-缘起-—-为什么搞这个"><a href="#1-缘起-—-为什么搞这个" class="headerlink" title="1. 缘起 — 为什么搞这个"></a>1. 缘起 — 为什么搞这个</h2><p>我有一套覆盖 A 股 5000+ 只股票的数据采集系统（stock-mcp-server，128 个工具、15 个数据源），每天能自动抓取实时行情、技术指标、资金流向、龙虎榜、公告、研报……数据很全，但<strong>数据不等于内容</strong>。</p>
+<p>雪球上有大量作者每天发收盘复盘、盘前早报、个股分析。如果我能用 AI 把这些数据自动写成文章发到雪球，相当于给我的数据系统装了一个”变现出口”。</p>
+<p>听起来简单——调 LLM 写篇文章然后发出去不就行了？</p>
+<p>实际操作下来，我踩了至少 <strong>15 个坑</strong>，写了 6000+ 行 Python，最终搭出了一条 4 阶段、6 道闸门的管线。这篇文章就是这些坑的完整记录。</p>
+<h2 id="2-核心方法-—-四阶段六闸门"><a href="#2-核心方法-—-四阶段六闸门" class="headerlink" title="2. 核心方法 — 四阶段六闸门"></a>2. 核心方法 — 四阶段六闸门</h2><h3 id="2-1-管线全貌"><a href="#2-1-管线全貌" class="headerlink" title="2.1 管线全貌"></a>2.1 管线全貌</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────┐   ┌──────────────┐   ┌──────────────┐   ┌────────────┐</span><br><span class="line">│ 1. 数据采集  │ → │ 2. 文章生成   │ → │ 3. 质量评审   │ → │ 4. 发布上链  │</span><br><span class="line">│ collect_xxx  │   │ generate_xxx  │   │ review_article│   │publish_xueqiu│</span><br><span class="line">│              │   │              │   │              │   │              │</span><br><span class="line">│ 快照 JSON    │   │ LLM 写作     │   │ 6道闸门      │   │ 雪球 API     │</span><br><span class="line">│ (不经 LLM)  │   │ 事实块+模板   │   │ 程序化+LLM   │   │ (Playwright) │</span><br><span class="line">└─────────────┘   └──────────────┘   └──────────────┘   └────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>关键设计原则：<strong>确定性方案做主力，LLM 做加分项</strong>。</p>
+<p>数据采集完全程序化（API 调用 → JSON 快照），数字渲染由模板引擎完成（LLM 不碰数字），评审环节程序化闸门在前、LLM 主观评审在后。LLM 只负责两件事：把数据写成可读的文章，以及从读者视角给出主观评价。</p>
+<h3 id="2-2-数据采集：快照为王"><a href="#2-2-数据采集：快照为王" class="headerlink" title="2.2 数据采集：快照为王"></a>2.2 数据采集：快照为王</h3><p>每个文章类型有一个 <code>collect_xxx.py</code>，负责拉取所有需要的数据并保存为快照 JSON：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># collect_stock.py — 个股数据采集</span></span><br><span class="line"><span class="comment"># 拉取: 实时行情 + 60日K线 + 技术指标 + 资金流 + 研报 + 公告</span></span><br><span class="line">snapshot = &#123;</span><br><span class="line">    <span class="string">&quot;date&quot;</span>: <span class="string">&quot;2026-09-01&quot;</span>,</span><br><span class="line">    <span class="string">&quot;code&quot;</span>: <span class="string">&quot;600519&quot;</span>,</span><br><span class="line">    <span class="string">&quot;name&quot;</span>: <span class="string">&quot;贵州茅台&quot;</span>,</span><br><span class="line">    <span class="string">&quot;data&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;quote&quot;</span>: &#123;<span class="string">&quot;price&quot;</span>: <span class="number">1523.00</span>, <span class="string">&quot;change_pct&quot;</span>: -<span class="number">0.32</span>, ...&#125;,</span><br><span class="line">        <span class="string">&quot;technical&quot;</span>: &#123;<span class="string">&quot;ma5&quot;</span>: <span class="number">1520</span>, <span class="string">&quot;ma20&quot;</span>: <span class="number">1535</span>, <span class="string">&quot;rsi&quot;</span>: <span class="number">42.3</span>, ...&#125;,</span><br><span class="line">        <span class="string">&quot;fund_flow&quot;</span>: &#123;<span class="string">&quot;main_net&quot;</span>: -<span class="number">2300</span>, ...&#125;,</span><br><span class="line">        <span class="string">&quot;reports&quot;</span>: [&#123;<span class="string">&quot;title&quot;</span>: <span class="string">&quot;...&quot;</span>, <span class="string">&quot;rating&quot;</span>: <span class="string">&quot;买入&quot;</span>&#125;],</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>快照的意义：<strong>所有数字从此不再经过 LLM</strong>。LLM 只看到”贵州茅台现价 1523 元”的事实块，而不是让它自己查数字。</p>
+<h3 id="2-3-文章生成：事实块-模板约束"><a href="#2-3-文章生成：事实块-模板约束" class="headerlink" title="2.3 文章生成：事实块 + 模板约束"></a>2.3 文章生成：事实块 + 模板约束</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># generate_stock.py — 7段模板</span></span><br><span class="line">TEMPLATE = <span class="string">&quot;&quot;&quot;文章结构（7 段，无数据的小节整节省略）:</span></span><br><span class="line"><span class="string">一、个股概况：公司基本介绍（150字以上）</span></span><br><span class="line"><span class="string">二、行情回顾：价格走势 + 成交量 + 换手率（200字以上）</span></span><br><span class="line"><span class="string">三、技术面分析：均线 + MACD + RSI + 布林带（200字以上）</span></span><br><span class="line"><span class="string">四、基本面透视：营收/利润 + ROE + PE/PB（200字以上）</span></span><br><span class="line"><span class="string">五、资金面观察：主力资金净流入趋势（有数据才写）</span></span><br><span class="line"><span class="string">六、消息面梳理：近期新闻/公告（150字以上）</span></span><br><span class="line"><span class="string">七、风险提示（100字以上）</span></span><br><span class="line"><span class="string">八、免责声明</span></span><br><span class="line"><span class="string">关键：无数据的章节【整节省略】，不写&quot;数据暂缺&quot;。&quot;&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>事实块的构建代码有 300+ 行，负责把快照 JSON 翻译成 LLM 能理解的结构化数据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">build_facts</span>(<span class="params">stock_detail: <span class="built_in">dict</span></span>) -&gt; <span class="built_in">list</span>:</span><br><span class="line">    <span class="string">&quot;&quot;&quot;从单只股票的快照构建事实块&quot;&quot;&quot;</span></span><br><span class="line">    d = stock_detail.get(<span class="string">&quot;data&quot;</span>, &#123;&#125;)</span><br><span class="line">    sections = []</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 行情数据</span></span><br><span class="line">    quote = d.get(<span class="string">&quot;quote&quot;</span>, &#123;&#125;)</span><br><span class="line">    <span class="keyword">if</span> quote:</span><br><span class="line">        rows = [</span><br><span class="line">            <span class="string">f&quot;股票代码: <span class="subst">&#123;code&#125;</span>&quot;</span>,</span><br><span class="line">            <span class="string">f&quot;现价: <span class="subst">&#123;_fmt(quote.get(<span class="string">&#x27;price&#x27;</span>))&#125;</span>&quot;</span>,</span><br><span class="line">            <span class="string">f&quot;涨跌幅: <span class="subst">&#123;_fmt(quote.get(<span class="string">&#x27;change_pct&#x27;</span>), <span class="string">&#x27;%&#x27;</span>)&#125;</span>&quot;</span>,</span><br><span class="line">            <span class="string">f&quot;换手率: <span class="subst">&#123;_fmt(quote.get(<span class="string">&#x27;turnover_rate&#x27;</span>), <span class="string">&#x27;%&#x27;</span>)&#125;</span>&quot;</span>,</span><br><span class="line">            <span class="string">f&quot;总市值: <span class="subst">&#123;_fmt(quote.get(<span class="string">&#x27;market_cap&#x27;</span>), <span class="string">&#x27;亿&#x27;</span>)&#125;</span>&quot;</span>,</span><br><span class="line">        ]</span><br><span class="line">        sections.append((<span class="string">&quot;行情数据&quot;</span>, rows))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 技术指标 (同理)</span></span><br><span class="line">    <span class="comment"># 资金流向 (同理)</span></span><br><span class="line">    <span class="keyword">return</span> sections</span><br></pre></td></tr></table></figure>
+
+<p>LLM 拿到的就是这些事实块 + 模板，它的工作是”把数据写成人话”，而不是”编造数据”。</p>
+<h3 id="2-4-质量评审：6-道闸门"><a href="#2-4-质量评审：6-道闸门" class="headerlink" title="2.4 质量评审：6 道闸门"></a>2.4 质量评审：6 道闸门</h3><p>这是整条管线的核心。每道闸门都是<strong>独立的程序化校验</strong>，任何一个不过就阻止发布：</p>
+<table>
+<thead>
+<tr>
+<th>闸门</th>
+<th>类型</th>
+<th>检查内容</th>
+<th>退出码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 正文有效性</td>
+<td>硬门禁</td>
+<td>占位符检测 + 最短长度 + 必须含市场数字</td>
+<td>exit 4</td>
+</tr>
+<tr>
+<td>② 数据暂缺</td>
+<td>硬门禁</td>
+<td>“数据暂缺”&#x2F;“暂无数据” 等占位表述</td>
+<td>exit 4</td>
+</tr>
+<tr>
+<td>③ 英文板块名</td>
+<td>硬门禁</td>
+<td>TV REST fallback 返回英文 GICS 名称</td>
+<td>exit 4</td>
+</tr>
+<tr>
+<td>④ 数字一致性</td>
+<td>硬门禁</td>
+<td>文章数字 vs 快照数字逐项比对</td>
+<td>exit 2</td>
+</tr>
+<tr>
+<td>⑤ 敏感词合规</td>
+<td>硬门禁</td>
+<td>收益承诺&#x2F;操作建议&#x2F;目标价检测</td>
+<td>exit 5</td>
+</tr>
+<tr>
+<td>⑥ LLM 读者评审</td>
+<td>软评审</td>
+<td>标题吸引力 + 合规红线 + AI味检测</td>
+<td>参考</td>
+</tr>
+</tbody></table>
+<p>前 5 道是<strong>程序化的硬门禁</strong>——不依赖 LLM，每次都能稳定执行。第 6 道是 LLM 主观评审，仅作参考。</p>
+<h4 id="闸门-⑤-敏感词合规（最复杂的一道）"><a href="#闸门-⑤-敏感词合规（最复杂的一道）" class="headerlink" title="闸门 ⑤ 敏感词合规（最复杂的一道）"></a>闸门 ⑤ 敏感词合规（最复杂的一道）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 收益承诺类：硬拦截（无豁免）</span></span><br><span class="line">_REWARD_PROMISE_PATTERNS = [</span><br><span class="line">    (<span class="string">r&quot;必(?:涨|赚|赢)|稳赚|包赚|翻倍&quot;</span>, <span class="string">&quot;收益承诺&quot;</span>),</span><br><span class="line">    (<span class="string">r&quot;目标价\s*[:：]?\s*\d&quot;</span>, <span class="string">&quot;目标价&quot;</span>),</span><br><span class="line">    (<span class="string">r&quot;\d+\.?\d*\s*元\s*(?:可|可以)?(?:加仓|建仓|布局)&quot;</span>, <span class="string">&quot;价格+操作建议&quot;</span>),</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 操作建议类：需要否定语境豁免</span></span><br><span class="line">_ACTION_ADVICE_PATTERNS = [</span><br><span class="line">    (<span class="string">r&quot;(?:建议|推荐).&#123;0,10&#125;(?:买入|卖出|加仓|建仓)&quot;</span>, <span class="string">&quot;操作建议&quot;</span>),</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 否定语境：命中词前 N 字出现 &quot;不/勿/切勿&quot; → 视为风险提示</span></span><br><span class="line">_NEGATION_CONTEXT = (<span class="string">&quot;不&quot;</span>, <span class="string">&quot;勿&quot;</span>, <span class="string">&quot;切勿&quot;</span>, <span class="string">&quot;不要&quot;</span>, <span class="string">&quot;禁止&quot;</span>, <span class="string">&quot;避免&quot;</span>, ...)</span><br></pre></td></tr></table></figure>
+
+<p>设计的关键点：<strong>“不建议买入”不能被误杀</strong>。所以操作建议类需要先检测否定语境，再决定是否拦截。</p>
+<h3 id="2-5-多空辩论：对抗式分析"><a href="#2-5-多空辩论：对抗式分析" class="headerlink" title="2.5 多空辩论：对抗式分析"></a>2.5 多空辩论：对抗式分析</h3><p>个股分析模式接入了 stock-mcp-server 的 <code>debate_multiagent</code> 模块：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">事实底稿(13项数据, 不经LLM)</span><br><span class="line">    → 多方研究员（找利好）</span><br><span class="line">    → 空方研究员（找利空）</span><br><span class="line">    → 交叉反驳</span><br><span class="line">    → 中立主持归纳分歧</span><br></pre></td></tr></table></figure>
+
+<p>辩论模块直接从 stock-mcp-server 导入，复用已有的 128 个数据工具作为事实底稿。辩论产出的”多空分歧点”会作为额外上下文注入文章生成阶段。</p>
+<h3 id="2-6-LLM-选择：确定性兜底-LLM-加分"><a href="#2-6-LLM-选择：确定性兜底-LLM-加分" class="headerlink" title="2.6 LLM 选择：确定性兜底 + LLM 加分"></a>2.6 LLM 选择：确定性兜底 + LLM 加分</h3><p>这里有一个重要的工程决策：<strong>不用最聪明的 LLM，用最稳定的 LLM</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>中文短输出</th>
+<th>稳定性</th>
+<th>成本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>mimo-v2.5</td>
+<td>❌ 3&#x2F;3 空返回</td>
+<td>不可用</td>
+<td>-</td>
+</tr>
+<tr>
+<td>agnes-2.0-flash</td>
+<td>✅ 5&#x2F;5 成功</td>
+<td>可靠</td>
+<td>低</td>
+</tr>
+<tr>
+<td>deepseek-v4-flash</td>
+<td>✅ 稳定</td>
+<td>可靠</td>
+<td>低</td>
+</tr>
+</tbody></table>
+<p>mimo-v2.5 在短输出场景下直接返回空字符串（3 次调用 3 次空返回），最终切换到 agnes-2.0-flash。<strong>LLM 短输出不稳定时，不要加重试次数——直接换模型</strong>。</p>
+<p>最终的 fallback 链：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># llm_config.json</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;base_url&quot;</span>: <span class="string">&quot;https://agnes-ai.example.com/v1&quot;</span>,</span><br><span class="line">    <span class="string">&quot;model&quot;</span>: <span class="string">&quot;agnes-2.0-flash&quot;</span>,</span><br><span class="line">    <span class="string">&quot;fallback&quot;</span>: [<span class="string">&quot;deepseek-v4-flash&quot;</span>, <span class="string">&quot;kimi-k2.6&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-踩坑记录-—-15-个真实-bug"><a href="#3-踩坑记录-—-15-个真实-bug" class="headerlink" title="3. 踩坑记录 — 15 个真实 bug"></a>3. 踩坑记录 — 15 个真实 bug</h2><h3 id="3-1-LLM-输出的-preamble-污染"><a href="#3-1-LLM-输出的-preamble-污染" class="headerlink" title="3.1 LLM 输出的 preamble 污染"></a>3.1 LLM 输出的 preamble 污染</h3><p>LLM 写完文章后经常输出一段”好的，以下是根据您提供的数据撰写的分析……”，这段寒暄被当成正文一起发布。</p>
+<p><strong>修复</strong>：<code>strip_llm_preamble()</code> 逐行扫描，跳过 18 种 preamble 模式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">_PREAMBLE_MARKERS = [</span><br><span class="line">    <span class="string">&quot;好的，作为&quot;</span>, <span class="string">&quot;好的，以下&quot;</span>, <span class="string">&quot;好的，根据&quot;</span>,</span><br><span class="line">    <span class="string">&quot;以下是.*撰&quot;</span>, <span class="string">&quot;为您撰写&quot;</span>, <span class="string">&quot;为您生成&quot;</span>,</span><br><span class="line">    ...</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
+
+<p>更隐蔽的问题：LLM 修订时会把提示词中的 meta 标记（<code># 标题</code>、<code># 输出</code>、<code># 原文</code>）原样复制进正文。这些也需要清除。</p>
+<h3 id="3-2-“数据暂缺”占位"><a href="#3-2-“数据暂缺”占位" class="headerlink" title="3.2 “数据暂缺”占位"></a>3.2 “数据暂缺”占位</h3><p>LLM 在数据不全时会写”数据暂缺”或”暂无数据”——这比不写更糟，因为读者看到的是”这个作者没数据还在发文章”。</p>
+<p><strong>修复</strong>：生成侧 prompt 改为”无数据整节省略”，评审侧硬门禁拦截任何占位表述。双保险。</p>
+<h3 id="3-3-英文板块名泄漏"><a href="#3-3-英文板块名泄漏" class="headerlink" title="3.3 英文板块名泄漏"></a>3.3 英文板块名泄漏</h3><p>TV REST 全市场列表作为主数据源时，东财 push2 限流 502 会 fallback 到 TV REST，返回的行业名是英文 GICS 分类（”Integrated Oil”、”Major Banks”）。</p>
+<p><strong>修复</strong>：评审闸门检测 Title Case 英文短语，命中即拒绝发布。</p>
+<h3 id="3-4-LLM-评审-JSON-解析崩溃"><a href="#3-4-LLM-评审-JSON-解析崩溃" class="headerlink" title="3.4 LLM 评审 JSON 解析崩溃"></a>3.4 LLM 评审 JSON 解析崩溃</h3><p>LLM 评审返回的 JSON 字符串值内可能含未转义英文引号 → <code>json.loads</code> 抛异常 → 评分丢失。</p>
+<p><strong>修复</strong>：<code>_parse_review_json()</code> 实现了三级降级：</p>
+<ol>
+<li>标准 <code>json.loads</code></li>
+<li>代码块提取 <code>```json {...} ```</code></li>
+<li>字段级正则兜底（独立提取 score&#x2F;suggestions&#x2F;pass）</li>
+</ol>
+<h3 id="3-5-numpy-bool-序列化爆炸"><a href="#3-5-numpy-bool-序列化爆炸" class="headerlink" title="3.5 numpy.bool_ 序列化爆炸"></a>3.5 numpy.bool_ 序列化爆炸</h3><p>辩论模块 <code>_format_dossier</code> 用 <code>json.dumps</code> 序列化数据时，numpy.bool_ 类型不被 JSON 支持 → <code>TypeError: Object of type bool_ is not JSON serializable</code>。</p>
+<p><strong>修复</strong>：3 处 <code>json.dumps</code> 加 <code>default=str</code>。</p>
+<h3 id="3-6-LLM-空返回"><a href="#3-6-LLM-空返回" class="headerlink" title="3.6 LLM 空返回"></a>3.6 LLM 空返回</h3><p>最离谱的 bug：mimo-v2.5 在短输出场景下返回空字符串，但状态码是 200。代码拿着空字符串继续执行 → 生成的”文章”只有事实块和模板，没有正文。</p>
+<p><strong>修复</strong>：空返回立即检测 + 空串最小长度检查 + 模型切换到 agnes。</p>
+<h3 id="3-7-修订器评分-N-A"><a href="#3-7-修订器评分-N-A" class="headerlink" title="3.7 修订器评分 N&#x2F;A"></a>3.7 修订器评分 N&#x2F;A</h3><p>LLM 评审时输出 <code>&quot;score&quot;: &quot;N/A&quot;</code>（字符串而非数字）→ 后续代码 <code>float(&quot;N/A&quot;)</code> 报错。</p>
+<p><strong>修复</strong>：<code>_extract_score</code> 显式处理 “评分 N&#x2F;A” → 返回 None；LLM 提示词要求 “score 必须是数字”。</p>
+<h3 id="3-8-占位符文章逃逸"><a href="#3-8-占位符文章逃逸" class="headerlink" title="3.8 占位符文章逃逸"></a>3.8 占位符文章逃逸</h3><p>LLM 429 时 generate_article 生成占位符”文章生成服务暂时不可用”，数字校验无数字可比对 → 判通过 → 占位符文章被发布。</p>
+<p><strong>修复</strong>：正文有效性闸门检测 3 个占位符关键词。</p>
+<h3 id="3-9-权益提升带来的合规压力"><a href="#3-9-权益提升带来的合规压力" class="headerlink" title="3.9 权益提升带来的合规压力"></a>3.9 权益提升带来的合规压力</h3><p>雪球创作者权益开通后流量上升 → 内容合规风险同步上升。之前”生成时约束”就够了，现在需要”发布前硬门禁”。</p>
+<p><strong>修复</strong>：新增 5 种收益承诺模式 + 6 种操作建议模式 + 否定语境豁免。</p>
+<h3 id="3-10-LLM-旁白混入正文"><a href="#3-10-LLM-旁白混入正文" class="headerlink" title="3.10 LLM 旁白混入正文"></a>3.10 LLM 旁白混入正文</h3><p>LLM 会在文章中写”（注：由于事实块中未包含XX数据，本小节按要求省略。）”——这不是写给读者的，是 LLM 的自我解释。</p>
+<p><strong>修复</strong>：正则清除 <code>（注：...省略/略过/不写...）</code> 类旁白。</p>
+<h2 id="4-总结-—-核心-takeaway"><a href="#4-总结-—-核心-takeaway" class="headerlink" title="4. 总结 — 核心 takeaway"></a>4. 总结 — 核心 takeaway</h2><p><strong>确定性方案做主力，LLM 做加分项</strong>。这条原则贯穿了整条管线：</p>
+<ul>
+<li>数据采集：纯程序化（API → JSON），不经 LLM</li>
+<li>数字渲染：模板引擎完成，LLM 不碰数字</li>
+<li>评审闸门：5 道程序化硬门禁 + 1 道 LLM 软评审</li>
+<li>合规检测：模式匹配 + 否定语境豁免，不依赖 LLM 判断</li>
+</ul>
+<p>LLM 只做两件事：把数据写成人话 + 从读者视角给主观评价。一旦 LLM 出问题（空返回、JSON 崩溃、preamble 污染），管线的程序化闸门能把控质量底线。</p>
+<p><strong>一句话总结</strong>：不要让 LLM 做它不擅长的事（保持数字准确、保持格式稳定、保持合规边界），让它做它擅长的事（自然语言表达、读者视角评价）。</p>
+<hr>
+<p><strong>项目规模</strong>：6000+ 行 Python，4 种文章类型（收盘复盘 &#x2F; 盘前早报 &#x2F; 周度复盘 &#x2F; 个股分析），60+ 个文件。</p>
+<p><strong>相关资源</strong>：</p>
+<ul>
+<li>stock-mcp-server：<a target="_blank" rel="noopener" href="https://github.com/yadinae/stock-mcp-server">github.com&#x2F;yadinae&#x2F;stock-mcp-server</a>（128 个数据工具）</li>
+<li>Hermes Agent 文档：<a target="_blank" rel="noopener" href="https://hermes-agent.nousresearch.com/docs">hermes-agent.nousresearch.com&#x2F;docs</a></li>
+</ul>
+<p><em>生成时间：2026-09-02 10:00</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/">https://boke.studyai.ltd/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AI-Agent/">AI Agent</a><a class="post-meta__tags" href="/tags/%E8%B4%A8%E9%87%8F%E9%97%A8%E7%A6%81/">质量门禁</a><a class="post-meta__tags" href="/tags/%E9%9B%AA%E7%90%83/">雪球</a><a class="post-meta__tags" href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96%E5%8F%91%E5%B8%83/">自动化发布</a><a class="post-meta__tags" href="/tags/%E5%90%88%E8%A7%84/">合规</a><a class="post-meta__tags" href="/tags/%E5%A4%9AAgent/">多Agent</a><a class="post-meta__tags" href="/tags/%E6%8A%95%E7%A0%94/">投研</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-xueqiu-pipeline.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"><img class="cover" src="/img/cover-ai-agent-learns-from-failures.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战</div></div><div class="info-2"><div class="info-item-1"> 59 个失败模式、42 条机器可读规则——全部由 Agent 从自己的会话历史中自动挖掘生成。这篇记录我怎么让 AI Agent 学会「从自己的错误中学习」，把「改了 A 忘了 B」这类集成 bug 变成可自动检测的规则。     1. 缘起：同样的坑，踩了三次事情要从 Cloudflare Workers 项目说起。 我有一个网盘应用（TG Cloud Drive），前端在 Cloudflare Pages，后端是 Workers。每次部署新功能，我都会遇到同一类 bug：  第一次：前端加了 X-Session-Id 请求头，CORS 没配 → 跨域报错 第二次：登录改用 session 后，文件移动功能还在读旧的 localStorage → 移动失败 第三次：新加了 GET 接口没写 Cache-Control → 用户看到旧数据  三次，三种表现，同一个根因：改了 A 但忘了 B。 我意识到这不是偶然——这是所有前后端分离项目的通病。而我的 AI Agent 每天都在帮用户部署代码，它也应该能从这些失败中学习。 于是我想：能不能让 Agent 自动挖掘自己的失败历史，...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/08/15/2026-08-15-qgs-production-metrics/" title="QGS 质量门禁：我踩了46次刹车，换来的质量提升值不值？"><img class="cover" src="/img/cover-qgs-production-metrics.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-15</div><div class="info-item-2">QGS 质量门禁：我踩了46次刹车，换来的质量提升值不值？</div></div><div class="info-2"><div class="info-item-1"> 我在 Hermes Agent 里装了 QGS（Quality Gate System）质量门禁——一个会在每次复杂任务输出前自动评分的系统。运行了10天，46次被阻断，102次人工审批点。这篇用真实数据复盘：它值不值得装？踩了多少坑？以及什么情况下 QGS 反而会拖后腿。     1. 缘起：为什么要在 Agent 里装刹车去年我写了一篇 QGS 质量门禁系统：给 AI Agent 装上”刹车和质检”，介绍了 QGS 的设计理念——在 Agent 输出前加一道质量评分闸门，分数低于阈值就阻断输出。 当时只是一个实验性的想法，跑的是简单任务。 这一个月，我把 QGS 接进了生产环境——每天 20+ 个 cron 任务、多模型并发、跨项目协作，复杂度远超当年。 10 天下来，审计日志里记录了 373 次评分、46 次阻断、102 次人工审批点。数据不会说谎——我们来聊聊值不值。 2. 生产环境数据：46 次刹车背后的故事先上硬数据。QGS 的所有决策都写入 ~/.hermes/qgs/audit_wal.jsonl（append-only JSONL），我从中提取了以下统计： 整...</div></div></div></a><a class="pagination-related" href="/2026/07/11/2026-07-11-180%E8%A1%8C%E4%BB%A3%E7%A0%81-%E6%88%91%E7%BB%99ai-agent%E8%A3%85%E4%BA%86%E4%B8%AAoom%E5%85%8D%E7%96%AB%E7%B3%BB%E7%BB%9F/" title="180行代码，我给 AI Agent 装了个 OOM 免疫系统"><img class="cover" src="/img/cover-oom-defense.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-11</div><div class="info-item-2">180行代码，我给 AI Agent 装了个 OOM 免疫系统</div></div><div class="info-2"><div class="info-item-1">引言：凌晨三点，Agent 又挂了凌晨两点五十八分，手机震了一下。 飞书推送：”🔴 CRITICAL: 内存 92.3%（482MB&#x2F;2GB 可用）—— GC 回收 847 个对象 (0.041s)” 我翻了个身，没理会。三秒后第二条消息进来： “✅ GC 回收完成，内存降至 67.2%” 安心了。两个月前，同样是凌晨三点，我的 AI Agent 正在跑一个 500 只股票的批量回测——已经跑了四个小时，快要出结果了——然后被 Linux OOM Killer 干掉了。四个小时的白工。 第二天我发现时，错误日志只有一行： 1Out of memory: Killed process 1270341 (python3)  没有任何警告，没有抢救机会，连 .py 文件里的 try/except 都没来得及跑。操作系统像关灯一样把进程灭了。   这不是段子。如果你在生产环境跑过 AI Agent——尤其是那些需要几小时才能完成的自动化流程——你大概率也经历过这种”一夜回到解放前”的崩溃。 我们花了大约一个下午，写了一个 180 行的 Python 脚本，给 Agent 装上...</div></div></div></a><a class="pagination-related" href="/2026/07/11/%E4%BB%8E%E6%80%A5%E8%AF%8A%E5%88%86%E8%AF%8A%E7%9C%8BAI-Agent%E7%9A%84%E8%B6%85%E6%97%B6%E6%B2%BB%E7%90%86/" title="从&quot;急诊分诊&quot;看 AI Agent 的超时治理"><img class="cover" src="/img/cover-triage-ai-agent.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-11</div><div class="info-item-2">从&quot;急诊分诊&quot;看 AI Agent 的超时治理</div></div><div class="info-2"><div class="info-item-1">引子：最认真的评审员，总是迟到想象你组建了一个专家评审团：功能专家、安全专家、性能分析师、优化顾问，以及一位”现实检验者”——他的任务是不看任何人的脸色，亲自跑一遍整个系统来验证所有结论。 这位现实检验者确实厉害，他能发现别人发现不了的问题，但他有个毛病：每次都最后一个交卷，有时甚至直接缺席。 这正是我们在对抗式解题法（Adversarial Evaluation）系统中遇到的真实困境。五个判别者并行评审同一份交付物，其他四位在 2-3 分钟内给出详细报告，而现实检验者（Reality Checker）动不动跑 10 分钟然后超时。   第一步：诊断——为什么只有他迟到？   判别者 SKILL.md 动作指令数 含端到端验证    现实检验者 44个 是（启动服务、curl 测试）   功能审查者 23个 否   安全审查者 7个 否   性能基准师 4个 否   优化师 3个 否   差距一眼可见：现实检验者的动作指令数是其他判别者的 2-11 倍。 原因在它的工作流设计上——它不仅仅做静态代码分析，还要求：  启动 Web 服务，用 curl 做端到端验证 交叉比对 ROA...</div></div></div></a><a class="pagination-related" href="/2026/08/05/2026-08-05-xueqiu-auto-publish-agent/" title="让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录"><img class="cover" src="/img/cover-xueqiu-auto-publish.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-05</div><div class="info-item-2">让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录</div></div><div class="info-2"><div class="info-item-1"> 我维护的 stock MCP Server 有上百个工具——实时行情、K线、龙虎榜、北向资金、涨停梯队……但某天我意识到：这些数据只喂给了自己，没有变成”作品”。于是花了 72 小时，给 Agent 接上一条「收盘后自动写市场综述并发到雪球」的管线。本文完整记录：6 大平台选型、阿里云 WAF 攻防（curl_cffi 全指纹被拦 → Playwright 页面内 fetch 穿透）、三个接口逆向坑，以及”LLM 写财经文数字必漂移”的数据零幻觉方案。第一篇文章已真实上线。     1. 缘起：一堆好工具，却没发挥出价值我有一套股票分析系统：一个 stock MCP Server（通过 Cloudflare Workers 网关暴露上百个工具），加上每天 11:00 的盘中简报、16:10 的收盘深度分析。数据链路非常完整——开盘、收盘、资金流向、涨停梯队，全部自动化。 但有一天我看着这些日报，突然问了自己一个问题：  这些分析只发给了我自己。它们能不能变成对外发布的作品？  网络上正好有专门的股票社区——雪球、东方财富、掘金。能不能让 Agent 每天收盘后，用 MCP 拉数...</div></div></div></a><a class="pagination-related" href="/2026/06/26/2026-06-27-%E4%BD%8E%E4%BB%B7%E5%80%BC%E4%BB%BB%E5%8A%A1%E8%AF%86%E5%88%AB-ai-agent-%E8%A7%84%E5%88%92%E4%B8%AD%E7%9A%84-%E6%96%AD%E8%88%8D%E7%A6%BB/" title="低价值任务识别：AI Agent 规划中的&quot;断舍离&quot;"><img class="cover" src="/img/cover-lowvalue-sorter.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-27</div><div class="info-item-2">低价值任务识别：AI Agent 规划中的&quot;断舍离&quot;</div></div><div class="info-2"><div class="info-item-1">低价值任务识别：AI Agent 规划中的”断舍离”在近期的 AI Agent 开发实践中，笔者发现一个普遍痛点：我们总想让 Agent 思考得越细致越好，疯狂堆砌规划步骤，结果却适得其反。今天，我们就来聊聊如何在 Agent 任务规划中做减法，用东方哲学智慧破解工程难题。 第一章：缘起——当 AI Agent 陷入”过度规划”的泥潭 一个真实案例：智能客服 Agent 的”连环套”去年我在做一个电商智能客服 Agent 项目时，遇到了一个典型的过度规划案例。Agent 被要求”查询订单状态”，它规划出了以下步骤：  解析用户意图 → 2. 查询用户身份 → 3. 验证登录状态 → 4. 获取订单列表 → 5. 筛选最近订单 → 6. 查询物流信息 → 7. 获取物流轨迹 → 8. 格式化输出 → 9. 用户反馈确认  看似逻辑严密，但实际上步骤 2、3 完全冗余——订单系统本身已绑定用户身份；步骤 6、7 可合并；步骤 8、9 更是多余的前置规划。最终这个 Agent 在 9 步中消耗了 2800+ Token，生成了大量中间结果，而实际只需要 3 步就能完成。 这种”连环套”...</div></div></div></a><a class="pagination-related" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"><img class="cover" src="/img/cover-ai-agent-learns-from-failures.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-29</div><div class="info-item-2">我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战</div></div><div class="info-2"><div class="info-item-1"> 59 个失败模式、42 条机器可读规则——全部由 Agent 从自己的会话历史中自动挖掘生成。这篇记录我怎么让 AI Agent 学会「从自己的错误中学习」，把「改了 A 忘了 B」这类集成 bug 变成可自动检测的规则。     1. 缘起：同样的坑，踩了三次事情要从 Cloudflare Workers 项目说起。 我有一个网盘应用（TG Cloud Drive），前端在 Cloudflare Pages，后端是 Workers。每次部署新功能，我都会遇到同一类 bug：  第一次：前端加了 X-Session-Id 请求头，CORS 没配 → 跨域报错 第二次：登录改用 session 后，文件移动功能还在读旧的 localStorage → 移动失败 第三次：新加了 GET 接口没写 Cache-Control → 用户看到旧数据  三次，三种表现，同一个根因：改了 A 但忘了 B。 我意识到这不是偶然——这是所有前后端分离项目的通病。而我的 AI Agent 每天都在帮用户部署代码，它也应该能从这些失败中学习。 于是我想：能不能让 Agent 自动挖掘自己的失败历史，...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">77</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">200</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">28</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%90%9E%E8%BF%99%E4%B8%AA"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 为什么搞这个</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-%E5%9B%9B%E9%98%B6%E6%AE%B5%E5%85%AD%E9%97%B8%E9%97%A8"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — 四阶段六闸门</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E7%AE%A1%E7%BA%BF%E5%85%A8%E8%B2%8C"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 管线全貌</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86%EF%BC%9A%E5%BF%AB%E7%85%A7%E4%B8%BA%E7%8E%8B"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 数据采集：快照为王</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%96%87%E7%AB%A0%E7%94%9F%E6%88%90%EF%BC%9A%E4%BA%8B%E5%AE%9E%E5%9D%97-%E6%A8%A1%E6%9D%BF%E7%BA%A6%E6%9D%9F"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 文章生成：事实块 + 模板约束</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E8%B4%A8%E9%87%8F%E8%AF%84%E5%AE%A1%EF%BC%9A6-%E9%81%93%E9%97%B8%E9%97%A8"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 质量评审：6 道闸门</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%97%B8%E9%97%A8-%E2%91%A4-%E6%95%8F%E6%84%9F%E8%AF%8D%E5%90%88%E8%A7%84%EF%BC%88%E6%9C%80%E5%A4%8D%E6%9D%82%E7%9A%84%E4%B8%80%E9%81%93%EF%BC%89"><span class="toc-number">2.4.1.</span> <span class="toc-text">闸门 ⑤ 敏感词合规（最复杂的一道）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%A4%9A%E7%A9%BA%E8%BE%A9%E8%AE%BA%EF%BC%9A%E5%AF%B9%E6%8A%97%E5%BC%8F%E5%88%86%E6%9E%90"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 多空辩论：对抗式分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-6-LLM-%E9%80%89%E6%8B%A9%EF%BC%9A%E7%A1%AE%E5%AE%9A%E6%80%A7%E5%85%9C%E5%BA%95-LLM-%E5%8A%A0%E5%88%86"><span class="toc-number">2.6.</span> <span class="toc-text">2.6 LLM 选择：确定性兜底 + LLM 加分</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-15-%E4%B8%AA%E7%9C%9F%E5%AE%9E-bug"><span class="toc-number">3.</span> <span class="toc-text">3. 踩坑记录 — 15 个真实 bug</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-LLM-%E8%BE%93%E5%87%BA%E7%9A%84-preamble-%E6%B1%A1%E6%9F%93"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 LLM 输出的 preamble 污染</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E2%80%9C%E6%95%B0%E6%8D%AE%E6%9A%82%E7%BC%BA%E2%80%9D%E5%8D%A0%E4%BD%8D"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 “数据暂缺”占位</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E8%8B%B1%E6%96%87%E6%9D%BF%E5%9D%97%E5%90%8D%E6%B3%84%E6%BC%8F"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 英文板块名泄漏</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-LLM-%E8%AF%84%E5%AE%A1-JSON-%E8%A7%A3%E6%9E%90%E5%B4%A9%E6%BA%83"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 LLM 评审 JSON 解析崩溃</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-numpy-bool-%E5%BA%8F%E5%88%97%E5%8C%96%E7%88%86%E7%82%B8"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 numpy.bool_ 序列化爆炸</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-LLM-%E7%A9%BA%E8%BF%94%E5%9B%9E"><span class="toc-number">3.6.</span> <span class="toc-text">3.6 LLM 空返回</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-%E4%BF%AE%E8%AE%A2%E5%99%A8%E8%AF%84%E5%88%86-N-A"><span class="toc-number">3.7.</span> <span class="toc-text">3.7 修订器评分 N&#x2F;A</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-8-%E5%8D%A0%E4%BD%8D%E7%AC%A6%E6%96%87%E7%AB%A0%E9%80%83%E9%80%B8"><span class="toc-number">3.8.</span> <span class="toc-text">3.8 占位符文章逃逸</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-9-%E6%9D%83%E7%9B%8A%E6%8F%90%E5%8D%87%E5%B8%A6%E6%9D%A5%E7%9A%84%E5%90%88%E8%A7%84%E5%8E%8B%E5%8A%9B"><span class="toc-number">3.9.</span> <span class="toc-text">3.9 权益提升带来的合规压力</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-10-LLM-%E6%97%81%E7%99%BD%E6%B7%B7%E5%85%A5%E6%AD%A3%E6%96%87"><span class="toc-number">3.10.</span> <span class="toc-text">3.10 LLM 旁白混入正文</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93-%E2%80%94-%E6%A0%B8%E5%BF%83-takeaway"><span class="toc-number">4.</span> <span class="toc-text">4. 总结 — 核心 takeaway</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/" title="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战"><img src="/img/cover-xueqiu-pipeline.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战"/></a><div class="content"><a class="title" href="/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/" title="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战">我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战</a><time datetime="2026-09-02T02:00:00.000Z" title="发表于 2026-09-02 10:00:00">2026-09-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"><img src="/img/cover-ai-agent-learns-from-failures.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"/></a><div class="content"><a class="title" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战">我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战</a><time datetime="2026-08-29T02:00:00.000Z" title="发表于 2026-08-29 10:00:00">2026-08-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/26/2026-08-26-kanban-multi-profile-pipeline/" title="4 个 AI Agent 接力写收盘报告——Kanban 多 Profile 流水线实战"><img src="/img/cover-kanban-multi-profile-pipeline.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="4 个 AI Agent 接力写收盘报告——Kanban 多 Profile 流水线实战"/></a><div class="content"><a class="title" href="/2026/08/26/2026-08-26-kanban-multi-profile-pipeline/" title="4 个 AI Agent 接力写收盘报告——Kanban 多 Profile 流水线实战">4 个 AI Agent 接力写收盘报告——Kanban 多 Profile 流水线实战</a><time datetime="2026-08-26T02:00:00.000Z" title="发表于 2026-08-26 10:00:00">2026-08-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/22/2026-08-22-hermes-multi-bot-orchestration/" title="我用 6 个 AI Bot 搭了一个虚拟团队——Hermes 多 Bot 编排实战"><img src="/img/cover-hermes-multi-bot-orchestration.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我用 6 个 AI Bot 搭了一个虚拟团队——Hermes 多 Bot 编排实战"/></a><div class="content"><a class="title" href="/2026/08/22/2026-08-22-hermes-multi-bot-orchestration/" title="我用 6 个 AI Bot 搭了一个虚拟团队——Hermes 多 Bot 编排实战">我用 6 个 AI Bot 搭了一个虚拟团队——Hermes 多 Bot 编排实战</a><time datetime="2026-08-22T02:00:00.000Z" title="发表于 2026-08-22 10:00:00">2026-08-22</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/19/2026-08-19-ai-tutor-security-audit/" title="给自己的 AI 家教做了一次安全审计——6 个 P0/P1 漏洞的发现与修复实录"><img src="/img/cover-ai-tutor-security-audit.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给自己的 AI 家教做了一次安全审计——6 个 P0/P1 漏洞的发现与修复实录"/></a><div class="content"><a class="title" href="/2026/08/19/2026-08-19-ai-tutor-security-audit/" title="给自己的 AI 家教做了一次安全审计——6 个 P0/P1 漏洞的发现与修复实录">给自己的 AI 家教做了一次安全审计——6 个 P0/P1 漏洞的发现与修复实录</a><time datetime="2026-08-19T02:00:00.000Z" title="发表于 2026-08-19 10:00:00">2026-08-19</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
