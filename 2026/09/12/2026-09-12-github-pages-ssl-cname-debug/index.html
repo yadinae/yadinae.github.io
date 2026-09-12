@@ -1,0 +1,333 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="博客突然打不开，Cloudflare 报 526 SSL 握手失败。我以为是证书过期了，折腾了一晚上，最后发现真凶是一个一行文本的 CNAME 文件丢了。这篇文章完整记录这次排障——包括我走过的弯路、真正起作用的排查顺序，以及给”静态博客 + 自定义域名 + Cloudflare”这套组合的避坑清单。  1. 缘起 — 博客突然全挂了上周五（09-11）下午，我准备像往常一样写篇文章发布，cur">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="博客突然打不开，Cloudflare 报 526 SSL 握手失败。我以为是证书过期了，折腾了一晚上，最后发现真凶是一个一行文本的 CNAME 文件丢了。这篇文章完整记录这次排障——包括我走过的弯路、真正起作用的排查顺序，以及给”静态博客 + 自定义域名 + Cloudflare”这套组合的避坑清单。  1. 缘起 — 博客突然全挂了上周五（09-11）下午，我准备像往常一样写篇文章发布，cur">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-gh-pages-cname-debug.png">
+<meta property="article:published_time" content="2026-09-12T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-09-12T02:13:29.751Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Cloudflare">
+<meta property="article:tag" content="GitHub Actions">
+<meta property="article:tag" content="GitHub Pages">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="排障">
+<meta property="article:tag" content="自定义域名">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-gh-pages-cname-debug.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录",
+  "url": "https://boke.studyai.ltd/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/",
+  "image": "https://boke.studyai.ltd/img/cover-gh-pages-cname-debug.png",
+  "datePublished": "2026-09-12T02:00:00.000Z",
+  "dateModified": "2026-09-12T02:13:29.751Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">208</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">29</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-gh-pages-cname-debug.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-12T02:00:00.000Z" title="发表于 2026-09-12 10:00:00">2026-09-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-12T02:13:29.751Z" title="更新于 2026-09-12 10:13:29">2026-09-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/">技术实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>博客突然打不开，Cloudflare 报 526 SSL 握手失败。我以为是证书过期了，折腾了一晚上，最后发现真凶是一个<strong>一行文本的 CNAME 文件丢了</strong>。这篇文章完整记录这次排障——包括我走过的弯路、真正起作用的排查顺序，以及给”静态博客 + 自定义域名 + Cloudflare”这套组合的避坑清单。</p>
+</blockquote>
+<h2 id="1-缘起-—-博客突然全挂了"><a href="#1-缘起-—-博客突然全挂了" class="headerlink" title="1. 缘起 — 博客突然全挂了"></a>1. 缘起 — 博客突然全挂了</h2><p>上周五（09-11）下午，我准备像往常一样写篇文章发布，<code>curl</code> 了一下线上地址：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s -o /dev/null -w <span class="string">&quot;%&#123;http_code&#125;&quot;</span> <span class="string">&quot;https://boke.studyai.ltd/&quot;</span></span><br><span class="line"><span class="comment"># 526</span></span><br></pre></td></tr></table></figure>
+
+<p>我的博客架构是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">访客 → Cloudflare (CDN + 反向代理) → GitHub Pages (yadinae.github.io)</span><br><span class="line">                自定义域名 boke.studyai.ltd</span><br><span class="line">        Hexo 源码 (MyNanoBot repo) → GitHub Actions → 编译 → Pages 仓库</span><br></pre></td></tr></table></figure>
+
+<p>526 这个错误码我在 Cloudflare 的文档里查过：<strong>origin server SSL connection failed</strong>——意思是 Cloudflare 去连 GitHub Pages 源站时 SSL 握手失败了。</p>
+<p>我第一反应是：GitHub Pages 的证书要到期了？这是 Cloudflare + GitHub Pages 组合的已知问题——GitHub Pages 的证书是自动签发的，偶尔会有签发延迟。我第一晚的操作是<strong>删掉 CNAME 文件重新触发证书签发流程</strong>（这个操作在 StackOverflow 上确实流传，我记错了它的适用场景）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ad98265  fix(blog): restore CNAME for custom domain  ← 发现 CNAME 文件居然丢了</span><br><span class="line">2a5887a  temp: remove CNAME to reset SSL cert        ← 我做的&quot;重置&quot;操作</span><br><span class="line">d4a4ea6  fix(blog): restore CNAME after SSL cert reset</span><br></pre></td></tr></table></figure>
+
+<p>等等，你看这个 git log 顺序——<strong>最下面那条 <code>restore CNAME</code> 才是关键</strong>：CNAME 文件在某个时刻已经从仓库里消失了。我”重置”之前，它就已经不存在了。</p>
+<h2 id="2-核心方法-—-正确的排障顺序"><a href="#2-核心方法-—-正确的排障顺序" class="headerlink" title="2. 核心方法 — 正确的排障顺序"></a>2. 核心方法 — 正确的排障顺序</h2><h3 id="2-1-先分清”谁挂了”，再谈”为什么”"><a href="#2-1-先分清”谁挂了”，再谈”为什么”" class="headerlink" title="2.1 先分清”谁挂了”，再谈”为什么”"></a>2.1 先分清”谁挂了”，再谈”为什么”</h3><p>静态博客挂了，只可能挂在这三层中的一层：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">第 1 层  Cloudflare → GitHub Pages 的连接（SSL/DNS）</span><br><span class="line">第 2 层  GitHub Pages 仓库本身（有没有内容）</span><br><span class="line">第 3 层  构建流程（GitHub Actions 有没有正常产出）</span><br></pre></td></tr></table></figure>
+
+<p>正确的排查顺序是<strong>从底往上</strong>，每层确认一个事实：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第 1 层：Pages 仓库里到底有没有产物？（绕过 CDN，看权威来源）</span></span><br><span class="line">git <span class="built_in">clone</span> --depth 1 https://github.com/yadinae/yadinae.github.io.git /tmp/ghp</span><br><span class="line"><span class="built_in">ls</span> /tmp/ghp/index.html /tmp/ghp/CNAME   <span class="comment"># 两个都应该存在</span></span><br><span class="line"><span class="built_in">cat</span> /tmp/ghp/CNAME                       <span class="comment"># 内容应该是 boke.studyai.ltd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第 2 层：CDN 缓存了什么？</span></span><br><span class="line">curl -sI <span class="string">&quot;https://boke.studyai.ltd/?v=<span class="subst">$(date +%s)</span>&quot;</span> | grep -i cf-cache-status</span><br><span class="line"><span class="comment"># MISS 且 status=526 → 源站确实挂了；HIT → 缓存的是旧响应，等 4 小时或换 URL</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第 3 层：构建有没有跑、跑成功了吗</span></span><br><span class="line">gh run list --<span class="built_in">limit</span> 3</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-我踩的第一个坑：把”现象”当”原因”"><a href="#2-2-我踩的第一个坑：把”现象”当”原因”" class="headerlink" title="2.2 我踩的第一个坑：把”现象”当”原因”"></a>2.2 我踩的第一个坑：把”现象”当”原因”</h3><p>526 只描述了一件事：<strong>Cloudflare 连源站时 SSL 失败</strong>。它既可能是证书问题，也可能是 CNAME 丢失导致 GitHub Pages 根本没把这个域名认作自己的站点（此时 Pages 返回的是默认的 github.io 证书，跟 Cloudflare 拿到的不匹配）。</p>
+<p>我花了一小时在搜索”Cloudflare 526 GitHub Pages”的结果里打转，那些答案全是”删 CNAME 重签”的方案。<strong>没有一条提到过先检查 Pages 仓库里 CNAME 还在不在</strong>——因为 CNAME 文件丢失是<strong>自己仓库</strong>的状态，Cloudflare 那侧的错误日志不会告诉你。</p>
+<p>真正有用的检查命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Pages 仓库（部署产物仓库）里的 CNAME，GitHub Pages 用它识别自定义域名</span></span><br><span class="line">git <span class="built_in">clone</span> --depth 1 &lt;pages-repo&gt; /tmp/ghp &amp;&amp; <span class="built_in">cat</span> /tmp/ghp/CNAME</span><br><span class="line"><span class="comment"># 没有这个文件 → Pages 不认你的域名 → 526 的根源大概率就是它</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-第二个坑：CNAME-要放在-Hexo-源码的-blog-source-里，不是-blog"><a href="#2-3-第二个坑：CNAME-要放在-Hexo-源码的-blog-source-里，不是-blog" class="headerlink" title="2.3 第二个坑：CNAME 要放在 Hexo 源码的 blog/source/ 里，不是 blog/"></a>2.3 第二个坑：CNAME 要放在 Hexo 源码的 <code>blog/source/</code> 里，不是 <code>blog/</code></h3><p>确认文件丢失后，我把它加回仓库，推上去，然后——<strong>构建触发了，但产物里还是没 CNAME，526 依旧</strong>。</p>
+<p>为什么？看我的部署链路：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MyNanoBot 仓库 (hexo 源码)  --GitHub Actions--&gt;  yadinae.github.io 仓库 (pages 产物)</span><br></pre></td></tr></table></figure>
+
+<p>Hexo 生成静态站点时，只会把 <strong><code>blog/source/</code> 目录下的文件</strong>原样拷贝进 <code>public/</code>（最终推送到 Pages 仓库的东西）。而我的 <code>deploy-blog.yml</code> 的 paths 过滤是：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span> [<span class="string">main</span>]</span><br><span class="line">    <span class="attr">paths:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;blog/source/**&#x27;</span>      <span class="comment"># ← 只监听这个</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;blog/_config.yml&#x27;</span></span><br><span class="line">      <span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<p>我把 CNAME 加到了 <code>blog/CNAME</code>——<strong>既不会被 Hexo 拷贝到产物，又不在 paths 监听范围内，构建根本不触发</strong>。</p>
+<p>修正：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;boke.studyai.ltd&quot;</span> &gt; blog/source/CNAME</span><br><span class="line">git add blog/source/CNAME &amp;&amp; git commit -m <span class="string">&quot;fix: CNAME in source/&quot;</span> &amp;&amp; git push</span><br><span class="line"><span class="comment"># 下一次构建产物里就有 CNAME 了，526 消失</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-三个坑串起来看"><a href="#2-4-三个坑串起来看" class="headerlink" title="2.4 三个坑串起来看"></a>2.4 三个坑串起来看</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>坑</th>
+<th>代价</th>
+<th>正确姿势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>把 526 当”证书问题”，直接搜 Cloudflare 方案</td>
+<td>一晚弯路</td>
+<td>先分层定位：产物仓库 &#x2F; CDN &#x2F; 构建，逐层取证</td>
+</tr>
+<tr>
+<td>2</td>
+<td>恢复 CNAME 时放错目录（<code>blog/CNAME</code>）</td>
+<td>触发不了构建</td>
+<td>Hexo 只认 <code>source/</code>；且 paths 过滤只监听 <code>source/**</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>删 CNAME”重置”后忘了它是<strong>功能文件</strong>不是”可删除的脏数据”</td>
+<td>多折腾一轮</td>
+<td>CNAME 是 Pages 识别自定义域名的唯一依据，删&#x3D;全站 526</td>
+</tr>
+</tbody></table>
+<h2 id="3-踩坑记录-—-反例与边界"><a href="#3-踩坑记录-—-反例与边界" class="headerlink" title="3. 踩坑记录 — 反例与边界"></a>3. 踩坑记录 — 反例与边界</h2><h3 id="3-1-什么时候”删-CNAME-重签”方案是对的？"><a href="#3-1-什么时候”删-CNAME-重签”方案是对的？" class="headerlink" title="3.1 什么时候”删 CNAME 重签”方案是对的？"></a>3.1 什么时候”删 CNAME 重签”方案是<strong>对的</strong>？</h3><p>网上流传的 <code>temp: remove CNAME</code> 操作，适用场景是：CNAME 文件<strong>一直存在且内容正确</strong>，但 Cloudflare 的 SSL 模式（Full&#x2F;Full Strict）与 GitHub Pages 自动签发的证书不匹配，导致 526。此时删 CNAME → 触发重新签发 → 恢复，确实有效。</p>
+<p>我这次的问题<strong>叠加了文件丢失</strong>，所以那招救不了我。判断标准很简单：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /tmp/ghp/CNAME   <span class="comment"># 有内容且 = 你的域名 → 走&quot;重签&quot;方案；没有 → 先补文件</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-GitHub-文档里其实有明确说法，但我忽略了"><a href="#3-2-GitHub-文档里其实有明确说法，但我忽略了" class="headerlink" title="3.2 GitHub 文档里其实有明确说法，但我忽略了"></a>3.2 GitHub 文档里其实有明确说法，但我忽略了</h3><p>GitHub Pages 官方文档说得很直白：CNAME 文件放在部署产物仓库的<strong>根目录</strong>（不是分支名子目录下），Pages 就识别为该域名的站点。Hexo 用户如果不用 <code>hexo generate</code> 直接把 <code>public/</code> 推上去，就必须让 <code>source/CNAME</code> 跟着构建流程走一遍。文档地址：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://pages.github.com/">GitHub Pages: Custom domains</a>（官方入口，内容会移动，按导航找 “Setting up a custom domain”）</li>
+<li><a target="_blank" rel="noopener" href="https://hexo.io/docs/generating">Hexo 构建</a></li>
+</ul>
+<h3 id="3-3-一个反直觉的点"><a href="#3-3-一个反直觉的点" class="headerlink" title="3.3 一个反直觉的点"></a>3.3 一个反直觉的点</h3><p>我最初以为 Cloudflare 那侧 526 是”证书过期”，因为 Cloudflare 的 5xx 错误页就是这么提示的。<strong>但 5xx 只说明”源站拒绝了连接”，不说明”拒绝的原因”</strong>。所有”源站 SSL 问题”都可能表现成 526&#x2F;521&#x2F;522&#x2F;525——SSL 握手失败是 525&#x2F;526，源站不可达是 522，源站超时是 524。看到 5xx 先做<strong>分诊</strong>（类比医院急诊：先分内外伤，再进科室），而不是直接跳去 SSL 专科。</p>
+<h2 id="4-总结-—-你的静态博客会挂在哪"><a href="#4-总结-—-你的静态博客会挂在哪" class="headerlink" title="4. 总结 — 你的静态博客会挂在哪"></a>4. 总结 — 你的静态博客会挂在哪</h2><p>这次排障让我沉淀出一条<strong>最小排障路径</strong>，下次博客打不开，按顺序跑：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">① curl 线上地址看状态码 → 404? 526? 403?</span><br><span class="line">② clone Pages 产物仓库 → index.html 和 CNAME 还在吗？</span><br><span class="line">③ 在 GitHub Actions 里查最近一次构建 → success 还是 failure？</span><br><span class="line">④ 看 Cloudflare 的 DNS / SSL 模式 → 与 ② 的结果对得上吗？</span><br></pre></td></tr></table></figure>
+
+<p>一句话 takeaway：<strong>Cloudflare 的错误码描述的是”连接失败”这个事实，不是原因；原因要从 GitHub Pages 侧的产物仓库反推。先取证，再治病。</strong></p>
+<p>如果你的博客也是 Hexo&#x2F;Hugo + GitHub Actions + 自定义域名 + Cloudflare 的组合，这份排障顺序可以直接抄走。</p>
+<hr>
+<p><em>踩坑日期 2026-09-11；排障耗时一晚；Git commit 历史见 MyNanoBot repo <code>git log -- blog/source/CNAME</code>。</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/">https://boke.studyai.ltd/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Hexo/">Hexo</a><a class="post-meta__tags" href="/tags/Cloudflare/">Cloudflare</a><a class="post-meta__tags" href="/tags/GitHub-Pages/">GitHub Pages</a><a class="post-meta__tags" href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89%E5%9F%9F%E5%90%8D/">自定义域名</a><a class="post-meta__tags" href="/tags/%E6%8E%92%E9%9A%9C/">排障</a><a class="post-meta__tags" href="/tags/GitHub-Actions/">GitHub Actions</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-gh-pages-cname-debug.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/09/09/2026-09-09-profile-skills-optimization-botmaker/" title="我把 AI Agent 的技能库从臃肿精简到锋利——Profile 优化实战"><img class="cover" src="/img/cover-profile-skills-optimization.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">我把 AI Agent 的技能库从臃肿精简到锋利——Profile 优化实战</div></div><div class="info-2"><div class="info-item-1"> 71 个全局技能、6 个 Profile、每个 Profile 塞了十几个不相关的 Skill——我的 AI Agent 团队看起来很”全能”，实际上每个 Bot 都在处理自己不擅长的事。这篇文章记录我怎么用 Botmaker 方法论，把技能库从臃肿精简到锋利，让每个 Agent 真正专注于自己的领域。     1. 缘起：一个万能 Bot 的「技能虚胖」问题我的 Hermes Agent 有 6 个 Profile：stock（股票分析）、edu（教育）、coder（代码）、critic（评审）、writer（写作）、research（调研）。一开始，我给每个 Profile 塞了尽可能多的技能——毕竟”技能越多，能力越强”嘛。 结果适得其反。 问题 1：上下文污染。 stock Profile 要分析一只股票，但系统提示里加载了 creative、email、media 这些跟投资完全无关的技能。Agent 的注意力被分散，回复质量下降。更隐蔽的是，有些技能的描述里包含特定的指令模式（比如”使用表格展示”、”添加 emoji”），会微妙地影响 Agent 在不相关场景下的输...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/07/05/2026-07-06-cloudflare-monetization-gateway-x402-%E5%85%A8%E9%9D%A2%E8%A7%A3%E8%AF%BB/" title="Cloudflare Monetization Gateway (x402) — 全面解读"><img class="cover" src="/img/cover-x402-payment.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-06</div><div class="info-item-2">Cloudflare Monetization Gateway (x402) — 全面解读</div></div><div class="info-2"><div class="info-item-1">Cloudflare x402全面解读：为AI Agent打造微支付基础设施 引言：AI Agent“不看广告”，传统互联网商业模式正在终结如果你运营过一个热门API或者公开数据源，你一定注意到了这个现象：AI爬虫的请求量可能是真实用户的 100到10,000倍。这些Agent（AI代理）像永不疲倦的读者，批量抓取你的内容，却从不点击广告，也不会忍受你的付费墙——因为他们没有瞳孔、没有耐心，只有代码。 传统的互联网商业模式建立在“注意力经济”之上：广告依赖人类视觉，订阅依赖人类决策。当流量主体从人类变成机器，这套体系开始崩塌。如何为机器对机器的互联网流量设计一个微支付层？ Cloudflare Monetization Gateway（代号 x402）正是回答这个问题的首个生产级方案。它不是又一个加密货币赌场，而是一个建立在HTTP标准之上、面向AI Agent的“即用即付”基础设施。本文将对它进行全面解读，并展示如何用 10行代码 让你的API变成按次收费的“投币机”。  第一章：解构 x402——不只是“402 Payment Required”失踪的HTTP状态码HTTP ...</div></div></div></a><a class="pagination-related" href="/2026/05/27/2026-05-27-hexo-theme-guide-2026/" title="Hexo 主题选型指南 2026：从 Butterfly 到新一代主题"><img class="cover" src="https://images.unsplash.com/photo-1669023414162-8b0573b9c6b2?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-27</div><div class="info-item-2">Hexo 主题选型指南 2026：从 Butterfly 到新一代主题</div></div><div class="info-2"><div class="info-item-1">一、故事的开端三个月前，我用 Hexo 搭了第一个博客。 选择 Hexo 的理由很简单：静态站点，Markdown 写作，GitHub Pages 免费部署，熟悉 Node.js 生态——对于技术人来说，这是一条阻力最小的路。 选主题的时候，我跟大多数人一样，装了 Butterfly。为什么呢？因为它星多（当时 7500+），文档全中文，出来效果也确实漂亮。一用就是三个月，写了十几篇文章，没出过什么问题。 直到上周我在群里看到一个朋友晒他的博客，用的也是 Hexo，但感觉完全不一样——排版更干净，加载更快，还自带知识库的布局。我问他用的什么主题，他说：「Stellar。」 于是我做了一件早就该做的事：认认真真把 Hexo 生态里的好主题翻了一遍。 这篇文章就是这次调研的完整记录。如果你也在用 Hexo，或者正打算建站，这份清单能帮你省下不少时间。 二、先看数据：Hexo 主题全景Hexo 官网 hexo.io&#x2F;themes 上收录了 380+ 个主题，而 GitHub 上以 hexo-theme 命名的仓库超过了 3800 个。 这是一个庞大的生态，但真正活跃、成熟、有...</div></div></div></a><a class="pagination-related" href="/2026/02/14/ai-hexo-github/" title="如何让AI通过Hexo接管GitHub博客"><img class="cover" src="https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-02-15</div><div class="info-item-2">如何让AI通过Hexo接管GitHub博客</div></div><div class="info-2"><div class="info-item-1">引言在这个AI迅速发展的时代，我们可以用智能助手来帮助我们管理技术博客。本文将详细介绍如何让AI通过Hexo接管并自动化维护你的GitHub博客，从而提高内容更新效率。 为什么让AI接管博客？1. 提高效率 自动内容生成：AI可以根据主题自动生成技术文章 快速部署：无需手动操作，AI可以直接发布新内容 智能优化：AI可以优化标题、标签和分类，提高SEO效果  2. 降低维护成本 无需手动学习Hexo命令：AI知道如何操作 自动处理重复任务：如文章格式化、图片优化等 24&#x2F;7可用：随时可以进行更新和维护  3. 提升质量 内容一致性：AI可以保持统一的写作风格 技术准确性：AI可以自动验证代码和技术细节 多语言支持：AI可以轻松处理多语言内容  系统架构123456789101112graph TB    A[用户指令] --&gt; B[AI Agent]    B --&gt; C[内容生成]    B --&gt; D[Hexo命令执行]    B --&gt; E[Git操作]    C --&gt; F[文章源文件]    D --&gt; F    F --&...</div></div></div></a><a class="pagination-related" href="/2026/05/25/Downy%EF%BC%9A%E5%9F%BA%E4%BA%8E-Cloudflare-Workers-%E7%9A%84%E5%BC%80%E6%BA%90%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%8D%8F%E4%BD%9C%E5%B9%B3%E5%8F%B0/" title="Downy：在 Cloudflare Workers 上搭建你的 AI 代理团队"><img class="cover" src="https://images.unsplash.com/photo-1674027444636-ce7379d51252?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-25</div><div class="info-item-2">Downy：在 Cloudflare Workers 上搭建你的 AI 代理团队</div></div><div class="info-2"><div class="info-item-1"> 一个普通人也能玩转的多智能体协作平台，无需服务器、无需 Docker、无需运维经验。     引言：一个普通开发者的 AI 代理梦（引言）几个月前，我想给自己的项目配一个 AI 助手。不是那种聊聊天就完事的，而是能真正干活的那种——能搜索资料、能读写文件、能跑后台任务。 翻了一圈市面上的方案：OpenClaw 不错，但要自己搭服务器；AutoGPT 太重量级；LangChain 的生态太复杂。我只是个普通开发者，不想为了一个 AI 助手去学一套完整的 DevOps 技能栈。 直到我发现了 Downy。 二、Downy 是什么Downy 是一个基于 Cloudflare Workers 的开源多智能体协作平台。简单说，它让你在几分钟内创建一支 AI 代理团队，每个代理都有自己的工作空间、独立的模型配置和对话历史。 项目地址：github.com&#x2F;bensenescu&#x2F;downy 核心特性一览   特性 说明    🧠 多代理架构 主代理（DownyAgent）+ 子代理（ChildAgent），每个独立运行、独立模型配置   ☁️ 全托管 部署在 Cloud...</div></div></div></a><a class="pagination-related" href="/2026/08/06/2026-08-06-cloudflare-wallet-overview/" title="Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建"><img class="cover" src="/img/cover-cloudflare-wallet.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-06</div><div class="info-item-2">Cloudflare Wallet 全景综述：AI 智能体的钱包、身份证与 Agent 电商基建</div></div><div class="info-2"><div class="info-item-1"> 2026 年 8 月 4 日，Cloudflare 发布 Cloudflare Wallets 与 cloudflare.pay：给部署在 Cloudflare 上的 AI 智能体一个稳定身份，以及一套”在人类设定的限额内安全花钱”的能力。这意味着 agentic commerce（智能体商务）的买方基建终于有了第一块正式拼图。本文基于官方博客、新闻稿与多家第三方报道，梳理这条产品线的来龙去脉：它解决什么痛点、架构长什么样、底层 x402 协议如何让 HTTP 402 复活、当前能做什么、还缺什么。     1. 缘起：AI 智能体的”付款困境”先看一个真实场景。你的 AI 智能体想试用一个新 API（比如某个模型服务、某个数据源），它需要做什么？  打开一个为人类设计的登录页面； 等一个人类过来添加支付方式； 生成 API key； 最后才搞清楚怎么调用这个 API。  这个流程对智能体来说几乎走不通，原因有两个：  没有稳定身份：智能体没有一个持久的标识符去注册服务，一个人类可以瞬间开出几十个智能体，商户根本不知道在和谁打交道； 没有原生支付手段：智能体没法填信用卡，也没法...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">80</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">208</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">29</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E5%8D%9A%E5%AE%A2%E7%AA%81%E7%84%B6%E5%85%A8%E6%8C%82%E4%BA%86"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 博客突然全挂了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%8E%92%E9%9A%9C%E9%A1%BA%E5%BA%8F"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — 正确的排障顺序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%85%88%E5%88%86%E6%B8%85%E2%80%9D%E8%B0%81%E6%8C%82%E4%BA%86%E2%80%9D%EF%BC%8C%E5%86%8D%E8%B0%88%E2%80%9D%E4%B8%BA%E4%BB%80%E4%B9%88%E2%80%9D"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 先分清”谁挂了”，再谈”为什么”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E6%88%91%E8%B8%A9%E7%9A%84%E7%AC%AC%E4%B8%80%E4%B8%AA%E5%9D%91%EF%BC%9A%E6%8A%8A%E2%80%9D%E7%8E%B0%E8%B1%A1%E2%80%9D%E5%BD%93%E2%80%9D%E5%8E%9F%E5%9B%A0%E2%80%9D"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 我踩的第一个坑：把”现象”当”原因”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%AC%AC%E4%BA%8C%E4%B8%AA%E5%9D%91%EF%BC%9ACNAME-%E8%A6%81%E6%94%BE%E5%9C%A8-Hexo-%E6%BA%90%E7%A0%81%E7%9A%84-blog-source-%E9%87%8C%EF%BC%8C%E4%B8%8D%E6%98%AF-blog"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 第二个坑：CNAME 要放在 Hexo 源码的 blog&#x2F;source&#x2F; 里，不是 blog&#x2F;</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E4%B8%89%E4%B8%AA%E5%9D%91%E4%B8%B2%E8%B5%B7%E6%9D%A5%E7%9C%8B"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 三个坑串起来看</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E5%8F%8D%E4%BE%8B%E4%B8%8E%E8%BE%B9%E7%95%8C"><span class="toc-number">3.</span> <span class="toc-text">3. 踩坑记录 — 反例与边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E2%80%9D%E5%88%A0-CNAME-%E9%87%8D%E7%AD%BE%E2%80%9D%E6%96%B9%E6%A1%88%E6%98%AF%E5%AF%B9%E7%9A%84%EF%BC%9F"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 什么时候”删 CNAME 重签”方案是对的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-GitHub-%E6%96%87%E6%A1%A3%E9%87%8C%E5%85%B6%E5%AE%9E%E6%9C%89%E6%98%8E%E7%A1%AE%E8%AF%B4%E6%B3%95%EF%BC%8C%E4%BD%86%E6%88%91%E5%BF%BD%E7%95%A5%E4%BA%86"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 GitHub 文档里其实有明确说法，但我忽略了</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%B8%80%E4%B8%AA%E5%8F%8D%E7%9B%B4%E8%A7%89%E7%9A%84%E7%82%B9"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 一个反直觉的点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93-%E2%80%94-%E4%BD%A0%E7%9A%84%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2%E4%BC%9A%E6%8C%82%E5%9C%A8%E5%93%AA"><span class="toc-number">4.</span> <span class="toc-text">4. 总结 — 你的静态博客会挂在哪</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/" title="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录"><img src="/img/cover-gh-pages-cname-debug.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录"/></a><div class="content"><a class="title" href="/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/" title="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录">GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录</a><time datetime="2026-09-12T02:00:00.000Z" title="发表于 2026-09-12 10:00:00">2026-09-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/09/2026-09-09-profile-skills-optimization-botmaker/" title="我把 AI Agent 的技能库从臃肿精简到锋利——Profile 优化实战"><img src="/img/cover-profile-skills-optimization.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我把 AI Agent 的技能库从臃肿精简到锋利——Profile 优化实战"/></a><div class="content"><a class="title" href="/2026/09/09/2026-09-09-profile-skills-optimization-botmaker/" title="我把 AI Agent 的技能库从臃肿精简到锋利——Profile 优化实战">我把 AI Agent 的技能库从臃肿精简到锋利——Profile 优化实战</a><time datetime="2026-09-09T02:00:00.000Z" title="发表于 2026-09-09 10:00:00">2026-09-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/05/2026-09-05-xueqiu-pipeline-v2-data-accuracy/" title="让代码写数据，让 AI 写分析——雪球文章管线 v2 数据准确性加固实战"><img src="/img/cover-xueqiu-pipeline-v2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="让代码写数据，让 AI 写分析——雪球文章管线 v2 数据准确性加固实战"/></a><div class="content"><a class="title" href="/2026/09/05/2026-09-05-xueqiu-pipeline-v2-data-accuracy/" title="让代码写数据，让 AI 写分析——雪球文章管线 v2 数据准确性加固实战">让代码写数据，让 AI 写分析——雪球文章管线 v2 数据准确性加固实战</a><time datetime="2026-09-05T02:00:00.000Z" title="发表于 2026-09-05 10:00:00">2026-09-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/" title="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战"><img src="/img/cover-xueqiu-pipeline.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战"/></a><div class="content"><a class="title" href="/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/" title="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战">我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战</a><time datetime="2026-09-02T02:00:00.000Z" title="发表于 2026-09-02 10:00:00">2026-09-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"><img src="/img/cover-ai-agent-learns-from-failures.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"/></a><div class="content"><a class="title" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战">我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战</a><time datetime="2026-08-29T02:00:00.000Z" title="发表于 2026-08-29 10:00:00">2026-08-29</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
