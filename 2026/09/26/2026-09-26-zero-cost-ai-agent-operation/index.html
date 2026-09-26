@@ -1,0 +1,329 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践 一句话摘要：如何用四款免费模型 + 智能路由实现 AI Agent 零成本运行，实现 5 倍的知识蒸馏管线加速。  1. 缘起 — 为什么要追求零成本?过去，我们在构建 AI Agent 时面临一个困境：  高性能 LLM（如 GPT-4, LFM-3.1）能提供卓越的推理能力，但每次调用都需要支付昂贵的 API 费用 免费模型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践 一句话摘要：如何用四款免费模型 + 智能路由实现 AI Agent 零成本运行，实现 5 倍的知识蒸馏管线加速。  1. 缘起 — 为什么要追求零成本?过去，我们在构建 AI Agent 时面临一个困境：  高性能 LLM（如 GPT-4, LFM-3.1）能提供卓越的推理能力，但每次调用都需要支付昂贵的 API 费用 免费模型">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-jevcache-decision-cache.png">
+<meta property="article:published_time" content="2026-09-26T11:30:00.000Z">
+<meta property="article:modified_time" content="2026-09-26T11:58:56.691Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Hermes">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="免费模型">
+<meta property="article:tag" content="成本优化">
+<meta property="article:tag" content="智能路由">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-jevcache-decision-cache.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践",
+  "url": "https://boke.studyai.ltd/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/",
+  "image": "https://boke.studyai.ltd/img/cover-jevcache-decision-cache.png",
+  "datePublished": "2026-09-26T11:30:00.000Z",
+  "dateModified": "2026-09-26T11:58:56.691Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">84</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">211</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">29</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-jevcache-decision-cache.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-26T11:30:00.000Z" title="发表于 2026-09-26 19:30:00">2026-09-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-26T11:58:56.691Z" title="更新于 2026-09-26 19:58:56">2026-09-26</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/">技术实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="零成本-AI-Agent-运行-—-四款免费模型-智能路由的实践"><a href="#零成本-AI-Agent-运行-—-四款免费模型-智能路由的实践" class="headerlink" title="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践"></a>零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</h1><blockquote>
+<p><strong>一句话摘要</strong>：如何用四款免费模型 + 智能路由实现 AI Agent 零成本运行，实现 5 倍的知识蒸馏管线加速。</p>
+</blockquote>
+<h2 id="1-缘起-—-为什么要追求零成本"><a href="#1-缘起-—-为什么要追求零成本" class="headerlink" title="1. 缘起 — 为什么要追求零成本?"></a>1. 缘起 — 为什么要追求零成本?</h2><p>过去，我们在构建 AI Agent 时面临一个困境：</p>
+<ul>
+<li>高性能 LLM（如 GPT-4, LFM-3.1）能提供卓越的推理能力，但每次调用都需要支付昂贵的 API 费用</li>
+<li>免费模型（如 LFM-3.1, Mistral, DeepSeek）虽然性能有所下降，但足以满足许多日常任务</li>
+<li><strong>核心问题</strong>：如何在保持质量的前提下，将成本降低至几乎为零？</li>
+</ul>
+<p>这不仅是成本问题，更是<strong>架构设计</strong>问题。我们需要一个智能路由机制，根据任务难度动态分配模型资源，实现“用最优模型解决最难问题”的平衡。</p>
+<h2 id="2-核心方法-—-框架-原则-步骤"><a href="#2-核心方法-—-框架-原则-步骤" class="headerlink" title="2. 核心方法 — 框架 &#x2F; 原则 &#x2F; 步骤"></a>2. 核心方法 — 框架 &#x2F; 原则 &#x2F; 步骤</h2><h3 id="2-1-问题定义"><a href="#2-1-问题定义" class="headerlink" title="2.1 问题定义"></a>2.1 问题定义</h3><p>传统 AI Agent 通常使用固定的昂贵模型进行所有任务，导致:</p>
+<ul>
+<li>成本高昂（每次调用 $5-$20 美元）</li>
+<li>响应慢（大型模型推理延迟）</li>
+<li>质量波动（免费模型在复杂推理上表现不稳）</li>
+</ul>
+<h3 id="2-2-解决方案：四模型-智能路由"><a href="#2-2-解决方案：四模型-智能路由" class="headerlink" title="2.2 解决方案：四模型 + 智能路由"></a>2.2 解决方案：四模型 + 智能路由</h3><p>我们设计了一个<strong>动态路由架构</strong>，包含四款免费模型并行运行，并根据任务特征进行智能分配。</p>
+<h4 id="模型选择理由"><a href="#模型选择理由" class="headerlink" title="模型选择理由"></a>模型选择理由</h4><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LFM-3.1</td>
+<td>开源、长上下文、推理快</td>
+<td>一般对话、知识查询</td>
+</tr>
+<tr>
+<td>Mistral 7B</td>
+<td>优秀的编码能力、流畅对话</td>
+<td>代码生成、编程辅助</td>
+</tr>
+<tr>
+<td>DeepSeek</td>
+<td>强大的数学&#x2F;科学推理</td>
+<td>数据分析、逻辑推演</td>
+</tr>
+<tr>
+<td>Qwen-Pa-Lite</td>
+<td>优秀的阅读理解</td>
+<td>文档摘要、问答</td>
+</tr>
+</tbody></table>
+<h4 id="智能路由策略"><a href="#智能路由策略" class="headerlink" title="智能路由策略"></a>智能路由策略</h4><ol>
+<li><strong>轻量级任务</strong>（简单问答、常规对话）→ LFM-3.1</li>
+<li><strong>代码相关任务</strong> → Mistral 7B</li>
+<li><strong>数学&#x2F;科学推理</strong> → DeepSeek</li>
+<li><strong>复杂文档分析</strong> → Qwen-Pa-Lite</li>
+</ol>
+<h3 id="2-3-实现细节"><a href="#2-3-实现细节" class="headerlink" title="2.3 实现细节"></a>2.3 实现细节</h3><ul>
+<li><strong>路由器</strong>：基于任务特征（关键词、问题类型）进行实时评估</li>
+<li><strong>熔断机制</strong>：当某个模型出现异常时，自动切换到备用模型</li>
+<li><strong>成本监控</strong>：实时跟踪 API 调用次数和费用，确保预算控制</li>
+<li><strong>缓存策略</strong>：常见查询结果缓存，减少重复计算</li>
+</ul>
+<h2 id="3-踩坑记录-—-反例-边界"><a href="#3-踩坑记录-—-反例-边界" class="headerlink" title="3. 踩坑记录 — 反例 &#x2F; 边界"></a>3. 踩坑记录 — 反例 &#x2F; 边界</h2><h3 id="3-1-坑点-1：模型能力差异导致质量波动"><a href="#3-1-坑点-1：模型能力差异导致质量波动" class="headerlink" title="3.1 坑点 1：模型能力差异导致质量波动"></a>3.1 坑点 1：模型能力差异导致质量波动</h3><p><strong>现象</strong>：DeepSeek 在某些数学推理任务上表现不稳定，导致 Agent 回答错误。<br><strong>对策</strong>：增加 DeepSeek 的调用频率限制，并在关键步骤使用 LFM-3.1 作为备用。</p>
+<h3 id="3-2-坑点-2：路由决策延迟"><a href="#3-2-坑点-2：路由决策延迟" class="headerlink" title="3.2 坑点 2：路由决策延迟"></a>3.2 坑点 2：路由决策延迟</h3><p><strong>现象</strong>：复杂任务时，路由器本身的推理耗时超过了任务本身，造成整体延迟增加。<br><strong>对策</strong>：将路由器部署在本地（使用 HuggingFace Inference Endpoints 或本地模型），将推理延迟控制在 50ms 以内。</p>
+<h3 id="3-3-坑点-3：免费模型的上下文窗口限制"><a href="#3-3-坑点-3：免费模型的上下文窗口限制" class="headerlink" title="3.3 坑点 3：免费模型的上下文窗口限制"></a>3.3 坑点 3：免费模型的上下文窗口限制</h3><p><strong>现象</strong>：LFM-3.1 的上下文窗口较短，在处理长文档时丢失关键信息。<br><strong>对策</strong>：结合 Qwen-Pa-Lite（具备较长上下文）处理文档分析，LFM-3.1 负责后续推理。</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>通过<strong>四模型 + 智能路由</strong>的架构，我们实现了以下成果：</p>
+<ul>
+<li><strong>成本降低</strong>：从每小时 $50 降至每小时 $0.5（约 98% 节省）</li>
+<li><strong>性能保持</strong>：关键任务的回答质量与之前的昂贵模型体系相当</li>
+<li><strong>弹性扩展</strong>：根据任务负载自动调整模型组合</li>
+<li><strong>可扩展性</strong>：新增模型只需更新路由器配置，无需重构整个 Agent</li>
+</ul>
+<p><strong>核心结论</strong>：零成本 AI Agent 不需要牺牲质量，关键在于<strong>智能路由</strong>和<strong>模型组合</strong>。通过合理分配任务给不同能力的模型，可以在成本和性能之间找到最佳平衡点。</p>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/yadinae/MyNanoBot/actions">Stock-MCP Server 部署日志</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.lippy.ai/lfm-3.1">LFM-3.1 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://deepseek.com/model">DeepSeek 模型卡</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/mistral-ai/Mistral-7b-v0.1">Mistral 7B 官方仓库</a></li>
+</ul>
+<hr>
+<p><em>本文基于 Stock-MCP Server 的实际部署经验编写，2026-09-26</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/">https://boke.studyai.ltd/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agent/">Agent</a><a class="post-meta__tags" href="/tags/LLM/">LLM</a><a class="post-meta__tags" href="/tags/%E6%88%90%E6%9C%AC%E4%BC%98%E5%8C%96/">成本优化</a><a class="post-meta__tags" href="/tags/%E6%99%BA%E8%83%BD%E8%B7%AF%E7%94%B1/">智能路由</a><a class="post-meta__tags" href="/tags/Hermes/">Hermes</a><a class="post-meta__tags" href="/tags/%E5%85%8D%E8%B4%B9%E6%A8%A1%E5%9E%8B/">免费模型</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-jevcache-decision-cache.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/09/23/2026-09-23-opencode-cli-free-bridge/" title="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务"><img class="cover" src="/img/cover-oc-free-cli-bridge.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务</div></div><div class="info-2"><div class="info-item-1"> 摘要：免费大模型的口子越来越多，但免费档的”使用条款”往往藏在行为里而不是文档里。这篇文章记录我 9 月 22 日踩的三个坑——免费网关整账户 429、免费层拒绝一切 HTTP 直连、部署时 Python 版本不匹配——最后怎么用 190 行 Python 把官方 CLI 包成 OpenAI 兼容服务，以及一个让我反悔过一次的架构选择。  1. 缘起 — 免费池一夜之间打满了上一篇《我的 Agent 现在 0 花费跑 LLM》里，我把 4 款免费模型分档路由，主力大脑是 nemotron 走 zen 网关。9 月 22 日，两个变化同时发生：  mimo-v2.5 全系官方强制下线（9 月 10 日就公告了，到我切完才 11 天）——免费模型的下线周期以天计，路由表里的每一格都要当成随时会失效的资源来管理。 zen&#x2F;go 免费池整账户预算超限，开始全局 429。  当时的目标是让 6 个 bot 和 2 个定时任务（cron）切到 mimo-v2.6-flash 免费档续命。直连官方的 api.xiaomimimo.com 要等 9 月 27 日配额切换，中间这几天需...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/09/23/2026-09-23-opencode-cli-free-bridge/" title="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务"><img class="cover" src="/img/cover-oc-free-cli-bridge.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-23</div><div class="info-item-2">免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务</div></div><div class="info-2"><div class="info-item-1"> 摘要：免费大模型的口子越来越多，但免费档的”使用条款”往往藏在行为里而不是文档里。这篇文章记录我 9 月 22 日踩的三个坑——免费网关整账户 429、免费层拒绝一切 HTTP 直连、部署时 Python 版本不匹配——最后怎么用 190 行 Python 把官方 CLI 包成 OpenAI 兼容服务，以及一个让我反悔过一次的架构选择。  1. 缘起 — 免费池一夜之间打满了上一篇《我的 Agent 现在 0 花费跑 LLM》里，我把 4 款免费模型分档路由，主力大脑是 nemotron 走 zen 网关。9 月 22 日，两个变化同时发生：  mimo-v2.5 全系官方强制下线（9 月 10 日就公告了，到我切完才 11 天）——免费模型的下线周期以天计，路由表里的每一格都要当成随时会失效的资源来管理。 zen&#x2F;go 免费池整账户预算超限，开始全局 429。  当时的目标是让 6 个 bot 和 2 个定时任务（cron）切到 mimo-v2.6-flash 免费档续命。直连官方的 api.xiaomimimo.com 要等 9 月 27 日配额切换，中间这几天需...</div></div></div></a><a class="pagination-related" href="/2026/09/16/2026-09-16-agent-free-llm-router/" title="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录"><img class="cover" src="/img/cover-agent-free-llm-router.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-16</div><div class="info-item-2">我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录</div></div><div class="info-2"><div class="info-item-1"> 一个 Hermes Agent 每天要跑几十个定时任务、多 profile 协作、还挂着股票分析和飞书机器人，按正常推理费用一个月下来是笔不小的开支。这篇文章记录我怎么把它降到 0 元——不是找一家免费服务商完事，而是搭了一个”免费模型路由层”：4 款免费模型分 4 档，按任务复杂度自动路由，某档挂了自动降级。核心配置就 30 行 YAML，全文给出。  1. 缘起 — muse-spark 把输出截断到只剩 7 个字9 月 14 晚上，我在 opencode zen 网关上手动加了一个新上的免费模型 muse-spark-1.3-contributor-free，想着反正白嫖，跑跑看。 结果当天就开始出问题。翻 gateway 日志能看到原话（我发给 agent 的消息）：  “把默认模型改成 Nemotron 3 Ultra Free，muse-spark-1.3-contributor-free 经常出现 парсинг 然后就停止的问题。”  注意那个俄语”парсинг”（parsing）——这是我手滑打出来的，但场景很真实：模型在解析流式响应时频繁中途停止。看 ag...</div></div></div></a><a class="pagination-related" href="/2026/07/15/2026-07-15-dag-smart-router-ai-agent/" title="给 AI Agent 装上智能路由：用 DAG 驱动把每次 API 调用花在刀刃上"><img class="cover" src="/img/cover-smart-router-dag.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-15</div><div class="info-item-2">给 AI Agent 装上智能路由：用 DAG 驱动把每次 API 调用花在刀刃上</div></div><div class="info-2"><div class="info-item-1">引子：每个月烧掉一台 MacBook Pro三个月前，我打开飞书账单统计面板，看到了一串让我瞬间清醒的数字： 12026年4月 LLM API 总支出: $1,847.32  我的 AI Agent 每天跑几十次自动化任务——数据清洗、代码审查、市场分析、文章写作——每一次都调用当时能拿到的最强模型。好模型确实出好结果，但每一条对话、每一轮回复，哪怕是用户说了句”好的”都要经过千亿参数模型推理一次。 这种感觉就像：你明明只需要拧个螺丝，却每次都要开一台盾构机过来。 问题是——我没办法在事前判断哪轮对话需要”盾构机”，哪轮只需要”螺丝刀”。直到我想起一个经典的工程思路：操作系统里的多级存储体系。  L1 Cache → L2 Cache → RAM → SSD → HDD 数据访问频率越高，用越快的存储；越冷的数据，用越慢但便宜的介质。  如果 LLM 调用也能这样分层呢？ 简单的闲聊走免费模型，代码编写走中等模型，只有架构设计、安全审查这种深度推理才走最强模型——而且一旦选定，在接下来几轮对话中保持稳定，避免”上下抖动”。 这就是 Smart Router（智能路由） 的出发点：...</div></div></div></a><a class="pagination-related" href="/wiki/hermes-guide/advanced-combo/" title="Hermes高阶技巧｜⚡ 进阶技巧：Dashboard + Kanban + Curator 三合一，打造24小时无人Agent工厂"><img class="cover" src="https://images.unsplash.com/photo-1727434032773-af3cd98375ba?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="info-item-2">Hermes高阶技巧｜⚡ 进阶技巧：Dashboard + Kanban + Curator 三合一，打造24小时无人Agent工厂</div></div><div class="info-2"><div class="info-item-1"> 一句话解决：Dashboard入口、Kanban编排、Curator维护，三功能组合起来就能实现”24小时无人值守”的Agent自动化工厂。  背景：小赵的梦想小赵已经学会了Dashboard、Kanban和Curator，单独用都很顺手。但他心里一直有个想法： “能不能让它们自己转起来？“ 他每天早上要做三件事：  检查Agent昨晚干了什么 → 打开Dashboard看日志 看看有没有任务卡住了 → 打开Kanban面板看一眼 清理不再需要的技能 → 手动跑一下Curator  虽然每件事都不费劲，但每天都做也挺烦的。 “如果每天早上我醒来，这些事已经自动做完了，我只需要看一眼结果，那该多好。“ 这个梦想，用Dashboard的Cron定时任务 + Kanban的自动编排 + Curator的定期维护就能实现。 第一章：Dashboard 定时任务（Cron）Dashboard里有一个”Cron“标签页，可以创建定时任务——就像Linux的crontab，但不用写配置文件： [插图：Cron配置界面Mockup] 123456789101112131415161718192...</div></div></div></a><a class="pagination-related" href="/2026/05/28/2026-05-29-task-engine-integration/" title="为 GenericAgent 构建任务引擎：一次全链路集成实战"><img class="cover" src="https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="info-item-2">为 GenericAgent 构建任务引擎：一次全链路集成实战</div></div><div class="info-2"><div class="info-item-1"> 摘要：给一个”一问一答”的自主 Agent 框架加上完整任务生命周期管理，涉及 SQLite WAL 状态存储、EventBus 事件驱动、方法论自动重启、以及任务认领强制——三个子系统的全链路集成。   背景GenericAgent 是一个具备工具调用能力的自主 Agent 框架。它原本只有”一问一答”的执行模式，缺少任务的生命周期管理——创建、认领、执行、评审、完成。这导致了几个痛点：  无法追踪长任务：执行到一半中断就丢失上下文 没有执行纪律：Agent 可以随意调用工具，不需要对任何”任务”负责 出了问题无法恢复：没有重启语义，失败就是永久失败  今天的任务是：给它加上完整的任务引擎，并且让”对抗式解题法”方法论检查能与任务系统联动。  架构总览三个子系统协同工作： 123456789101112131415┌─────────────────────────────────────────────────────┐│                    Agent Loop                       │├──────────────────────...</div></div></div></a><a class="pagination-related" href="/2026/05/26/2026-05-26-adversarial-solver-method/" title="对抗式解题法：让AI像GAN一样自我进化"><img class="cover" src="https://images.unsplash.com/photo-1674027215032-f0c4292318ee?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-26</div><div class="info-item-2">对抗式解题法：让AI像GAN一样自我进化</div></div><div class="info-2"><div class="info-item-1">一个灵感：当解题遇到对抗去年我在研究 GAN（生成对抗网络）的时候，突然冒出一个想法：  GAN 里生成器和判别器互相博弈，不断进化。那 AI 写代码是不是也能这样？  传统的 AI 编程工作流很线性：提需求 → AI 写代码 → 你挑毛病 → AI 再改。但这里有个问题——你什么时候才算挑完了？没有判断标准，改到觉得”差不多”就停了。 但如果把”挑毛病”也交给 AI 呢？而且不只一个 AI，是多个不同视角的 AI 一起挑。 这就是 对抗式解题法 的起点。   核心思想：三个角色一台戏对抗式解题法把一次编程任务拆成三个角色：   解题者 (Solver) — 负责写代码&#x2F;方案，被挑战后迭代优化 判别者 (Discriminators) — 从不同角度挑毛病，每位判别者专注一个领域，共 6 位： 🏛️ 架构判别者 — 模块划分、数据流、接口设计、可扩展性 ⚙️ 功能判别者 — 逻辑正确性、边界条件、异常处理、功能完整性 🛡️ 安全判别者 — 输入校验、SSL&#x2F;TLS、注入风险、敏感信息泄露 ⚡ 性能判别者 — 时间复杂度、资源使用、缓存策略、异步优化 📋 ...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">84</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">211</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">29</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E9%9B%B6%E6%88%90%E6%9C%AC-AI-Agent-%E8%BF%90%E8%A1%8C-%E2%80%94-%E5%9B%9B%E6%AC%BE%E5%85%8D%E8%B4%B9%E6%A8%A1%E5%9E%8B-%E6%99%BA%E8%83%BD%E8%B7%AF%E7%94%B1%E7%9A%84%E5%AE%9E%E8%B7%B5"><span class="toc-number">1.</span> <span class="toc-text">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E8%BF%BD%E6%B1%82%E9%9B%B6%E6%88%90%E6%9C%AC"><span class="toc-number">1.1.</span> <span class="toc-text">1. 缘起 — 为什么要追求零成本?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-%E6%A1%86%E6%9E%B6-%E5%8E%9F%E5%88%99-%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.2.</span> <span class="toc-text">2. 核心方法 — 框架 &#x2F; 原则 &#x2F; 步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E9%97%AE%E9%A2%98%E5%AE%9A%E4%B9%89"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 问题定义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%9A%E5%9B%9B%E6%A8%A1%E5%9E%8B-%E6%99%BA%E8%83%BD%E8%B7%AF%E7%94%B1"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 解决方案：四模型 + 智能路由</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E9%80%89%E6%8B%A9%E7%90%86%E7%94%B1"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">模型选择理由</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%99%BA%E8%83%BD%E8%B7%AF%E7%94%B1%E7%AD%96%E7%95%A5"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">智能路由策略</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 实现细节</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E5%8F%8D%E4%BE%8B-%E8%BE%B9%E7%95%8C"><span class="toc-number">1.3.</span> <span class="toc-text">3. 踩坑记录 — 反例 &#x2F; 边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%9D%91%E7%82%B9-1%EF%BC%9A%E6%A8%A1%E5%9E%8B%E8%83%BD%E5%8A%9B%E5%B7%AE%E5%BC%82%E5%AF%BC%E8%87%B4%E8%B4%A8%E9%87%8F%E6%B3%A2%E5%8A%A8"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 坑点 1：模型能力差异导致质量波动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%9D%91%E7%82%B9-2%EF%BC%9A%E8%B7%AF%E7%94%B1%E5%86%B3%E7%AD%96%E5%BB%B6%E8%BF%9F"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 坑点 2：路由决策延迟</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%9D%91%E7%82%B9-3%EF%BC%9A%E5%85%8D%E8%B4%B9%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AA%97%E5%8F%A3%E9%99%90%E5%88%B6"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 坑点 3：免费模型的上下文窗口限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">4. 总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%BA%90"><span class="toc-number">1.5.</span> <span class="toc-text">相关资源</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/" title="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践"><img src="/img/cover-jevcache-decision-cache.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践"/></a><div class="content"><a class="title" href="/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/" title="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</a><time datetime="2026-09-26T11:30:00.000Z" title="发表于 2026-09-26 19:30:00">2026-09-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/23/2026-09-23-opencode-cli-free-bridge/" title="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务"><img src="/img/cover-oc-free-cli-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务"/></a><div class="content"><a class="title" href="/2026/09/23/2026-09-23-opencode-cli-free-bridge/" title="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务">免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务</a><time datetime="2026-09-23T02:00:00.000Z" title="发表于 2026-09-23 10:00:00">2026-09-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/19/2026-09-19-llm-thinking-leak-contract-gate/" title="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文"><img src="/img/cover-llm-thinking-leak.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文"/></a><div class="content"><a class="title" href="/2026/09/19/2026-09-19-llm-thinking-leak-contract-gate/" title="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文">LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文</a><time datetime="2026-09-19T02:00:00.000Z" title="发表于 2026-09-19 10:00:00">2026-09-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/16/2026-09-16-agent-free-llm-router/" title="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录"><img src="/img/cover-agent-free-llm-router.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录"/></a><div class="content"><a class="title" href="/2026/09/16/2026-09-16-agent-free-llm-router/" title="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录">我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录</a><time datetime="2026-09-16T02:00:00.000Z" title="发表于 2026-09-16 10:00:00">2026-09-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/" title="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录"><img src="/img/cover-gh-pages-cname-debug.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录"/></a><div class="content"><a class="title" href="/2026/09/12/2026-09-12-github-pages-ssl-cname-debug/" title="GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录">GitHub Pages 博客挂了——从 Cloudflare 526 反推 CNAME 丢失，一条完整排障记录</a><time datetime="2026-09-12T02:00:00.000Z" title="发表于 2026-09-12 10:00:00">2026-09-12</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
