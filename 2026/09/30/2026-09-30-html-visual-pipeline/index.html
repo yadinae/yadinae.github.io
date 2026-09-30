@@ -1,0 +1,383 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染 一句话摘要：文字不会乱码、产物可以 git diff、坏一块只重做一块 —— 用「HTML 中间表示 + Playwright 截图 + ffmpeg 拼接」这一套，同时供出了博客封面、文章插图和课程视频，边际成本为零。  1. 缘起 — 三个都被”文字”卡住的场景过去半年，我在三个完全不同的场景里撞上了同一堵墙： 场景一：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/09/30/2026-09-30-html-visual-pipeline/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染 一句话摘要：文字不会乱码、产物可以 git diff、坏一块只重做一块 —— 用「HTML 中间表示 + Playwright 截图 + ffmpeg 拼接」这一套，同时供出了博客封面、文章插图和课程视频，边际成本为零。  1. 缘起 — 三个都被”文字”卡住的场景过去半年，我在三个完全不同的场景里撞上了同一堵墙： 场景一：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-html-visual-pipeline.png">
+<meta property="article:published_time" content="2026-09-30T02:30:00.000Z">
+<meta property="article:modified_time" content="2026-09-30T02:08:38.376Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="HTML">
+<meta property="article:tag" content="Playwright">
+<meta property="article:tag" content="ffmpeg">
+<meta property="article:tag" content="内容生产">
+<meta property="article:tag" content="自动化">
+<meta property="article:tag" content="视频生成">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-html-visual-pipeline.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染",
+  "url": "https://boke.studyai.ltd/2026/09/30/2026-09-30-html-visual-pipeline/",
+  "image": "https://boke.studyai.ltd/img/cover-html-visual-pipeline.png",
+  "datePublished": "2026-09-30T02:30:00.000Z",
+  "dateModified": "2026-09-30T02:08:38.376Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/09/30/2026-09-30-html-visual-pipeline/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">85</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">215</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">29</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-html-visual-pipeline.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-09-30T02:30:00.000Z" title="发表于 2026-09-30 10:30:00">2026-09-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-09-30T02:08:38.376Z" title="更新于 2026-09-30 10:08:38">2026-09-30</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E5%AE%9E%E8%B7%B5/">技术实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="AI-画不出一句对的话-—-我把封面、插图、视频都改成了-HTML-渲染"><a href="#AI-画不出一句对的话-—-我把封面、插图、视频都改成了-HTML-渲染" class="headerlink" title="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染"></a>AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染</h1><blockquote>
+<p><strong>一句话摘要</strong>：文字不会乱码、产物可以 <code>git diff</code>、坏一块只重做一块 —— 用「HTML 中间表示 + Playwright 截图 + ffmpeg 拼接」这一套，同时供出了博客封面、文章插图和课程视频，边际成本为零。</p>
+</blockquote>
+<h2 id="1-缘起-—-三个都被”文字”卡住的场景"><a href="#1-缘起-—-三个都被”文字”卡住的场景" class="headerlink" title="1. 缘起 — 三个都被”文字”卡住的场景"></a>1. 缘起 — 三个都被”文字”卡住的场景</h2><p>过去半年，我在三个完全不同的场景里撞上了同一堵墙：</p>
+<p><strong>场景一：带标题的封面图。</strong> 用文生图模型做产品封面，中文标题永远是重灾区 —— 多笔画的字糊成一团，凭空多出或少掉笔画，有时整行字变成外星文。最后定下的规矩很朴素：<strong>AI 生图只做纯视觉背景（无文字），所有带文字的图走排版</strong>。</p>
+<p><strong>场景二：博客封面风格杂糅。</strong> 首页有的文章配 Unsplash 外链图、有的配 AI 生成图、有的配程序化绘图，色调彼此打架。我需要的不是”更会画的模型”，而是一个<strong>统一规格（1200×675 OG 标准）+ 统一版式库</strong>的东西。</p>
+<p><strong>场景三：教案变成视频。</strong> 灵犀学堂的教案要喂给 Lumen 管线生成 YouTube 课程视频，而课件画面几乎全是文字卡片、流程图、要点列表 ——「第四章第三个过程」这种精确文字，AI 视频生成器同样无能为力，还按秒计费。</p>
+<p>三个场景的共同点被我后来总结成一句话：<strong>我的视觉内容本质是「文字 + 版式」，不是摄影。</strong></p>
+<p>而浏览器，恰好是这个星球上最强的文字排版引擎。</p>
+<h2 id="2-核心方法-—-HTML-作为视觉中间表示"><a href="#2-核心方法-—-HTML-作为视觉中间表示" class="headerlink" title="2. 核心方法 — HTML 作为视觉中间表示"></a>2. 核心方法 — HTML 作为视觉中间表示</h2><h3 id="2-1-为什么是-HTML，而不是让模型直接出图"><a href="#2-1-为什么是-HTML，而不是让模型直接出图" class="headerlink" title="2.1 为什么是 HTML，而不是让模型直接出图"></a>2.1 为什么是 HTML，而不是让模型直接出图</h3><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>AI 生图</th>
+<th>HTML → 截图</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>文字精准</td>
+<td>❌ 中文高频乱码</td>
+<td>✅ 浏览器排版，零容错</td>
+</tr>
+<tr>
+<td>可复现</td>
+<td>❌ 同 prompt 不同结果</td>
+<td>✅ 同模板同输入 &#x3D; 同像素</td>
+</tr>
+<tr>
+<td>可版本控制</td>
+<td>❌ 图片没法 diff</td>
+<td>✅ 模板就是代码，<code>git diff</code> 一目了然</td>
+</tr>
+<tr>
+<td>局部修改</td>
+<td>❌ 重抽一次全凭运气</td>
+<td>✅ 改一行 CSS 重截一张</td>
+</tr>
+<tr>
+<td>边际成本</td>
+<td>按张&#x2F;按秒计费</td>
+<td>✅ 本地 Playwright + ffmpeg，<strong>0 元</strong></td>
+</tr>
+</tbody></table>
+<p>分工因此变得非常干净：<strong>LLM 负责”写什么”（脚本、文案、数据 JSON），HTML+CSS 负责”长什么样”，Playwright 负责”拍下来”，ffmpeg 负责”拼起来”。</strong> 每一层都能单独重跑，不牵一发动全身。</p>
+<p><img src="/img/illustration-pipeline.png" alt="HTML 中间表示：一套渲染链供出三种产物"></p>
+<p><em>（这张插图本身就是用文中第 2.3 节的管线生成的 —— 数据 JSON 喂给图表模板，一次渲染到位。）</em></p>
+<h3 id="2-2-封面：版式-×-主题矩阵"><a href="#2-2-封面：版式-×-主题矩阵" class="headerlink" title="2.2 封面：版式 × 主题矩阵"></a>2.2 封面：版式 × 主题矩阵</h3><p><code>generate_blog_cover_v2.py</code> 把封面拆成 <strong>8 种版式（H01–H08）× 6 套主题</strong> &#x3D; 48 种组合，输出 1200×675（OG 标准），底层是一个 Playwright 渲染器 <code>render_social_card.mjs</code>。这条管线已经产出 <strong>76 张封面</strong>（含本文这张）入库，全站封面风格由此锁死。</p>
+<p>截图工具 <code>html2img.py</code> 里有一段值得抄走的防御性设计 —— 模板加载的 fallback 链：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">render_template</span>(<span class="params">template_name: <span class="built_in">str</span>, variables: <span class="built_in">dict</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="comment"># fallback 链：目标模板 → default → cover（绝不静默崩溃）</span></span><br><span class="line">    fallback_chain = [template_name, <span class="string">&quot;default&quot;</span>, <span class="string">&quot;cover&quot;</span>]</span><br><span class="line">    used = <span class="literal">None</span></span><br><span class="line">    <span class="keyword">for</span> name <span class="keyword">in</span> fallback_chain:</span><br><span class="line">        tpl_path = TEMPLATES_DIR / <span class="string">f&quot;<span class="subst">&#123;name&#125;</span>.html&quot;</span></span><br><span class="line">        <span class="keyword">if</span> tpl_path.exists():</span><br><span class="line">            used = name</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">if</span> used <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;错误: 无可用模板（尝试过 <span class="subst">&#123;<span class="string">&#x27;, &#x27;</span>.join(fallback_chain)&#125;</span>）&quot;</span>, file=sys.stderr)</span><br><span class="line">        sys.exit(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>批量生产时，”模板没找到”如果静默降级成空白图，你会在三天后才发现一整批封面是废的 —— <strong>宁可退出，不可静默</strong>。</p>
+<h3 id="2-3-插图：数据即代码"><a href="#2-3-插图：数据即代码" class="headerlink" title="2.3 插图：数据即代码"></a>2.3 插图：数据即代码</h3><p><code>generate_illustration_v2.py</code> 走同一条渲染链，但输入换成数据 JSON，内置 6 种图表版式（bar &#x2F; kpi &#x2F; matrix &#x2F; ledger &#x2F; pipeline &#x2F; beforeafter），输出 1200×800。文章里的排行、KPI、前后对比，改一个数字重跑一次即可，不用重新画图。</p>
+<h3 id="2-4-视频：时间线-HTML-→-定点截图-→-xfade"><a href="#2-4-视频：时间线-HTML-→-定点截图-→-xfade" class="headerlink" title="2.4 视频：时间线 HTML → 定点截图 → xfade"></a>2.4 视频：时间线 HTML → 定点截图 → xfade</h3><p>这是三条管线里最有意思的一条。<code>scene-recorder.js</code> 的开头写着当初的核心决策：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Scene Screenshot Video — 每场景一张高质量截图 + ffmpeg crossfade</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * 不做逐帧录制（太慢），改为：</span></span><br><span class="line"><span class="comment"> * 1. 每个场景生成动画 HTML</span></span><br><span class="line"><span class="comment"> * 2. Playwright 等动画完成后截一张静态图</span></span><br><span class="line"><span class="comment"> * 3. ffmpeg 用 crossfade 拼接，每张图持续 N 秒</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<p>机制四步：</p>
+<ol>
+<li><strong><code>buildScenes(script)</code></strong>：把脚本 sections 映射成场景对象（<code>hero</code> &#x2F; <code>cards</code> &#x2F; <code>flow</code> &#x2F; <code>content</code> &#x2F; <code>closing</code>），每个场景带自己的 <code>duration</code>；</li>
+<li><strong><code>buildPageHTML(scenes)</code></strong>：把<strong>所有场景塞进单页 1920×1080 HTML</strong>，内嵌时间线数组 <code>TL</code> 和一段 <code>requestAnimationFrame</code> 循环按秒切换 <code>.on</code> 类，另加 4 层视差背景（深度 0.5&#x2F;0.7&#x2F;1.0&#x2F;1.15）；</li>
+<li><strong>Playwright 定点截图</strong>：打开这一页，按每个场景的 <code>duration</code> 实时等待，到点 <code>page.screenshot()</code> 拿一张 PNG —— <strong>全程只开一次浏览器</strong>；</li>
+<li><strong>ffmpeg <code>xfade</code> 链</strong>：N 张 PNG 两两串接成片。</li>
+</ol>
+<p>转场不是随机的，而是按<strong>下一场的内容类型</strong>挑：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">pickTransition</span>(<span class="params">scenes, idx</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> nextType = scenes[idx + <span class="number">1</span>]?.<span class="property">type</span>;</span><br><span class="line">  <span class="keyword">if</span> (nextType === <span class="string">&#x27;hero&#x27;</span>)    <span class="keyword">return</span> <span class="string">&#x27;fade&#x27;</span>;        <span class="comment">// 标题页，干净淡入</span></span><br><span class="line">  <span class="keyword">if</span> (nextType === <span class="string">&#x27;closing&#x27;</span>) <span class="keyword">return</span> <span class="string">&#x27;fadeblack&#x27;</span>;   <span class="comment">// 结尾，经黑收束</span></span><br><span class="line">  <span class="keyword">if</span> (nextType === <span class="string">&#x27;flow&#x27;</span>)    <span class="keyword">return</span> <span class="string">&#x27;slideright&#x27;</span>;  <span class="comment">// 流程图，运动承接</span></span><br><span class="line">  <span class="keyword">if</span> (nextType === <span class="string">&#x27;cards&#x27;</span>)   <span class="keyword">return</span> <span class="string">&#x27;circleopen&#x27;</span>;  <span class="comment">// 卡片，聚焦展开</span></span><br><span class="line">  <span class="keyword">if</span> (nextType === <span class="string">&#x27;content&#x27;</span>) <span class="keyword">return</span> <span class="string">&#x27;wipeleft&#x27;</span>;    <span class="comment">// 正文，像翻页</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>实测数据</strong>（今天现场跑的 demo：5 个场景，目标总时长 21.5s）：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>实测值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>定点截图（含实时等待）</td>
+<td><strong>~30s</strong></td>
+</tr>
+<tr>
+<td>ffmpeg xfade 拼接</td>
+<td><strong>57s ← 真正的瓶颈</strong></td>
+</tr>
+<tr>
+<td>总耗时</td>
+<td><strong>87.2s</strong></td>
+</tr>
+<tr>
+<td>产出</td>
+<td>0.7MB &#x2F; 1920×1080 &#x2F; h264 &#x2F; 24fps &#x2F; yuv420p</td>
+</tr>
+<tr>
+<td>成片实际时长</td>
+<td><strong>17.5s</strong> &#x3D; 21.5 − 4×1s</td>
+</tr>
+</tbody></table>
+<p>两个反直觉的点：</p>
+<ul>
+<li><strong>截图不是瓶颈，<code>xfade</code> 串行滤镜链才是。</strong> 每多一个场景就多一级滤镜、多一路 <code>-loop 1</code> 输入，耗时线性增长。场景数上去了，要么接受等，要么降分辨率&#x2F;framerate。</li>
+<li><strong>成片比目标短。</strong> 每段 1s 的转场会吃掉 1s 素材，<code>总时长 = Σduration − (n−1) × fade</code>。做定时长视频（Shorts 卡 60s）时必须把这笔账算进去。</li>
+</ul>
+<h3 id="2-5-局部重生成：HTML-的可寻址性红利"><a href="#2-5-局部重生成：HTML-的可寻址性红利" class="headerlink" title="2.5 局部重生成：HTML 的可寻址性红利"></a>2.5 局部重生成：HTML 的可寻址性红利</h3><p>Lumen 侧还有一层 <code>scene-repair-service</code>，暴露 <code>POST /api/content/:productionId/scenes/:sceneId/regenerate</code> —— <strong>只重生成某一个坏场景并重建、复审，而不是整条管线重跑</strong>（另有 <code>PATCH</code> 接口改场景内容本身）。因为场景是可寻址的 HTML 片段，改哪儿截哪儿。这条对”AI 产出 10 个场景坏 1 个”的批量内容生产，是成本数量级的差别。</p>
+<h2 id="3-踩坑记录"><a href="#3-踩坑记录" class="headerlink" title="3. 踩坑记录"></a>3. 踩坑记录</h2><h3 id="3-1-xfade-不会告诉你它输出了-yuv444p（静默坑）"><a href="#3-1-xfade-不会告诉你它输出了-yuv444p（静默坑）" class="headerlink" title="3.1 xfade 不会告诉你它输出了 yuv444p（静默坑）"></a>3.1 <code>xfade</code> 不会告诉你它输出了 yuv444p（静默坑）</h3><p>今天为了写这篇文章现场复现了一遍：拿 rgb24 的 PNG 直接喂 <code>xfade</code> —</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ffmpeg -y -loop 1 -t 3 -framerate 24 -i a.png -loop 1 -t 3 -framerate 24 -i b.png \</span><br><span class="line">  -filter_complex <span class="string">&quot;[0:v][1:v]xfade=transition=fade:duration=1:offset=2[v]&quot;</span> \</span><br><span class="line">  -map <span class="string">&quot;[v]&quot;</span> -c:v libx264 out.mp4</span><br><span class="line"><span class="comment"># rc=0，命令&quot;成功&quot;，但 ffprobe 显示 pix_fmt=yuv444p</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>不报错、退出码 0、文件能生成</strong> —— 但产物是 yuv444p，手机播放器和不少平台转码会出问题。正确姿势是每一路先转一次、收尾再转一次：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-filter_complex <span class="string">&quot;[0:v]format=yuv420p[ti0];[1:v]format=yuv420p[ti1];[ti0][ti1]xfade=transition=fade:duration=1:offset=2[v];[v]format=yuv420p[out]&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>教训：<strong>“命令成功退出” ≠ “产物可用”。</strong> 关键属性（像素格式、时长、分辨率）要用 <code>ffprobe</code> 断言，不能只看退出码 —— 这和”LLM 返回了 200 不等于内容合规”是同一个道理。</p>
+<h3 id="3-2-字体文件坏了，中文全是方框"><a href="#3-2-字体文件坏了，中文全是方框" class="headerlink" title="3.2 字体文件坏了，中文全是方框"></a>3.2 字体文件坏了，中文全是方框</h3><p>系统里的 <code>NotoSansSC-Bold.ttf</code> &#x2F; <code>NotoSansSC-Regular.ttf</code> 已损坏，Pillow 报 <code>unknown file format</code>，中文渲染成一排方框。解法是改用可变字体 <code>NotoSansSC-VF.ttf</code>。</p>
+<p>HTML 路线有同类风险，只是更隐蔽：<strong>浏览器找不到字体会静默 fallback 到另一个字体</strong>，排版宽度全变、截出来的图和你在编辑器里看的不一样。渲染前务必 <code>document.fonts.ready</code> + 确认目标字体真的加载成功。</p>
+<h3 id="3-3-逐帧录制-vs-定点截图-—-我们自己的演化路线"><a href="#3-3-逐帧录制-vs-定点截图-—-我们自己的演化路线" class="headerlink" title="3.3 逐帧录制 vs 定点截图 — 我们自己的演化路线"></a>3.3 逐帧录制 vs 定点截图 — 我们自己的演化路线</h3><p>我们的工具箱里两条路线都活着，对比很直观：</p>
+<ul>
+<li><strong>旧方案 <code>html2video.py</code></strong>：Playwright 15fps 逐帧截图 + ffmpeg 编码。要等 CSS 动画真实播完一整遍，慢，且长视频成本高；</li>
+<li><strong>新方案 <code>scene-recorder.js</code></strong>：每个场景只在动画到位后截 <strong>1 张</strong>，切换交给 ffmpeg 转场。</li>
+</ul>
+<p>什么时候仍然必须逐帧：场景内部有<strong>必须逐帧保留的动画</strong>（曲线逐点绘制、粒子效果）。而我们的课件型内容几乎都是”静态构图 + 场景切换”，定点截图完全够用 —— 这是一个”先看内容形态，再选渲染策略”的判断，不是无脑选快的。</p>
+<h3 id="3-4-这个方法什么时候不适用"><a href="#3-4-这个方法什么时候不适用" class="headerlink" title="3.4 这个方法什么时候不适用"></a>3.4 这个方法什么时候不适用</h3><ul>
+<li><strong>照片、人物、复杂视觉意境</strong> → 还是交给文生图，且遵守”纯视觉无文字”；</li>
+<li><strong>已有图片的更新</strong> → Cloudflare CDN 可能缓存旧版长达 4 小时，别原地覆盖，加 <code>-v2</code> 后缀重命名推送；</li>
+<li><strong>自由布局的示意图</strong> → HTML flex&#x2F;grid 表达力有限，复杂拓扑还是得 SVG &#x2F; 绘图库；</li>
+<li><strong>单张一次性图片</strong> → 直接让模型画更快，模板化只在<strong>重复生产</strong>时回本。</li>
+</ul>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p><strong>Takeaway：内容型视觉 &#x3D; 文字 + 版式，那就别让模型去画文字，让它去写 HTML。</strong></p>
+<p>落地顺序建议：</p>
+<ol>
+<li>先挑最痛的一条视觉管线，做 <strong>3 个版式</strong>就够（不必像我这样堆到 8×6）；</li>
+<li>模板加载必须有 fallback 且<strong>失败即退出</strong>，不做静默降级；</li>
+<li>渲染层固定（同一浏览器、同一字体、同一 viewport），变化只发生在数据层；</li>
+<li>产物用 <code>ffprobe</code> &#x2F; 尺寸断言验收，不看退出码；</li>
+<li>批量场景按<strong>可寻址片段</strong>组织，坏哪儿重生成哪儿。</li>
+</ol>
+<p>相关资源：<a target="_blank" rel="noopener" href="https://playwright.dev/">Playwright</a> · <a target="_blank" rel="noopener" href="https://ffmpeg.org/">ffmpeg</a> · <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/09/30/2026-09-30-html-visual-pipeline/">https://boke.studyai.ltd/2026/09/30/2026-09-30-html-visual-pipeline/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/">自动化</a><a class="post-meta__tags" href="/tags/Playwright/">Playwright</a><a class="post-meta__tags" href="/tags/HTML/">HTML</a><a class="post-meta__tags" href="/tags/%E8%A7%86%E9%A2%91%E7%94%9F%E6%88%90/">视频生成</a><a class="post-meta__tags" href="/tags/%E5%86%85%E5%AE%B9%E7%94%9F%E4%BA%A7/">内容生产</a><a class="post-meta__tags" href="/tags/ffmpeg/">ffmpeg</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-html-visual-pipeline.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/" title="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践"><img class="cover" src="/img/cover-jevcache-decision-cache.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</div></div><div class="info-2"><div class="info-item-1">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践 一句话摘要：如何用四款免费模型 + 智能路由实现 AI Agent 零成本运行，实现 5 倍的知识蒸馏管线加速。  1. 缘起 — 为什么要追求零成本?过去，我们在构建 AI Agent 时面临一个困境：  高性能 LLM（如 GPT-4, LFM-3.1）能提供卓越的推理能力，但每次调用都需要支付昂贵的 API 费用 免费模型（如 LFM-3.1, Mistral, DeepSeek）虽然性能有所下降，但足以满足许多日常任务 核心问题：如何在保持质量的前提下，将成本降低至几乎为零？  这不仅是成本问题，更是架构设计问题。我们需要一个智能路由机制，根据任务难度动态分配模型资源，实现“用最优模型解决最难问题”的平衡。 2. 核心方法 — 框架 &#x2F; 原则 &#x2F; 步骤2.1 问题定义传统 AI Agent 通常使用固定的昂贵模型进行所有任务，导致:  成本高昂（每次调用 $5-$20 美元） 响应慢（大型模型推理延迟） 质量波动（免费模型在复杂推理上表现不稳）  2.2 解决方案：四模型 + 智能路...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/08/05/2026-08-05-xueqiu-auto-publish-agent/" title="让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录"><img class="cover" src="/img/cover-xueqiu-auto-publish.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-05</div><div class="info-item-2">让 AI Agent 在雪球自动发股评：从阿里云 WAF 攻防到数据零幻觉的完整实录</div></div><div class="info-2"><div class="info-item-1"> 我维护的 stock MCP Server 有上百个工具——实时行情、K线、龙虎榜、北向资金、涨停梯队……但某天我意识到：这些数据只喂给了自己，没有变成”作品”。于是花了 72 小时，给 Agent 接上一条「收盘后自动写市场综述并发到雪球」的管线。本文完整记录：6 大平台选型、阿里云 WAF 攻防（curl_cffi 全指纹被拦 → Playwright 页面内 fetch 穿透）、三个接口逆向坑，以及”LLM 写财经文数字必漂移”的数据零幻觉方案。第一篇文章已真实上线。     1. 缘起：一堆好工具，却没发挥出价值我有一套股票分析系统：一个 stock MCP Server（通过 Cloudflare Workers 网关暴露上百个工具），加上每天 11:00 的盘中简报、16:10 的收盘深度分析。数据链路非常完整——开盘、收盘、资金流向、涨停梯队，全部自动化。 但有一天我看着这些日报，突然问了自己一个问题：  这些分析只发给了我自己。它们能不能变成对外发布的作品？  网络上正好有专门的股票社区——雪球、东方财富、掘金。能不能让 Agent 每天收盘后，用 MCP 拉数...</div></div></div></a><a class="pagination-related" href="/2026/08/29/2026-08-29-ai-agent-learns-from-own-failures/" title="我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战"><img class="cover" src="/img/cover-ai-agent-learns-from-failures.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-29</div><div class="info-item-2">我让 AI Agent 从自己的失败中学习——失败模式自动挖掘 + 规则生成实战</div></div><div class="info-2"><div class="info-item-1"> 59 个失败模式、42 条机器可读规则——全部由 Agent 从自己的会话历史中自动挖掘生成。这篇记录我怎么让 AI Agent 学会「从自己的错误中学习」，把「改了 A 忘了 B」这类集成 bug 变成可自动检测的规则。     1. 缘起：同样的坑，踩了三次事情要从 Cloudflare Workers 项目说起。 我有一个网盘应用（TG Cloud Drive），前端在 Cloudflare Pages，后端是 Workers。每次部署新功能，我都会遇到同一类 bug：  第一次：前端加了 X-Session-Id 请求头，CORS 没配 → 跨域报错 第二次：登录改用 session 后，文件移动功能还在读旧的 localStorage → 移动失败 第三次：新加了 GET 接口没写 Cache-Control → 用户看到旧数据  三次，三种表现，同一个根因：改了 A 但忘了 B。 我意识到这不是偶然——这是所有前后端分离项目的通病。而我的 AI Agent 每天都在帮用户部署代码，它也应该能从这些失败中学习。 于是我想：能不能让 Agent 自动挖掘自己的失败历史，...</div></div></div></a><a class="pagination-related" href="/2026/07/02/2026-07-03-%E4%BD%A0%E5%8F%88%E8%A2%AB%E4%BD%8E%E4%BB%B7%E5%80%BC%E4%BB%BB%E5%8A%A1%E7%BB%91%E6%9E%B6%E4%BA%86-ai%E5%8A%A9%E4%BD%A0%E4%B8%80%E7%9C%BC%E8%AF%86%E7%A0%B4/" title="你又被低价值任务绑架了？AI助你一眼识破"><img class="cover" src="/img/cover-freed-from-busywork.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-03</div><div class="info-item-2">你又被低价值任务绑架了？AI助你一眼识破</div></div><div class="info-2"><div class="info-item-1">你又被低价值任务绑架了？AI助你一眼识破 你是否曾深夜盯着待办清单，划掉十几项“已完成”，却觉得今天毫无成就感？知识工作者平均 60% 的时间花在电子沟通与信息检索上，其中相当比例属于低价值任务——不可否认，我们正陷入“假性勤奋”的陷阱。   识别低价值任务，是个人与团队效能提升的第一步。这不是教你更拼命地“做完”，而是帮你筛选出“该做”的事。彼得·德鲁克说：“效率是正确地做事，效能是做正确的事。”本文将从框架、AI 技术到代码实践，系统说明如何用智能手段找出并剔除低价值任务。  一、重新认识“任务价值”——为什么你总是忙而无获我们习惯用完成数量衡量成就，却忽略了帕累托法则：80% 的核心价值来自 20% 的关键任务。每一天，我们被混杂在紧急而不重要的会议、低效的信息转发、琐碎的格式整理中。RescueTime 统计显示，普通办公人员每天约有 28% 的工作时间花在低价值软件应用上。更致命的是，频繁任务切换（尤其是低价值干扰）会使整体工作效率降低 40%（《深度工作》引用的注意力残留研究）。 什么是“低价值任务”？简单来说：产出远低于投入，且可由规则或简单决策完成的工作。比如“整...</div></div></div></a><a class="pagination-related" href="/2026/08/01/2026-08-01-activeagent-idle-spin-diagnosis/" title="我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录"><img class="cover" src="/img/cover-activeagent-idle-spin-v2.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-01</div><div class="info-item-2">我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录</div></div><div class="info-2"><div class="info-item-1"> 每天 21:00 准点发报告、每 15 分钟执行一次”工作循环”——我的自主 Agent 看起来忙得不可开交。但有人问了一句：”怎么每次报告的内容都差不多？” 一查之下发现：它从 7&#x2F;27 起就在空转，5 天产出了零。 这篇记录完整的 8 处断链诊断与修复过程，附可直接抄的检查清单。     1. 缘起：一个让人起疑的问题我搭了一套名为 ActiveAgent 的三向 Agent 互联运行时（连接教育 Agent、股票 MCP 网关和 Hermes），它有两个核心承诺：  每 15 分钟一次 tick：自动扫描 3 个项目 × 9 个维度，发现问题就修复 每天 21:00 报告：汇总当天干了什么、进度如何  某天我翻看连续几天的每日报告，越看越不对劲：  “怎么每次报告的内容都差不多呢？教案进度始终只有 1 个评审，自主扫描都是那几个数字。”  直觉告诉我它可能没在正常工作。于是开始排查——这一查，牵出一串**”看起来活着、实际上空转”**的连环断链。 2. 核心方法：8 处断链的定位与修复 第一步：确认”它真的没干活”先看数据全景：    组件 表面状态 实际状态 ...</div></div></div></a><a class="pagination-related" href="/wiki/hermes-guide/advanced-combo/" title="Hermes高阶技巧｜⚡ 进阶技巧：Dashboard + Kanban + Curator 三合一，打造24小时无人Agent工厂"><img class="cover" src="https://images.unsplash.com/photo-1727434032773-af3cd98375ba?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="info-item-2">Hermes高阶技巧｜⚡ 进阶技巧：Dashboard + Kanban + Curator 三合一，打造24小时无人Agent工厂</div></div><div class="info-2"><div class="info-item-1"> 一句话解决：Dashboard入口、Kanban编排、Curator维护，三功能组合起来就能实现”24小时无人值守”的Agent自动化工厂。  背景：小赵的梦想小赵已经学会了Dashboard、Kanban和Curator，单独用都很顺手。但他心里一直有个想法： “能不能让它们自己转起来？“ 他每天早上要做三件事：  检查Agent昨晚干了什么 → 打开Dashboard看日志 看看有没有任务卡住了 → 打开Kanban面板看一眼 清理不再需要的技能 → 手动跑一下Curator  虽然每件事都不费劲，但每天都做也挺烦的。 “如果每天早上我醒来，这些事已经自动做完了，我只需要看一眼结果，那该多好。“ 这个梦想，用Dashboard的Cron定时任务 + Kanban的自动编排 + Curator的定期维护就能实现。 第一章：Dashboard 定时任务（Cron）Dashboard里有一个”Cron“标签页，可以创建定时任务——就像Linux的crontab，但不用写配置文件： [插图：Cron配置界面Mockup] 123456789101112131415161718192...</div></div></div></a><a class="pagination-related" href="/2026/04/12/2026-04-13-ai-agent-workflow-guide/" title="AI Agent 完全指南：2026 年如何用多代理系统提升工作效率"><img class="cover" src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-13</div><div class="info-item-2">AI Agent 完全指南：2026 年如何用多代理系统提升工作效率</div></div><div class="info-2"><div class="info-item-1"> 写在前面：本文系统整理了我在过去三个月里使用 AI Agent 的完整经验，包含工具选型、工作流设计、成本控制等实战内容。如果你也想构建自己的 AI 工作体系，这篇值得收藏。   一、为什么需要 AI Agent？1.1 从「工具」到「助手」的进化回想一下我们是怎么用 AI 的：  提问 → 等待回答 → 手动复制 → 粘贴到其他工具 → 继续下一步  这是典型的「工具思维」—— AI 只是一个更强的搜索引擎。 但 Agent 改变了这个关系：  设定目标 → AI 自动规划步骤 → 执行 → 反馈结果 → 人类只需审核  我称之为「助手思维」—— AI 不再是工具，而是能独立完成任务的数字员工。 1.2 我的真实收益过去三个月，我用 AI Agent 完成了：    任务类型 原来耗时 现在耗时 效率提升    每周 AI 新闻简报 3 小时 15 分钟 12x   公众号文章创作 6 小时 2 小时 3x   代码 code review 2 小时 20 分钟 6x   竞品分析报告 8 小时 1.5 小时 5.3x   时间不是省出来的，是重新分配了。  二、多代理协作系...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">85</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">215</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">29</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AI-%E7%94%BB%E4%B8%8D%E5%87%BA%E4%B8%80%E5%8F%A5%E5%AF%B9%E7%9A%84%E8%AF%9D-%E2%80%94-%E6%88%91%E6%8A%8A%E5%B0%81%E9%9D%A2%E3%80%81%E6%8F%92%E5%9B%BE%E3%80%81%E8%A7%86%E9%A2%91%E9%83%BD%E6%94%B9%E6%88%90%E4%BA%86-HTML-%E6%B8%B2%E6%9F%93"><span class="toc-number">1.</span> <span class="toc-text">AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%B8%89%E4%B8%AA%E9%83%BD%E8%A2%AB%E2%80%9D%E6%96%87%E5%AD%97%E2%80%9D%E5%8D%A1%E4%BD%8F%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="toc-number">1.1.</span> <span class="toc-text">1. 缘起 — 三个都被”文字”卡住的场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-HTML-%E4%BD%9C%E4%B8%BA%E8%A7%86%E8%A7%89%E4%B8%AD%E9%97%B4%E8%A1%A8%E7%A4%BA"><span class="toc-number">1.2.</span> <span class="toc-text">2. 核心方法 — HTML 作为视觉中间表示</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%98%AF-HTML%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E8%AE%A9%E6%A8%A1%E5%9E%8B%E7%9B%B4%E6%8E%A5%E5%87%BA%E5%9B%BE"><span class="toc-number">1.2.1.</span> <span class="toc-text">2.1 为什么是 HTML，而不是让模型直接出图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E5%B0%81%E9%9D%A2%EF%BC%9A%E7%89%88%E5%BC%8F-%C3%97-%E4%B8%BB%E9%A2%98%E7%9F%A9%E9%98%B5"><span class="toc-number">1.2.2.</span> <span class="toc-text">2.2 封面：版式 × 主题矩阵</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E6%8F%92%E5%9B%BE%EF%BC%9A%E6%95%B0%E6%8D%AE%E5%8D%B3%E4%BB%A3%E7%A0%81"><span class="toc-number">1.2.3.</span> <span class="toc-text">2.3 插图：数据即代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E8%A7%86%E9%A2%91%EF%BC%9A%E6%97%B6%E9%97%B4%E7%BA%BF-HTML-%E2%86%92-%E5%AE%9A%E7%82%B9%E6%88%AA%E5%9B%BE-%E2%86%92-xfade"><span class="toc-number">1.2.4.</span> <span class="toc-text">2.4 视频：时间线 HTML → 定点截图 → xfade</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-%E5%B1%80%E9%83%A8%E9%87%8D%E7%94%9F%E6%88%90%EF%BC%9AHTML-%E7%9A%84%E5%8F%AF%E5%AF%BB%E5%9D%80%E6%80%A7%E7%BA%A2%E5%88%A9"><span class="toc-number">1.2.5.</span> <span class="toc-text">2.5 局部重生成：HTML 的可寻址性红利</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95"><span class="toc-number">1.3.</span> <span class="toc-text">3. 踩坑记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-xfade-%E4%B8%8D%E4%BC%9A%E5%91%8A%E8%AF%89%E4%BD%A0%E5%AE%83%E8%BE%93%E5%87%BA%E4%BA%86-yuv444p%EF%BC%88%E9%9D%99%E9%BB%98%E5%9D%91%EF%BC%89"><span class="toc-number">1.3.1.</span> <span class="toc-text">3.1 xfade 不会告诉你它输出了 yuv444p（静默坑）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%AD%97%E4%BD%93%E6%96%87%E4%BB%B6%E5%9D%8F%E4%BA%86%EF%BC%8C%E4%B8%AD%E6%96%87%E5%85%A8%E6%98%AF%E6%96%B9%E6%A1%86"><span class="toc-number">1.3.2.</span> <span class="toc-text">3.2 字体文件坏了，中文全是方框</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E9%80%90%E5%B8%A7%E5%BD%95%E5%88%B6-vs-%E5%AE%9A%E7%82%B9%E6%88%AA%E5%9B%BE-%E2%80%94-%E6%88%91%E4%BB%AC%E8%87%AA%E5%B7%B1%E7%9A%84%E6%BC%94%E5%8C%96%E8%B7%AF%E7%BA%BF"><span class="toc-number">1.3.3.</span> <span class="toc-text">3.3 逐帧录制 vs 定点截图 — 我们自己的演化路线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E8%BF%99%E4%B8%AA%E6%96%B9%E6%B3%95%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%B8%8D%E9%80%82%E7%94%A8"><span class="toc-number">1.3.4.</span> <span class="toc-text">3.4 这个方法什么时候不适用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">1.4.</span> <span class="toc-text">4. 总结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/09/30/2026-09-30-html-visual-pipeline/" title="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染"><img src="/img/cover-html-visual-pipeline.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染"/></a><div class="content"><a class="title" href="/2026/09/30/2026-09-30-html-visual-pipeline/" title="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染">AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染</a><time datetime="2026-09-30T02:30:00.000Z" title="发表于 2026-09-30 10:30:00">2026-09-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/" title="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践"><img src="/img/cover-jevcache-decision-cache.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践"/></a><div class="content"><a class="title" href="/2026/09/26/2026-09-26-zero-cost-ai-agent-operation/" title="零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践">零成本 AI Agent 运行 — 四款免费模型 + 智能路由的实践</a><time datetime="2026-09-26T11:30:00.000Z" title="发表于 2026-09-26 19:30:00">2026-09-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/23/2026-09-23-opencode-cli-free-bridge/" title="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务"><img src="/img/cover-oc-free-cli-bridge.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务"/></a><div class="content"><a class="title" href="/2026/09/23/2026-09-23-opencode-cli-free-bridge/" title="免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务">免费 LLM 拒了我的 API 调用，我把官方 CLI 包成了 OpenAI 服务</a><time datetime="2026-09-23T02:00:00.000Z" title="发表于 2026-09-23 10:00:00">2026-09-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/19/2026-09-19-llm-thinking-leak-contract-gate/" title="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文"><img src="/img/cover-llm-thinking-leak.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文"/></a><div class="content"><a class="title" href="/2026/09/19/2026-09-19-llm-thinking-leak-contract-gate/" title="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文">LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文</a><time datetime="2026-09-19T02:00:00.000Z" title="发表于 2026-09-19 10:00:00">2026-09-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/16/2026-09-16-agent-free-llm-router/" title="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录"><img src="/img/cover-agent-free-llm-router.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录"/></a><div class="content"><a class="title" href="/2026/09/16/2026-09-16-agent-free-llm-router/" title="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录">我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录</a><time datetime="2026-09-16T02:00:00.000Z" title="发表于 2026-09-16 10:00:00">2026-09-16</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
