@@ -1,0 +1,492 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>QGS 三层架构：把质量门禁变成可组合的基础设施 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="传统的 LLM 质量评审是黑盒：全靠一个大模型输出 JSON，既定位不准、又高误报、还贵。QGS 三层架构把判断拆成 确定性快筛（Layer1）+ 语义判断（Layer2）+ 独立反思（Layer3），把质量门禁从”评分器”变成了可组合、可调试、可扩展的基础设施。   1. 缘起 — 为什么要重构 QGS1.1 痛点：纯 LLM 评审的三大顽疾最早的 QGS（Quality Gate Syste">
+<meta property="og:type" content="article">
+<meta property="og:title" content="QGS 三层架构：把质量门禁变成可组合的基础设施">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/10/12/2026-10-12-qgs-three-layer-architecture/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="传统的 LLM 质量评审是黑盒：全靠一个大模型输出 JSON，既定位不准、又高误报、还贵。QGS 三层架构把判断拆成 确定性快筛（Layer1）+ 语义判断（Layer2）+ 独立反思（Layer3），把质量门禁从”评分器”变成了可组合、可调试、可扩展的基础设施。   1. 缘起 — 为什么要重构 QGS1.1 痛点：纯 LLM 评审的三大顽疾最早的 QGS（Quality Gate Syste">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-qgs-three-layer.png">
+<meta property="article:published_time" content="2026-10-12T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-12T02:47:35.804Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Agent架构">
+<meta property="article:tag" content="LLM工程化">
+<meta property="article:tag" content="QGS">
+<meta property="article:tag" content="质量门禁">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-qgs-three-layer.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "QGS 三层架构：把质量门禁变成可组合的基础设施",
+  "url": "https://boke.studyai.ltd/2026/10/12/2026-10-12-qgs-three-layer-architecture/",
+  "image": "https://boke.studyai.ltd/img/cover-qgs-three-layer.png",
+  "datePublished": "2026-10-12T02:00:00.000Z",
+  "dateModified": "2026-10-12T02:47:35.804Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/10/12/2026-10-12-qgs-three-layer-architecture/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'QGS 三层架构：把质量门禁变成可组合的基础设施',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">89</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">225</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">30</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-qgs-three-layer.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">QGS 三层架构：把质量门禁变成可组合的基础设施</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">QGS 三层架构：把质量门禁变成可组合的基础设施</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-12T02:00:00.000Z" title="发表于 2026-10-12 10:00:00">2026-10-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-12T02:47:35.804Z" title="更新于 2026-10-12 10:47:35">2026-10-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/">技术架构</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>传统的 LLM 质量评审是黑盒：全靠一个大模型输出 JSON，既定位不准、又高误报、还贵。QGS 三层架构把判断拆成 <strong>确定性快筛（Layer1）+ 语义判断（Layer2）+ 独立反思（Layer3）</strong>，把质量门禁从”评分器”变成了可组合、可调试、可扩展的基础设施。</p>
+</blockquote>
+<hr>
+<h2 id="1-缘起-—-为什么要重构-QGS"><a href="#1-缘起-—-为什么要重构-QGS" class="headerlink" title="1. 缘起 — 为什么要重构 QGS"></a>1. 缘起 — 为什么要重构 QGS</h2><h3 id="1-1-痛点：纯-LLM-评审的三大顽疾"><a href="#1-1-痛点：纯-LLM-评审的三大顽疾" class="headerlink" title="1.1 痛点：纯 LLM 评审的三大顽疾"></a>1.1 痛点：纯 LLM 评审的三大顽疾</h3><p>最早的 QGS（Quality Gate System）是个纯 LLM 评审器：把交付物塞进 prompt，让模型打分、给建议、输出 JSON。跑了一段时间后，三个问题暴露无遗：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>表现</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>位置不准</strong></td>
+<td>LLM 只能”猜”行号，经常指错文件、错行、甚至幻觉出不存在的函数</td>
+<td>开发者无法定位修复，信任度归零</td>
+</tr>
+<tr>
+<td><strong>误报率高</strong></td>
+<td>同一段代码，换个温度、换个模型，结论可能反转；测试文件里的 <code>print()</code> 也被当 P2 报上来</td>
+<td>噪音淹没信号，评审变成”狼来了”</td>
+</tr>
+<tr>
+<td><strong>成本失控</strong></td>
+<td>每次评审都要调一次大模型，Token 消耗不可控；想加规则只能改 prompt，版本管理混乱</td>
+<td>规模上不去，迭代慢</td>
+</tr>
+</tbody></table>
+<h3 id="1-2-关键洞察：判断要分层"><a href="#1-2-关键洞察：判断要分层" class="headerlink" title="1.2 关键洞察：判断要分层"></a>1.2 关键洞察：判断要分层</h3><p>把质量判断拆成三层，各司其职：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│  输入：交付物（代码、文档、配置、任务描述...）                  │</span><br><span class="line">└─────────────────────────────┬───────────────────────────────┘</span><br><span class="line">                              ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│  Layer 1：确定性规则引擎（YAML + 正则/AST）                    │</span><br><span class="line">│  - 0.26s 级扫描，精确到文件:行:列                              │</span><br><span class="line">│  - 规则即数据，可离线测试、版本管理、CI 集成                   │</span><br><span class="line">│  - 只做机械检查：有没有 print、硬编码密钥、bare except...      │</span><br><span class="line">└─────────────────────────────┬───────────────────────────────┘</span><br><span class="line">                              ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│  Layer 2：LLM 语义判断                                        │</span><br><span class="line">│  - 拿着 Layer 1 的发现，做&quot;真/假/遗漏&quot;三向判断                 │</span><br><span class="line">│  - 过滤误报（如：测试文件里的 print 不算）                     │</span><br><span class="line">│  - 发现规则覆盖不到的语义问题（架构不合理、边界未处理...）     │</span><br><span class="line">└─────────────────────────────┬───────────────────────────────┘</span><br><span class="line">                              ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│  Layer 3：独立反思模块（可选，QGS_REFLECTION=1）              │</span><br><span class="line">│  - 第二判别者从相反角度质疑 Layer 2 结论                       │</span><br><span class="line">│  - 找遗漏、找过度宽松、找过度严格                              │</span><br><span class="line">│  - 额外成本 ≈ 1 次 LLM 调用，显著降低幻觉                     │</span><br><span class="line">└─────────────────────────────┬───────────────────────────────┘</span><br><span class="line">                              ▼</span><br><span class="line">┌─────────────────────────────────────────────────────────────┐</span><br><span class="line">│  输出：Review(score, issues[], evidence_ladder[])             │</span><br><span class="line">│  - 每层产出可追溯，证据链完整                                   │</span><br><span class="line">│  - 支持 P0-P4 严重度分级，加权评分                              │</span><br><span class="line">└─────────────────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="2-核心方法-—-三层架构详解"><a href="#2-核心方法-—-三层架构详解" class="headerlink" title="2. 核心方法 — 三层架构详解"></a>2. 核心方法 — 三层架构详解</h2><h3 id="2-1-Layer-1：规则即数据"><a href="#2-1-Layer-1：规则即数据" class="headerlink" title="2.1 Layer 1：规则即数据"></a>2.1 Layer 1：规则即数据</h3><p>规则不再硬编码在 prompt 里，而是 YAML 文件落盘：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ~/.hermes/qgs/rules/print-in-prod.yaml</span></span><br><span class="line"><span class="attr">id:</span> <span class="string">print-in-prod</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">&quot;生产环境禁止 print 语句&quot;</span></span><br><span class="line"><span class="attr">severity:</span> <span class="string">P2</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">|</span></span><br><span class="line"><span class="string">  生产代码中使用 print() 会：</span></span><br><span class="line"><span class="string">  1. 输出到 stdout，可能被日志系统忽略</span></span><br><span class="line"><span class="string">  2. 性能开销（同步 I/O）</span></span><br><span class="line"><span class="string">  3. 调试信息泄露风险</span></span><br><span class="line"><span class="string">  4. 难以控制级别（info/warn/error）</span></span><br><span class="line"><span class="string"></span><span class="attr">pattern:</span> <span class="string">&#x27;\\bprint\\s*\\(&#x27;</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">python</span></span><br><span class="line"><span class="attr">exclude_paths:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">tests/</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&#x27;test_*.py&#x27;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&#x27;*_test.py&#x27;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">scripts/</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">__pycache__/</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">.venv/</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">node_modules/</span></span><br><span class="line"><span class="attr">message:</span> <span class="string">&quot;生产代码中不应使用 print()，改用 logging 模块&quot;</span></span><br><span class="line"><span class="attr">fix_suggestion:</span> <span class="string">|</span></span><br><span class="line"><span class="string">  import logging</span></span><br><span class="line"><span class="string">  logger = logging.getLogger(__name__)</span></span><br><span class="line"><span class="string">  # 将 print(x) 替换为：</span></span><br><span class="line"><span class="string">  logger.debug(&#x27;%s&#x27;, x)</span></span><br><span class="line"><span class="string">  logger.info(&#x27;%s&#x27;, x)  # 如果是信息性输出</span></span><br><span class="line"><span class="string">  logger.warning(&#x27;%s&#x27;, x)  # 如果是警告</span></span><br><span class="line"><span class="string">  logger.error(&#x27;%s&#x27;, x)  # 如果是错误</span></span><br><span class="line"><span class="string"></span><span class="attr">auto_fixable:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">evidence_required:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>规则引擎核心实现</strong>（<code>~/.hermes/qgs/rules_engine.py</code>）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@dataclass</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RuleFinding</span>:</span><br><span class="line">    rule_id: <span class="built_in">str</span></span><br><span class="line">    file_path: <span class="built_in">str</span></span><br><span class="line">    line_no: <span class="built_in">int</span></span><br><span class="line">    column: <span class="built_in">int</span>          <span class="comment"># 精确到列</span></span><br><span class="line">    severity: <span class="built_in">str</span>        <span class="comment"># P0-P4</span></span><br><span class="line">    message: <span class="built_in">str</span></span><br><span class="line">    raw_match: <span class="built_in">str</span>       <span class="comment"># 匹配到的原文</span></span><br><span class="line">    fix_suggestion: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RuleEngine</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, rules_dir: Path</span>):</span><br><span class="line">        <span class="variable language_">self</span>.rules = <span class="variable language_">self</span>._load_rules(rules_dir)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">scan_file</span>(<span class="params">self, file_path: Path</span>) -&gt; <span class="built_in">list</span>[RuleFinding]:</span><br><span class="line">        findings = []</span><br><span class="line">        content = file_path.read_text(encoding=<span class="string">&quot;utf-8&quot;</span>, errors=<span class="string">&quot;ignore&quot;</span>)</span><br><span class="line">        <span class="keyword">for</span> rule <span class="keyword">in</span> <span class="variable language_">self</span>.rules:</span><br><span class="line">            <span class="keyword">if</span> <span class="variable language_">self</span>._is_excluded(file_path, rule):</span><br><span class="line">                <span class="keyword">continue</span></span><br><span class="line">            regex = re.<span class="built_in">compile</span>(rule[<span class="string">&quot;pattern&quot;</span>])</span><br><span class="line">            <span class="keyword">for</span> i, line <span class="keyword">in</span> <span class="built_in">enumerate</span>(content.splitlines(), <span class="number">1</span>):</span><br><span class="line">                <span class="keyword">for</span> <span class="keyword">match</span> <span class="keyword">in</span> regex.finditer(line):</span><br><span class="line">                    findings.append(RuleFinding(</span><br><span class="line">                        rule_id=rule[<span class="string">&quot;id&quot;</span>],</span><br><span class="line">                        file_path=<span class="built_in">str</span>(file_path),</span><br><span class="line">                        line_no=i,</span><br><span class="line">                        column=<span class="keyword">match</span>.start() + <span class="number">1</span>,</span><br><span class="line">                        severity=rule.get(<span class="string">&quot;severity&quot;</span>, <span class="string">&quot;P3&quot;</span>),</span><br><span class="line">                        message=rule.get(<span class="string">&quot;message&quot;</span>, <span class="string">&quot;&quot;</span>),</span><br><span class="line">                        raw_match=<span class="keyword">match</span>.group(),</span><br><span class="line">                        fix_suggestion=rule.get(<span class="string">&quot;fix_suggestion&quot;</span>, <span class="string">&quot;&quot;</span>),</span><br><span class="line">                    ))</span><br><span class="line">        <span class="keyword">return</span> findings</span><br></pre></td></tr></table></figure>
+
+<p><strong>离线调试，零 LLM 成本</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 扫描单文件</span></span><br><span class="line">python3 ~/.hermes/qgs/rules_engine.py --file server.py --verbose</span><br><span class="line"></span><br><span class="line"><span class="comment"># 批量扫描目录 + 输出 JSON</span></span><br><span class="line">python3 ~/.hermes/qgs/rules_engine.py --<span class="built_in">dir</span> ~/projects/myapp/ --output results.json</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只看统计</span></span><br><span class="line">python3 ~/.hermes/qgs/rules_engine.py --file server.py --stats</span><br></pre></td></tr></table></figure>
+
+<p>目前已内置 10 条规则（持续扩充中）：</p>
+<table>
+<thead>
+<tr>
+<th>规则 ID</th>
+<th>严重度</th>
+<th>检测目标</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hardcoded-secret</code></td>
+<td>P0</td>
+<td>API key&#x2F;password&#x2F;token 硬编码</td>
+</tr>
+<tr>
+<td><code>eval-usage</code></td>
+<td>P0</td>
+<td><code>eval()</code>&#x2F;<code>exec()</code> 使用</td>
+</tr>
+<tr>
+<td><code>shell-true</code></td>
+<td>P1</td>
+<td><code>subprocess.run(..., shell=True)</code></td>
+</tr>
+<tr>
+<td><code>print-in-prod</code></td>
+<td>P2</td>
+<td>生产代码 <code>print()</code></td>
+</tr>
+<tr>
+<td><code>hardcoded-url</code></td>
+<td>P2</td>
+<td>硬编码 URL&#x2F;端点</td>
+</tr>
+<tr>
+<td><code>missing-error-handling</code></td>
+<td>P2</td>
+<td>缺少 try-except 的高危调用</td>
+</tr>
+<tr>
+<td><code>bare-except</code></td>
+<td>P2</td>
+<td><code>except:</code> 裸捕获</td>
+</tr>
+<tr>
+<td><code>magic-number</code></td>
+<td>P3</td>
+<td>魔法数字</td>
+</tr>
+<tr>
+<td><code>todo-comment</code></td>
+<td>P3</td>
+<td>TODO&#x2F;FIXME 注释</td>
+</tr>
+<tr>
+<td><code>unused-import</code></td>
+<td>P3</td>
+<td>未使用的导入</td>
+</tr>
+</tbody></table>
+<h3 id="2-2-Layer-2：LLM-语义判断（模板注入）"><a href="#2-2-Layer-2：LLM-语义判断（模板注入）" class="headerlink" title="2.2 Layer 2：LLM 语义判断（模板注入）"></a>2.2 Layer 2：LLM 语义判断（模板注入）</h3><p>Layer 1 的产出不直接给人看，而是注入到 Layer 2 的 prompt 模板中（Jinja2）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">你是一个质量评审员。以下是确定性扫描发现的问题，请判断哪些是真实缺陷：</span><br><span class="line"></span><br><span class="line">=== Layer 1 确定性扫描结果 ===</span><br><span class="line">&#123;% for finding in layer1_findings %&#125;</span><br><span class="line">- [&#123;&#123; finding.severity &#125;&#125;] &#123;&#123; finding.file_path &#125;&#125;:&#123;&#123; finding.line_no &#125;&#125;:&#123;&#123; finding.column &#125;&#125; (&#123;&#123; finding.rule_id &#125;&#125;)</span><br><span class="line">  &#123;&#123; finding.message &#125;&#125;</span><br><span class="line">  原文：&#123;&#123; finding.raw_match &#125;&#125;</span><br><span class="line">  &#123;% if finding.fix_suggestion %&#125;</span><br><span class="line">  建议：&#123;&#123; finding.fix_suggestion[:200] &#125;&#125;</span><br><span class="line">  &#123;% endif %&#125;</span><br><span class="line">&#123;% endfor %&#125;</span><br><span class="line"></span><br><span class="line">任务上下文：&#123;&#123; task_context &#125;&#125;</span><br><span class="line">交付物状态：&#123;&#123; delivery_artifact &#125;&#125;</span><br><span class="line"></span><br><span class="line">请判断：</span><br><span class="line">1. 哪些 finding 是真实缺陷（false positive 过滤）</span><br><span class="line">2. 哪些是误报（如 print 在测试文件中应排除）</span><br><span class="line">3. 是否有 Layer 1 未覆盖的问题（架构、边界、性能...）</span><br><span class="line"></span><br><span class="line">输出 JSON：</span><br><span class="line">&#123;</span><br><span class="line">  &quot;verified_issues&quot;: [...],</span><br><span class="line">  &quot;dismissed_as_false_positive&quot;: [...],</span><br><span class="line">  &quot;new_issues_found&quot;: [...]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>Critic 集成点</strong>（<code>~/.hermes/qgs/critic.py</code>）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Critic</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, config: <span class="type">Optional</span>[CriticConfig] = <span class="literal">None</span></span>):</span><br><span class="line">        <span class="variable language_">self</span>._config = config <span class="keyword">or</span> CriticConfig()</span><br><span class="line">        <span class="variable language_">self</span>._rule_engine: <span class="type">Optional</span>[RuleEngine] = <span class="literal">None</span></span><br><span class="line">        <span class="variable language_">self</span>._layer1_enabled = os.environ.get(<span class="string">&quot;QGS_LAYER1&quot;</span>, <span class="string">&quot;0&quot;</span>) == <span class="string">&quot;1&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">review</span>(<span class="params">self, task: Task, llm_client=<span class="literal">None</span></span>) -&gt; Review:</span><br><span class="line">        <span class="comment"># Layer 1：确定性扫描</span></span><br><span class="line">        layer1_findings = <span class="variable language_">self</span>._run_layer1_scan(task)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Layer 2：LLM 评审（注入 Layer 1 结果）</span></span><br><span class="line">        prompt = <span class="variable language_">self</span>._build_review_prompt(task, layer1_findings)</span><br><span class="line">        result = <span class="variable language_">self</span>._call_llm(prompt, llm_client)</span><br><span class="line">        rv = <span class="variable language_">self</span>._parse_response(result, task)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 记录证据链</span></span><br><span class="line">        rv.evidence_ladder = <span class="variable language_">self</span>._build_evidence_ladder(task, method=rv.review_method)</span><br><span class="line">        <span class="keyword">if</span> layer1_findings:</span><br><span class="line">            rv.evidence_ladder.setdefault(<span class="string">&quot;layer1&quot;</span>, []).extend(</span><br><span class="line">                f.to_dict() <span class="keyword">for</span> f <span class="keyword">in</span> layer1_findings</span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">return</span> rv</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-Layer-3：独立反思模块"><a href="#2-3-Layer-3：独立反思模块" class="headerlink" title="2.3 Layer 3：独立反思模块"></a>2.3 Layer 3：独立反思模块</h3><p>Layer 2 也有盲区：同一个模型、同一个 prompt 模板，系统性偏差很难自纠。Layer 3 引入<strong>第二判别者</strong>，从相反角度质疑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ~/.hermes/qgs/discriminator.py</span></span><br><span class="line">REFLECTION_PROMPT = <span class="string">&quot;&quot;&quot;你是一个独立审查员。以下是另一位评审员的结论，请从相反角度质疑：</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">评审结论：</span></span><br><span class="line"><span class="string">&#123;conclusion&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">请找出：</span></span><br><span class="line"><span class="string">1. 评审员可能遗漏的问题（missed_issues）</span></span><br><span class="line"><span class="string">2. 评审员过度宽松的地方（overly_lenient）</span></span><br><span class="line"><span class="string">3. 评审员过度严格的地方/误报（overly_strict）</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">保持客观，不要为了批评而批评。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">输出 JSON：</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">  &quot;missed_issues&quot;: [&#123;&quot;severity&quot;: &quot;P1&quot;, &quot;description&quot;: &quot;...&quot;, &quot;location&quot;: &quot;...&quot;, &quot;suggestion&quot;: &quot;...&quot;&#125;],</span></span><br><span class="line"><span class="string">  &quot;overly_lenient&quot;: [...],</span></span><br><span class="line"><span class="string">  &quot;overly_strict&quot;: [...],</span></span><br><span class="line"><span class="string">  &quot;revised_summary&quot;: &quot;修正后的总体评价&quot;</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">&quot;&quot;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ReflectionModule</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, critic_config=<span class="literal">None</span>, reflection_model: <span class="built_in">str</span> = <span class="string">&quot;&quot;</span></span>):</span><br><span class="line">        <span class="variable language_">self</span>._enabled = os.environ.get(<span class="string">&quot;QGS_REFLECTION&quot;</span>, <span class="string">&quot;0&quot;</span>) == <span class="string">&quot;1&quot;</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">reflect</span>(<span class="params">self, review: AdversarialReview, task: Task</span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> <span class="variable language_">self</span>._enabled:</span><br><span class="line">            <span class="keyword">return</span> &#123;<span class="string">&quot;enabled&quot;</span>: <span class="literal">False</span>, <span class="string">&quot;reason&quot;</span>: <span class="string">&quot;QGS_REFLECTION not set&quot;</span>&#125;</span><br><span class="line">        </span><br><span class="line">        prompt = REFLECTION_PROMPT.<span class="built_in">format</span>(</span><br><span class="line">            conclusion=json.dumps(review.to_dict(), ensure_ascii=<span class="literal">False</span>, indent=<span class="number">2</span>)</span><br><span class="line">        )</span><br><span class="line">        <span class="comment"># 调用另一个模型/配置做反思</span></span><br><span class="line">        ...</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">merge_reflection</span>(<span class="params">self, original: AdversarialReview, reflection: <span class="built_in">dict</span></span>) -&gt; AdversarialReview:</span><br><span class="line">        <span class="comment"># 将遗漏问题合并到原始评审，创建&quot;独立反思&quot;判别者</span></span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>AdversarialEvaluator 集成</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 评审结束后，如果启用反思且（未收敛 或 首轮），触发 Layer 3</span></span><br><span class="line"><span class="keyword">if</span> os.environ.get(<span class="string">&quot;QGS_REFLECTION&quot;</span>, <span class="string">&quot;0&quot;</span>) == <span class="string">&quot;1&quot;</span> <span class="keyword">and</span> (<span class="keyword">not</span> converged <span class="keyword">or</span> <span class="built_in">round</span> == <span class="number">1</span>):</span><br><span class="line">    reflection_module = ReflectionModule(critic_config=<span class="variable language_">self</span>._critic_config)</span><br><span class="line">    reflection = reflection_module.reflect(review, task)</span><br><span class="line">    <span class="keyword">if</span> reflection.get(<span class="string">&quot;enabled&quot;</span>) <span class="keyword">and</span> <span class="string">&quot;error&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> reflection:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;  ▸ QGS 独立反思: 发现 <span class="subst">&#123;<span class="built_in">len</span>(reflection.get(<span class="string">&#x27;missed_issues&#x27;</span>, []))&#125;</span> 个遗漏问题&quot;</span>)</span><br><span class="line">        review = reflection_module.merge_reflection(review, reflection)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="3-实战效果-—-真实跑数"><a href="#3-实战效果-—-真实跑数" class="headerlink" title="3. 实战效果 — 真实跑数"></a>3. 实战效果 — 真实跑数</h2><h3 id="3-1-启用方式"><a href="#3-1-启用方式" class="headerlink" title="3.1 启用方式"></a>3.1 启用方式</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 默认：Layer 1 + Layer 2（Layer 1 需显式开启）</span></span><br><span class="line">hermes run <span class="string">&quot;修复这个 bug&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显式启用 Layer 1 规则扫描</span></span><br><span class="line">QGS_LAYER1=1 hermes run <span class="string">&quot;修复这个 bug&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 全栈：Layer 1 + Layer 2 + Layer 3</span></span><br><span class="line">QGS_LAYER1=1 QGS_REFLECTION=1 hermes run <span class="string">&quot;修复这个 bug&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-典型输出对比"><a href="#3-2-典型输出对比" class="headerlink" title="3.2 典型输出对比"></a>3.2 典型输出对比</h3><p><strong>仅 Layer 2（旧版）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">QGS 评审: 60/100 FAIL</span><br><span class="line">- 代码中发现 print 语句（第 42 行）</span><br><span class="line">- 建议添加错误处理</span><br><span class="line"># 位置不准、不知道是不是测试文件、没给修复代码</span><br></pre></td></tr></table></figure>
+
+<p><strong>Layer 1 + Layer 2</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[P2] server.py:42:17 (print-in-prod)</span><br><span class="line">  生产代码中不应使用 print()</span><br><span class="line">  原文: print(&quot;debug: user_id=&quot;, user_id)</span><br><span class="line">  建议: logger.debug(&#x27;user_id=%s&#x27;, user_id)</span><br><span class="line"></span><br><span class="line">[P0] config.py:15:5 (hardcoded-secret)</span><br><span class="line">  发现可能的硬编码密钥</span><br><span class="line">  原文: API_KEY = &quot;sk-live-xxxxxx&quot;</span><br><span class="line">  </span><br><span class="line">QGS 功能审查者: P0×1 (加权 100) + P2×1 (加权 20) = 120</span><br><span class="line">QGS 安全审查者: P0×1 (加权 100)</span><br><span class="line">总分: 35/100 FAIL</span><br><span class="line"># 精确到列、自动过滤测试文件、给出修复代码</span><br></pre></td></tr></table></figure>
+
+<p><strong>全三层（+ Layer 3）</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">▸ QGS 功能审查者: P1×2 (加权 100)</span><br><span class="line">▸ QGS 安全审查者: P2×1 (加权 20)</span><br><span class="line">▸ QGS 独立反思: 发现 1 个遗漏问题</span><br><span class="line">  - [P1] auth.py:88: 缺少对 revoked token 的检查（Layer 2 漏报）</span><br><span class="line">  </span><br><span class="line">总分: 28/100 FAIL</span><br><span class="line"># 反思层补齐了语义盲区</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-3-关键指标对比"><a href="#3-3-关键指标对比" class="headerlink" title="3.3 关键指标对比"></a>3.3 关键指标对比</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>传统 QGS (纯 LLM)</th>
+<th>三层架构</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>位置精度</td>
+<td>行级猜测</td>
+<td><strong>列级确定</strong></td>
+</tr>
+<tr>
+<td>误报率</td>
+<td>~30%</td>
+<td><strong>&lt;5%（Layer1 过滤 + Layer3 质疑）</strong></td>
+</tr>
+<tr>
+<td>单次评审成本</td>
+<td>~2k-5k tokens</td>
+<td>Layer1: 0 token &#x2F; Layer2: ~3k &#x2F; Layer3: +1k</td>
+</tr>
+<tr>
+<td>可调试性</td>
+<td>黑盒</td>
+<td><strong>规则文件可离线单测</strong></td>
+</tr>
+<tr>
+<td>规则迭代</td>
+<td>改 prompt、重跑、靠运气</td>
+<td><strong>改 YAML、跑 rules_engine.py、秒出结果</strong></td>
+</tr>
+<tr>
+<td>扩展性</td>
+<td>全靠 prompt engineering</td>
+<td><strong>新规则 &#x3D; 新 YAML，零代码改动</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-踩坑记录-—-反例与边界"><a href="#4-踩坑记录-—-反例与边界" class="headerlink" title="4. 踩坑记录 — 反例与边界"></a>4. 踩坑记录 — 反例与边界</h2><h3 id="4-1-坑-1：规则正则的贪婪匹配"><a href="#4-1-坑-1：规则正则的贪婪匹配" class="headerlink" title="4.1 坑 1：规则正则的贪婪匹配"></a>4.1 坑 1：规则正则的贪婪匹配</h3><p>早期 <code>hardcoded-url</code> 规则用 <code>(?i)(https?://|http://)\S+</code>，把 markdown 里的链接、日志里的 URL 全报了。</p>
+<p><strong>修复</strong>：细化排除路径 + 上下文感知：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">exclude_paths:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;*.md&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;*.txt&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">logs/</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;.git/&quot;</span></span><br><span class="line"><span class="attr">pattern:</span> <span class="string">&#x27;(?&lt;!\]\()https?://[^\s\)&quot;]+&#x27;</span>  <span class="comment"># 排除 markdown 链接语法</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-坑-2：Layer-1-扫不到动态生成的代码"><a href="#4-2-坑-2：Layer-1-扫不到动态生成的代码" class="headerlink" title="4.2 坑 2：Layer 1 扫不到动态生成的代码"></a>4.2 坑 2：Layer 1 扫不到动态生成的代码</h3><p>交付物里包含字符串拼接的 SQL、模板渲染后的代码，Layer 1 扫的是源文件，漏报。</p>
+<p><strong>缓解</strong>：Layer 2 prompt 里强制要求”检查交付物中嵌入的代码片段”，Layer 3 反思专门查”动态生成内容”。</p>
+<h3 id="4-3-坑-3：反思模块偶尔”为了反思而反思”"><a href="#4-3-坑-3：反思模块偶尔”为了反思而反思”" class="headerlink" title="4.3 坑 3：反思模块偶尔”为了反思而反思”"></a>4.3 坑 3：反思模块偶尔”为了反思而反思”</h3><p>Layer 3 偶尔会强行找问题，把原本正确的 <code>dismissed_as_false_positive</code> 判成 <code>missed_issues</code>。</p>
+<p><strong>缓解</strong>：</p>
+<ul>
+<li>调低 <code>temperature=0.3</code>，加 <code>response_format={&quot;type&quot;: &quot;json_object&quot;}</code></li>
+<li>在 <code>merge_reflection</code> 里做二次校验：只合并 severity ≥ P2 的遗漏问题</li>
+<li>加人工复核入口：<code>QGS_REFLECTION_HUMAN_REVIEW=1</code> 时落盘供人工确认</li>
+</ul>
+<h3 id="4-4-坑-4：环境变量控制不够细粒度"><a href="#4-4-坑-4：环境变量控制不够细粒度" class="headerlink" title="4.4 坑 4：环境变量控制不够细粒度"></a>4.4 坑 4：环境变量控制不够细粒度</h3><p>最初只有 <code>QGS_LAYER1=1</code> &#x2F; <code>QGS_REFLECTION=1</code> 两个开关，想”只跑 Layer1 不跨 Layer2”做不到。</p>
+<p><strong>后续计划</strong>：在 <code>config.yaml</code> 里加分层配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">qgs:</span></span><br><span class="line">  <span class="attr">layer1:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">rules_dir:</span> <span class="string">~/.hermes/qgs/rules/</span></span><br><span class="line">    <span class="attr">severity_filter:</span> <span class="string">P2</span>  <span class="comment"># 只报 P2 及以上</span></span><br><span class="line">  <span class="attr">layer2:</span></span><br><span class="line">    <span class="attr">use_deterministic_first:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">layer3:</span></span><br><span class="line">    <span class="attr">enabled:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">reflection_threshold:</span> <span class="number">0.7</span>  <span class="comment"># 收敛分数 &lt; 0.7 才触发</span></span><br><span class="line">    <span class="attr">reflection_model:</span> <span class="string">&quot;&quot;</span>       <span class="comment"># 可指定专用反思模型</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-复用场景-—-不止于内容生成"><a href="#5-复用场景-—-不止于内容生成" class="headerlink" title="5. 复用场景 — 不止于内容生成"></a>5. 复用场景 — 不止于内容生成</h2><p>三层架构的核心模式 <strong>确定性快筛 → LLM 慢审 → 独立复核</strong> 可迁移到任何需要”质量门禁”的场景：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>Layer 1 规则示例</th>
+<th>Layer 2 语义判断</th>
+<th>Layer 3 反思焦点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>代码审查</strong></td>
+<td>语法错误、禁用 API、安全模式</td>
+<td>架构一致性、设计模式滥用、性能隐患</td>
+<td>遗漏的安全洞、过度设计</td>
+</tr>
+<tr>
+<td><strong>数据校验</strong></td>
+<td>Schema 合规、非空、枚举值</td>
+<td>业务逻辑自洽（如：订单金额&#x3D;明细求和）</td>
+<td>异常分布、数据漂移</td>
+</tr>
+<tr>
+<td><strong>Agent 决策审计</strong></td>
+<td>工具调用格式、参数类型、预算超限</td>
+<td>决策链路合理性、目标达成度</td>
+<td>幻觉工具调用、目标偏移</td>
+</tr>
+<tr>
+<td><strong>文档生成</strong></td>
+<td>标题层级、必填段落、链接有效性</td>
+<td>术语一致性、受众适配度、示例可运行性</td>
+<td>过度营销语、事实核查</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="6-总结与行动建议"><a href="#6-总结与行动建议" class="headerlink" title="6. 总结与行动建议"></a>6. 总结与行动建议</h2><h3 id="6-1-核心心法"><a href="#6-1-核心心法" class="headerlink" title="6.1 核心心法"></a>6.1 核心心法</h3><ol>
+<li><strong>判断要分层</strong>：确定性的事交给规则引擎，语义的事交给 LLM，兜底交给独立反思</li>
+<li><strong>规则即数据</strong>：YAML 落盘、版本管理、可离线测试、可 CI 集成 —— 这是基础设施思维</li>
+<li><strong>证据链要完整</strong>：每层产出可追溯，Layer1 给位置，Layer2 给理由，Layer3 给异议</li>
+<li><strong>成本要可控</strong>：Layer1 零成本，Layer2&#x2F;3 按需开启，环境变量一键切换</li>
+</ol>
+<h3 id="6-2-立即可用"><a href="#6-2-立即可用" class="headerlink" title="6.2 立即可用"></a>6.2 立即可用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 体验 Layer 1 离线扫描</span></span><br><span class="line">python3 ~/.hermes/qgs/rules_engine.py --file your_code.py --verbose</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 在 Hermes 任务中启用</span></span><br><span class="line">QGS_LAYER1=1 hermes run <span class="string">&quot;你的任务&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 关键任务开全栈</span></span><br><span class="line">QGS_LAYER1=1 QGS_REFLECTION=1 hermes run <span class="string">&quot;核心模块重构&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-贡献规则"><a href="#6-3-贡献规则" class="headerlink" title="6.3 贡献规则"></a>6.3 贡献规则</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 写 YAML 放进 ~/.hermes/qgs/rules/</span></span><br><span class="line"><span class="comment"># 2. 离线测试</span></span><br><span class="line">python3 ~/.hermes/qgs/rules_engine.py --file test_case.py --verbose</span><br><span class="line"><span class="comment"># 3. PR 提交，CI 自动跑规则回归集</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="7-相关链接"><a href="#7-相关链接" class="headerlink" title="7. 相关链接"></a>7. 相关链接</h2><ul>
+<li><strong>架构设计文档</strong>：<a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/LAYERED-ARCHITECTURE.md"><code>~/.hermes/qgs/LAYERED-ARCHITECTURE.md</code></a></li>
+<li><strong>规则引擎指南</strong>：<a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/RULES-ENGINE.md"><code>~/.hermes/qgs/RULES-ENGINE.md</code></a></li>
+<li><strong>集成报告</strong>：<a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/INTEGRATION-REPORT.md"><code>~/.hermes/qgs/INTEGRATION-REPORT.md</code></a></li>
+<li><strong>Fleet 协作规范</strong>：<a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/FLEET-COLLABORATION.md"><code>~/.hermes/qgs/FLEET-COLLABORATION.md</code></a></li>
+<li><strong>核心实现</strong>：<a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/critic.py"><code>critic.py</code></a> · <a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/rules_engine.py"><code>rules_engine.py</code></a> · <a target="_blank" rel="noopener" href="https://github.com/yadinae/hermes-agent/blob/main/.hermes/qgs/discriminator.py"><code>discriminator.py</code></a></li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>一句话总结</strong>：把质量门禁从”请大模型打分”重构为”规则引擎快筛 + LLM 语义判断 + 独立反思复核”的三层漏斗，是 LLM 工程化落地的关键一步 —— <strong>好系统不靠模型聪明，靠架构兜底</strong>。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/10/12/2026-10-12-qgs-three-layer-architecture/">https://boke.studyai.ltd/2026/10/12/2026-10-12-qgs-three-layer-architecture/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/QGS/">QGS</a><a class="post-meta__tags" href="/tags/%E8%B4%A8%E9%87%8F%E9%97%A8%E7%A6%81/">质量门禁</a><a class="post-meta__tags" href="/tags/Agent%E6%9E%B6%E6%9E%84/">Agent架构</a><a class="post-meta__tags" href="/tags/LLM%E5%B7%A5%E7%A8%8B%E5%8C%96/">LLM工程化</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-qgs-three-layer.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/10/10/2026-10-10-skill-routing-contract-audit/" title="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检"><img class="cover" src="/img/cover-skill-routing-contract-audit.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：技能越剪越少，引用越断越多。一篇 50 天、1157 条发现的巡检实录，讲清楚”技能路由契约”到底是什么、怎么把 154 个误报压到 7 个，以及为什么这类扫描器必须只报告、不拦截。  1. 缘起 — 剪枝的爽感，和引用的暗伤我的 Hermes 技能库在 9 月中到 10 月初经历两轮大瘦身：峰值 255 个活跃技能（09-02），到 10-09 只剩 190 个。剪完之后目录清爽、description 列表变短、agent 选技能时不再被无关项干扰——那种爽感和把衣柜清空一模一样。 但两周后我注意到一件不对劲的事：有几次 agent 按 SKILL.md 里的指引去”用某某技能”，加载失败了。翻回去看，那个技能早就被我挪进 .archive/ 了，而引用它的文档纹丝不动。 这暴露了一个结构性问题：Hermes 没有中心路由。技能不是靠斜杠命令注册的，是 agent 读 description 自主 skill_view(name=...) 加载的。于是技能之间的互相引用——“用 X 技能”、”详见 Y”、skill_view(name=&#39;z&#39;)—...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/08/15/2026-08-15-qgs-production-metrics/" title="QGS 质量门禁：我踩了46次刹车，换来的质量提升值不值？"><img class="cover" src="/img/cover-qgs-production-metrics.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-15</div><div class="info-item-2">QGS 质量门禁：我踩了46次刹车，换来的质量提升值不值？</div></div><div class="info-2"><div class="info-item-1"> 我在 Hermes Agent 里装了 QGS（Quality Gate System）质量门禁——一个会在每次复杂任务输出前自动评分的系统。运行了10天，46次被阻断，102次人工审批点。这篇用真实数据复盘：它值不值得装？踩了多少坑？以及什么情况下 QGS 反而会拖后腿。     1. 缘起：为什么要在 Agent 里装刹车去年我写了一篇 QGS 质量门禁系统：给 AI Agent 装上”刹车和质检”，介绍了 QGS 的设计理念——在 Agent 输出前加一道质量评分闸门，分数低于阈值就阻断输出。 当时只是一个实验性的想法，跑的是简单任务。 这一个月，我把 QGS 接进了生产环境——每天 20+ 个 cron 任务、多模型并发、跨项目协作，复杂度远超当年。 10 天下来，审计日志里记录了 373 次评分、46 次阻断、102 次人工审批点。数据不会说谎——我们来聊聊值不值。 2. 生产环境数据：46 次刹车背后的故事先上硬数据。QGS 的所有决策都写入 ~/.hermes/qgs/audit_wal.jsonl（append-only JSONL），我从中提取了以下统计： 整...</div></div></div></a><a class="pagination-related" href="/2026/08/08/2026-08-08-aa-v2-primeagent-rewrite/" title="我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写"><img class="cover" src="/img/cover-aa-v2-primeagent-rewrite-v2.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-08</div><div class="info-item-2">我的 Agent 一出生就是落后产品：从 1416 次 tick 到 PrimeAgent 基座重写</div></div><div class="info-2"><div class="info-item-1"> 上周我写了一篇《我的 Agent 假装上班了 5 天》，诊断了自研 ActiveAgent 的”空转”。这周我做了个更狠的决定：亲手杀掉它，推倒重写。 原因是一句话——“agent 技术发展日新月异，大概率 AA 一出生就是个落后产品。” 这篇记录从「要不要继续做」的灵魂拷问，到 AA v2 四层架构、QGS 三 Gate 时机设计、6 轮对抗式评审收敛的全过程。     1. 缘起：一个让我失眠的问题我的 ActiveAgent（AA）是一个”自治运维壳”：每 15 分钟 tick 一次，扫描 3 个项目 × 9 个维度，发现问题就修复，每天 21:00 出日报。上周刚把它”假装上班 5 天”的空转问题修好（见《我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录》）。 修完之后，我盯着它问了自己一个问题：AA 还有必要继续发展吗？ 把账算清楚之后，答案让我睡不着：    数据 数值 含义    tick 次数 1416 次 系统自认为”工作”的总次数   其中只 report 的 98% 几乎全部只是汇报，没有行动   skills 只有声明无实现 宣称的能力是空...</div></div></div></a><a class="pagination-related" href="/2026/06/05/2026-06-05-QGS-quality-gate-system/" title="QGS 质量门禁系统：给 AI Agent 装上&quot;刹车和质检&quot;"><img class="cover" src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-05</div><div class="info-item-2">QGS 质量门禁系统：给 AI Agent 装上&quot;刹车和质检&quot;</div></div><div class="info-2"><div class="info-item-1"> 当 AI Agent 开始自主执行多步操作时，你如何确保它不会”脑子一抽”干出离谱的事？QGS（Quality Gate System）就是为此而生的一套内嵌质量门禁系统。  问题：Agent 失控的两个瞬间设想两个场景： 场景一：你让 Agent “部署一下这个服务”，它开心地执行了 rm -rf /（误），然后告诉你”部署完成！” 场景二：Agent 写了一篇技术文章，看起来头头是道，但里面引用的 API 版本已经过时了三年，调用的方法根本不存在。 这类问题在传统的 LLM 对话中并不突出——因为每轮输出你都肉眼可见。但当 Agent 进入自主执行模式——连跑十几轮工具调用、读写文件、操作浏览器、部署服务——你就没法每步都盯着了。 QGS 就是那个在后台默默盯着的”质检员”。 什么是 QGS？QGS &#x3D; Quality Gate System，直译是”质量门禁系统”。它不是一个独立的外部工具，而是嵌入在 Agent 执行循环内部的一套质量控制框架。 形象点说，传统 Agent 的执行循环像一条单向高速公路： 1用户输入 → LLM 思考 → 工具调用 → 输出结果...</div></div></div></a><a class="pagination-related" href="/2026/09/19/2026-09-19-llm-thinking-leak-contract-gate/" title="LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文"><img class="cover" src="/img/cover-llm-thinking-leak.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-19</div><div class="info-item-2">LLM 把思考过程当正文发表——一道契约门禁如何终结&quot;清洗型&quot;防脏文</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：推理模型的思考段泄漏进正文，靠正则清洗永远追不上——把防御点从”事后清洗”挪到”事前契约”，脏文进不了发布口。  1. 缘起 — 一篇被我手动删掉的脏文我的雪球自动发帖管线跑了三个月，每天定时出稿。9 月 18 日那天，个股分析环节发出去一篇文章——正文 80% 是 LLM 的思考独白，”让我们分析原文””规划各部分内容””（字数约 180 字）”这种话赫然出现在给读者看的文章里。我删掉了它。 删完我问了自己一个问题：这条管线明明已经跑了这么久、加了那么多清洗规则，为什么还会有这种事？ 查完根因，我发现这不是一组零散 bug，而是一个架构性缺陷。今天把整个故障链和修复过程写出来，因为我估计你迟早也会撞上一模一样的墙。 2. 故障链复盘 — 四层防线全在”事后”先还原 9 月 18 日那天发生了什么。故障是三层原因叠加的结果： 第一层：数据源 name 回显成代码。 东财 API 的 name 字段返回了 &quot;002631&quot; 而不是”德尔未来”，只有 quote.name 里才有真实名称。LLM 拿到带代码名的数据，标题就变成了”股票代码：00263...</div></div></div></a><a class="pagination-related" href="/2026/09/02/2026-09-02-xueqiu-pipeline-quality-gates/" title="我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战"><img class="cover" src="/img/cover-xueqiu-pipeline.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-02</div><div class="info-item-2">我让 AI Agent 在雪球自动发股评——多阶段质量门禁管线实战</div></div><div class="info-2"><div class="info-item-1"> 从数据采集到发布上链，4 个阶段 6 道闸门——这是我构建雪球自动发股评管线踩过的所有坑。  1. 缘起 — 为什么搞这个我有一套覆盖 A 股 5000+ 只股票的数据采集系统（stock-mcp-server，128 个工具、15 个数据源），每天能自动抓取实时行情、技术指标、资金流向、龙虎榜、公告、研报……数据很全，但数据不等于内容。 雪球上有大量作者每天发收盘复盘、盘前早报、个股分析。如果我能用 AI 把这些数据自动写成文章发到雪球，相当于给我的数据系统装了一个”变现出口”。 听起来简单——调 LLM 写篇文章然后发出去不就行了？ 实际操作下来，我踩了至少 15 个坑，写了 6000+ 行 Python，最终搭出了一条 4 阶段、6 道闸门的管线。这篇文章就是这些坑的完整记录。 2. 核心方法 — 四阶段六闸门2.1 管线全貌1234567┌─────────────┐   ┌──────────────┐   ┌──────────────┐   ┌────────────┐│ 1. 数据采集  │ → │ 2. 文章生成   │ → │ 3. 质量评审   │ → │...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">89</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">225</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">30</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E9%87%8D%E6%9E%84-QGS"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 为什么要重构 QGS</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E7%97%9B%E7%82%B9%EF%BC%9A%E7%BA%AF-LLM-%E8%AF%84%E5%AE%A1%E7%9A%84%E4%B8%89%E5%A4%A7%E9%A1%BD%E7%96%BE"><span class="toc-number">1.1.</span> <span class="toc-text">1.1 痛点：纯 LLM 评审的三大顽疾</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%85%B3%E9%94%AE%E6%B4%9E%E5%AF%9F%EF%BC%9A%E5%88%A4%E6%96%AD%E8%A6%81%E5%88%86%E5%B1%82"><span class="toc-number">1.2.</span> <span class="toc-text">1.2 关键洞察：判断要分层</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-%E4%B8%89%E5%B1%82%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — 三层架构详解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Layer-1%EF%BC%9A%E8%A7%84%E5%88%99%E5%8D%B3%E6%95%B0%E6%8D%AE"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 Layer 1：规则即数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Layer-2%EF%BC%9ALLM-%E8%AF%AD%E4%B9%89%E5%88%A4%E6%96%AD%EF%BC%88%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 Layer 2：LLM 语义判断（模板注入）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Layer-3%EF%BC%9A%E7%8B%AC%E7%AB%8B%E5%8F%8D%E6%80%9D%E6%A8%A1%E5%9D%97"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 Layer 3：独立反思模块</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AE%9E%E6%88%98%E6%95%88%E6%9E%9C-%E2%80%94-%E7%9C%9F%E5%AE%9E%E8%B7%91%E6%95%B0"><span class="toc-number">3.</span> <span class="toc-text">3. 实战效果 — 真实跑数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%90%AF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 启用方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%85%B8%E5%9E%8B%E8%BE%93%E5%87%BA%E5%AF%B9%E6%AF%94"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 典型输出对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%85%B3%E9%94%AE%E6%8C%87%E6%A0%87%E5%AF%B9%E6%AF%94"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 关键指标对比</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E5%8F%8D%E4%BE%8B%E4%B8%8E%E8%BE%B9%E7%95%8C"><span class="toc-number">4.</span> <span class="toc-text">4. 踩坑记录 — 反例与边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%9D%91-1%EF%BC%9A%E8%A7%84%E5%88%99%E6%AD%A3%E5%88%99%E7%9A%84%E8%B4%AA%E5%A9%AA%E5%8C%B9%E9%85%8D"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 坑 1：规则正则的贪婪匹配</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%9D%91-2%EF%BC%9ALayer-1-%E6%89%AB%E4%B8%8D%E5%88%B0%E5%8A%A8%E6%80%81%E7%94%9F%E6%88%90%E7%9A%84%E4%BB%A3%E7%A0%81"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 坑 2：Layer 1 扫不到动态生成的代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E5%9D%91-3%EF%BC%9A%E5%8F%8D%E6%80%9D%E6%A8%A1%E5%9D%97%E5%81%B6%E5%B0%94%E2%80%9D%E4%B8%BA%E4%BA%86%E5%8F%8D%E6%80%9D%E8%80%8C%E5%8F%8D%E6%80%9D%E2%80%9D"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 坑 3：反思模块偶尔”为了反思而反思”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E5%9D%91-4%EF%BC%9A%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E6%8E%A7%E5%88%B6%E4%B8%8D%E5%A4%9F%E7%BB%86%E7%B2%92%E5%BA%A6"><span class="toc-number">4.4.</span> <span class="toc-text">4.4 坑 4：环境变量控制不够细粒度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A4%8D%E7%94%A8%E5%9C%BA%E6%99%AF-%E2%80%94-%E4%B8%8D%E6%AD%A2%E4%BA%8E%E5%86%85%E5%AE%B9%E7%94%9F%E6%88%90"><span class="toc-number">5.</span> <span class="toc-text">5. 复用场景 — 不止于内容生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%80%BB%E7%BB%93%E4%B8%8E%E8%A1%8C%E5%8A%A8%E5%BB%BA%E8%AE%AE"><span class="toc-number">6.</span> <span class="toc-text">6. 总结与行动建议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%A0%B8%E5%BF%83%E5%BF%83%E6%B3%95"><span class="toc-number">6.1.</span> <span class="toc-text">6.1 核心心法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E7%AB%8B%E5%8D%B3%E5%8F%AF%E7%94%A8"><span class="toc-number">6.2.</span> <span class="toc-text">6.2 立即可用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E8%B4%A1%E7%8C%AE%E8%A7%84%E5%88%99"><span class="toc-number">6.3.</span> <span class="toc-text">6.3 贡献规则</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-%E7%9B%B8%E5%85%B3%E9%93%BE%E6%8E%A5"><span class="toc-number">7.</span> <span class="toc-text">7. 相关链接</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/12/2026-10-12-qgs-three-layer-architecture/" title="QGS 三层架构：把质量门禁变成可组合的基础设施"><img src="/img/cover-qgs-three-layer.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="QGS 三层架构：把质量门禁变成可组合的基础设施"/></a><div class="content"><a class="title" href="/2026/10/12/2026-10-12-qgs-three-layer-architecture/" title="QGS 三层架构：把质量门禁变成可组合的基础设施">QGS 三层架构：把质量门禁变成可组合的基础设施</a><time datetime="2026-10-12T02:00:00.000Z" title="发表于 2026-10-12 10:00:00">2026-10-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/10/2026-10-10-skill-routing-contract-audit/" title="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检"><img src="/img/cover-skill-routing-contract-audit.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检"/></a><div class="content"><a class="title" href="/2026/10/10/2026-10-10-skill-routing-contract-audit/" title="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检">技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检</a><time datetime="2026-10-10T02:00:00.000Z" title="发表于 2026-10-10 10:00:00">2026-10-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/2026-10-07-llm-decision-cache-sidecar/" title="重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑"><img src="/img/cover-llm-decision-cache-sidecar.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑"/></a><div class="content"><a class="title" href="/2026/10/07/2026-10-07-llm-decision-cache-sidecar/" title="重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑">重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑</a><time datetime="2026-10-07T02:00:00.000Z" title="发表于 2026-10-07 10:00:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/02/2026-10-02-openai-regulation-storm/" title="AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级"><img src="/img/cover-ai-regulation-storm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级"/></a><div class="content"><a class="title" href="/2026/10/02/2026-10-02-openai-regulation-storm/" title="AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级">AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级</a><time datetime="2026-10-02T02:00:00.000Z" title="发表于 2026-10-02 10:00:00">2026-10-02</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/09/30/2026-09-30-html-visual-pipeline/" title="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染"><img src="/img/cover-html-visual-pipeline-20260930.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染"/></a><div class="content"><a class="title" href="/2026/09/30/2026-09-30-html-visual-pipeline/" title="AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染">AI 画不出一句对的话 — 我把封面、插图、视频都改成了 HTML 渲染</a><time datetime="2026-09-30T02:30:00.000Z" title="发表于 2026-09-30 10:30:00">2026-09-30</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
