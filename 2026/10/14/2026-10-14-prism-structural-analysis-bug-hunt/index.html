@@ -1,0 +1,379 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="普通的代码审查（肉眼 + linter）只能看到表面缺陷。我们在 agent-evolution 引擎上用 Prism 结构分析棱镜（Cranot 的 5 个分析技能），在一次 &#x2F;prism-scan 运行中发现了 13 处带行号的缺陷（含 2 高严重），全部落到代码并修复。本文把 Prism 的思路、找到的真实例子和复用方法写给你。   1. 缘起 — 代码审查做了 3 年，还是没撞见真正的坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="普通的代码审查（肉眼 + linter）只能看到表面缺陷。我们在 agent-evolution 引擎上用 Prism 结构分析棱镜（Cranot 的 5 个分析技能），在一次 &#x2F;prism-scan 运行中发现了 13 处带行号的缺陷（含 2 高严重），全部落到代码并修复。本文把 Prism 的思路、找到的真实例子和复用方法写给你。   1. 缘起 — 代码审查做了 3 年，还是没撞见真正的坑">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-2026-10-14-prism-structural-analysis.png">
+<meta property="article:published_time" content="2026-10-14T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-14T02:16:27.956Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Agent工程化">
+<meta property="article:tag" content="Prism">
+<meta property="article:tag" content="agent-evolution">
+<meta property="article:tag" content="代码审查">
+<meta property="article:tag" content="静态分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-2026-10-14-prism-structural-analysis.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷",
+  "url": "https://boke.studyai.ltd/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/",
+  "image": "https://boke.studyai.ltd/img/cover-2026-10-14-prism-structural-analysis.png",
+  "datePublished": "2026-10-14T02:00:00.000Z",
+  "dateModified": "2026-10-14T02:16:27.956Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">90</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">230</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">31</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-2026-10-14-prism-structural-analysis.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-14T02:00:00.000Z" title="发表于 2026-10-14 10:00:00">2026-10-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-14T02:16:27.956Z" title="更新于 2026-10-14 10:16:27">2026-10-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">工程实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>普通的代码审查（肉眼 + linter）只能看到表面缺陷。我们在 <code>agent-evolution</code> 引擎上用 <strong>Prism 结构分析棱镜</strong>（Cranot 的 5 个分析技能），在一次 <code>/prism-scan</code> 运行中发现了 <strong>13 处带行号的缺陷</strong>（含 2 高严重），全部落到代码并修复。本文把 Prism 的思路、找到的真实例子和复用方法写给你。</p>
+</blockquote>
+<hr>
+<h2 id="1-缘起-—-代码审查做了-3-年，还是没撞见真正的坑"><a href="#1-缘起-—-代码审查做了-3-年，还是没撞见真正的坑" class="headerlink" title="1. 缘起 — 代码审查做了 3 年，还是没撞见真正的坑"></a>1. 缘起 — 代码审查做了 3 年，还是没撞见真正的坑</h2><p><code>agent-evolution</code> 是我们让 AI Agent 自己进化的引擎：扫描执行日志 → 分类错误 → 拉取修复策略 → 生成改进计划 → 自动 apply → 验证。<code>evolve_analysis.py</code> 单文件 <strong>2419 行</strong>，负责从 <code>fix_strategies.md</code> 解析修复模板，往 <code>knowledge-base.json</code> 积累教训，往 <code>evolution-plan-*.json</code> 写计划。</p>
+<p>我们写 pytest，跑 black，甚至请同事肉眼过了两轮——都没撞见以下几个缺陷：</p>
+<ul>
+<li><code>.count(&#39;401&#39;)</code> 把字符串 <code>&quot;401&quot;</code> 误当 HTTP 状态码</li>
+<li><code>hash()</code> 作为去重主键却<strong>跨进程随机化</strong></li>
+<li><code>_load_knowledge_base</code> 用裸 <code>except: pass</code> 把<strong>损坏的 JSON 吞成空字典</strong>，随后把空字典写回覆盖原文件</li>
+<li>写状态文件<strong>非原子写</strong>，半写崩溃留下损坏 JSON</li>
+</ul>
+<p>这些缺陷从代码上”长得很正常”，只有在某个边界条件命中才翻车。普通 reviewer 又怎么会发现呢？答案是：<strong>换一个棱镜</strong>(prism)。</p>
+<h2 id="2-核心方法-—-Prism-不是“检查清单”，是“动态认知棱镜”"><a href="#2-核心方法-—-Prism-不是“检查清单”，是“动态认知棱镜”" class="headerlink" title="2. 核心方法 — Prism 不是“检查清单”，是“动态认知棱镜”"></a>2. 核心方法 — Prism 不是“检查清单”，是“动态认知棱镜”</h2><p>Prism（来自 <a target="_blank" rel="noopener" href="https://github.com/Cranot/super-hermes"><code>Cranot/super-hermes</code></a>）是 5 个 Hermes 技能：</p>
+<table>
+<thead>
+<tr>
+<th>技能</th>
+<th>作用</th>
+<th>什么场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/prism-discover</code></td>
+<td>列出 10~20 个可能分析的领域</td>
+<td>不知从何下手时</td>
+</tr>
+<tr>
+<td><code>/prism-scan</code></td>
+<td>炒一个<strong>专属认知棱镜</strong>，然后执行</td>
+<td>单文件&#x2F;单文档深度审查</td>
+</tr>
+<tr>
+<td><code>/prism-full</code></td>
+<td>设计多轮流水线 + 必做对抗性自校</td>
+<td>重要模块，值得花成本</td>
+</tr>
+<tr>
+<td><code>/prism-3way</code></td>
+<td>WHERE(结构)&#x2F;WHEN(时间)&#x2F;WHY(可能性) 三角 + 综合</td>
+<td>非代码 artifacts</td>
+</tr>
+<tr>
+<td><code>/prism-reflect</code></td>
+<td>分析<strong>分析本身的盲区</strong>，写 <code>.prism-history.md</code></td>
+<td>知道自己不能看什么</td>
+</tr>
+</tbody></table>
+<p>Prism 的核心区别在两点：</p>
+<p><strong>① 棱镜不是固定模板。</strong> <code>/prism-scan</code> 会现炮制定一个针对<strong>当前文件的</strong>认知棱镜（75–200 词，必须“建构再诊断”），比如 <em>“找出每一个隐式边界（coercion &#x2F; default &#x2F; null check），追踪多跳错误分支到用户可见伤害”</em> —— 而不是背诵一份通用 checklist。</p>
+<p><strong>② 守恒定律 (Conservation Law)。</strong> 每次分析都会推出一条 <code>A × B = 常量</code> 的结构守恒，比如 Prism 在 <code>agent-evolution</code> 上一次扫出的：</p>
+<blockquote>
+<p><strong>正则表达式 × 格式鲁棒性 &#x3D; 常数（阶段 1）；自动化 × 验证 &#x3D; 常数（结构性）；文件 I&#x2F;O × 状态完整性 &#x3D; 常数</strong></p>
+</blockquote>
+<p>守恒定律不是建议 —— 它揭示了一个工程问题在<strong>所有实现</strong>上都逃不过的权衡。把守恒定律放在眼前，就能反向推出“什么改进一定会制造新缺陷”，从而扫掉表面光鲜的伪修。</p>
+<h2 id="3-实战-—-Prism-怎么把-13-处缺陷藏到明白"><a href="#3-实战-—-Prism-怎么把-13-处缺陷藏到明白" class="headerlink" title="3. 实战 — Prism 怎么把 13 处缺陷藏到明白"></a>3. 实战 — Prism 怎么把 13 处缺陷藏到明白</h2><p>Prism 在 <code>evolve_analysis.py</code> 上的第一次扫是 <code>/prism-reflect</code>（自反镜 + 盲区记录）。它既产出缺陷清单，又把 <code>Maximized/Sacrificed/Recommendations</code> 写入 <code>.prism-history.md</code>，为下轮 <code>/prism-scan</code> 引路。</p>
+<p>随后两轮 commit (<code>8399fb2</code> 高 2 严 + <code>698af9c</code> 中 9 低) 把所有缺陷落到代码。以下是 6 个最典型的，每个都来自不同“隐式边界”。</p>
+<h3 id="3-1-count-401-把日志噪声当真实-HTTP-失败"><a href="#3-1-count-401-把日志噪声当真实-HTTP-失败" class="headerlink" title="3.1 .count(&#39;401&#39;) 把日志噪声当真实 HTTP 失败"></a>3.1 <code>.count(&#39;401&#39;)</code> 把日志噪声当真实 HTTP 失败</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复前 L325 — analyze_api_health</span></span><br><span class="line"><span class="keyword">if</span> line.count(<span class="string">&#x27;401&#x27;</span>) &gt; <span class="number">0</span>:</span><br><span class="line">    failures.append(...)</span><br></pre></td></tr></table></figure>
+
+<p>咱扫日志里的一段错误 <code>...status=40101...</code> — 字符串里恰好包含了一个 <code>401</code>，瞬间被当作一次 auth 失败，把正常请求记成异常 <strong>×1</strong>。Prism 的镜头让它暴露出来： <em>“朴素 <code>.count(&#39;401&#39;)</code> 只能看到 401 出现的字面形态，却摧毁了 <strong>上下文信息</strong> —— 是 state&#x3D;40101 还是 HTTP 401。后者分支选错，前者则是假阳。”</em></p>
+<p><strong>修复</strong>: 词边界 <code>\\b401\\b</code> + 失败特征正则，只统计真实失败信号。</p>
+<h3 id="3-2-hash-作为去重主键-——-跨进程随机化"><a href="#3-2-hash-作为去重主键-——-跨进程随机化" class="headerlink" title="3.2 hash() 作为去重主键 —— 跨进程随机化"></a>3.2 <code>hash()</code> 作为去重主键 —— 跨进程随机化</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复前 _deduplicate_knowledge</span></span><br><span class="line">key = <span class="built_in">hash</span>(item)   <span class="comment"># ← CPython PYTHONHASHSEED 随机化，跨进程不同</span></span><br><span class="line"><span class="keyword">if</span> key <span class="keyword">in</span> seen: ...</span><br></pre></td></tr></table></figure>
+
+<p>知识库去重用 <code>hash()</code>，却无人想到 <strong>hash() 在默认 <code>PYTHONHASHSEED</code> 下对 str&#x2F;bytes&#x2F;datetime 是随机的</strong>。于是同一个缺陧在进程 A 去重后，在进程 B 又重新入库，知识库逐轮 <strong>膨胀</strong> 而非收敛。Prism 的 <strong>temporal simulation</strong> 镜头 (Cycle 3: 原作者离) 把它揪出来：<em>“一项依赖进程内隐状态去重的知识累积，没写进文档就等着新人踩坑。”</em></p>
+<p><strong>修复</strong>: 规范化 JSON 字符串作为确定性去记键；<code>failure_lessons</code> 保留最旧教训。</p>
+<h3 id="3-3-硬编码路径-home-admin-hermes-vs-HERMES-HOME"><a href="#3-3-硬编码路径-home-admin-hermes-vs-HERMES-HOME" class="headerlink" title="3.3 硬编码路径 /home/admin/.hermes vs HERMES_HOME"></a>3.3 硬编码路径 <code>/home/admin/.hermes</code> vs <code>HERMES_HOME</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复前 L570</span></span><br><span class="line">skill_md = Path(<span class="string">f&quot;/home/admin/.hermes/skills/<span class="subst">&#123;cat&#125;</span>/<span class="subst">&#123;name&#125;</span>/SKILL.md&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>验证函数硬编了 <code>/home/admin/.hermes</code>，而 <code>apply_safe_improvements</code> 写路径却用 <code>HERMES_HOME</code> —— 两套路径不同步，<strong>本地验过“有效”的改进在 CI&#x2F;他人机器上全部变成“失败”</strong>。Prism 的 <strong>identity</strong> 镜头揪出这个 <em>“声称的身份 vs 实际身份”</em> 鸿沟。</p>
+<p><strong>修复</strong>: <code>HERMES_HOME / &quot;skills&quot; / cat / name / &quot;SKILL.md&quot;</code>。</p>
+<h3 id="3-4-裸-except-pass-把损坏-JSON-吞成空字典-→-随后覆盖原文件"><a href="#3-4-裸-except-pass-把损坏-JSON-吞成空字典-→-随后覆盖原文件" class="headerlink" title="3.4 裸 except: pass 把损坏 JSON 吞成空字典 → 随后覆盖原文件"></a>3.4 裸 <code>except: pass</code> 把损坏 JSON 吞成空字典 → 随后覆盖原文件</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复前 L1489 — _load_knowledge_base</span></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">return</span> json.load(f)</span><br><span class="line"><span class="keyword">except</span> Exception:</span><br><span class="line">    <span class="keyword">pass</span>               <span class="comment"># ← 返回空字典</span></span><br><span class="line"><span class="comment"># …_accumulate_knowledge 把空字典写回覆盖 knowledge-file</span></span><br></pre></td></tr></table></figure>
+
+<p>知识库损毁 → 静默返回 <code>{}</code> → 调用方当作“空库”，<strong>把空字典写回原路径</strong>，把 50 条历史教训彻底抹掉。Prism 的 <strong>error resilience</strong> 镜头追得很远：<em>“destroyed context &#x3D; ‘损坏’ 信号本身；wrong decision &#x3D; 选择‘空默认’而非‘报警+保留’；harm &#x3D; 下游静默覆盖。”</em></p>
+<p><strong>修复</strong>: <code>except (json.JSONDecodeError, OSError)</code> → 备份 <code>.corrupt</code> + 报警，决不返回空覆盖。</p>
+<h3 id="3-5-非原子写-→-半写崩溃留下损坋-JSON"><a href="#3-5-非原子写-→-半写崩溃留下损坋-JSON" class="headerlink" title="3.5 非原子写 → 半写崩溃留下损坋 JSON"></a>3.5 非原子写 → 半写崩溃留下损坋 JSON</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复前 L1584 — _get_evolution_cycle</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(state_path, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    json.dump(state, f)   <span class="comment"># ← 写入未完成就 crash，state 文件废了</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>修复</strong>:<code>tmp + os.replace</code> 原子写；读损坏文件时备份 <code>.corrupt</code> + 重置不崩溃。</p>
+<h3 id="3-6-from-datetime-import-写进循环内"><a href="#3-6-from-datetime-import-写进循环内" class="headerlink" title="3.6 from datetime import 写进循环内"></a>3.6 <code>from datetime import</code> 写进循环内</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 修复前 L1439 — 循环内导模块</span></span><br><span class="line"><span class="keyword">for</span> ...:</span><br><span class="line">    <span class="keyword">from</span> datetime <span class="keyword">import</span> datetime   <span class="comment"># 重复导入开销</span></span><br></pre></td></tr></table></figure>
+
+<p>Prism 还抓到**“知识丢失”** (Cycle 1): 每次 loop 都从 <code>import</code> 入口进，新人难以判断 <code>datetime</code> 真正归属何处，易犯搬迁遗漏。 → 模块级导入。</p>
+<h3 id="3-7-consecutive-failure-的验证路径缺失"><a href="#3-7-consecutive-failure-的验证路径缺失" class="headerlink" title="3.7 consecutive_failure 的验证路径缺失"></a>3.7 <code>consecutive_failure</code> 的验证路径缺失</h3><p>Prism 还指出：<strong>检测到 P0 之后没有“验证它是否恢复”的分支</strong> —— 于是增加了 <code>effective / partial / failed</code> 三路验证分支。</p>
+<h2 id="4-踩坑记录-—-用-Prism-需要注意的-3-点"><a href="#4-踩坑记录-—-用-Prism-需要注意的-3-点" class="headerlink" title="4. 踩坑记录 — 用 Prism 需要注意的 3 点"></a>4. 踩坑记录 — 用 Prism 需要注意的 3 点</h2><h3 id="4-1-镜头成本不便宜"><a href="#4-1-镜头成本不便宜" class="headerlink" title="4.1 镜头成本不便宜"></a>4.1 镜头成本不便宜</h3><p><code>/prism-reflect</code> 是 2~3 倍 <code>/prism-scan</code> 的Token —— 只拿<strong>值得的模块</strong>下镜子。Prism 自己的建议说得最清楚：</p>
+<blockquote>
+<p><em>“对安全攻击面：<code>/prism-scan with security focus</code>；对时间退化：<code>/prism-scan with temporal focus</code>；对跨文件架构：<code>/prism-full</code>。”</em></p>
+</blockquote>
+<p><strong>不要对每个文件全科普</strong>。在 <code>README.md</code> 或已发布博文上扫一次，换一轮 <code>prism-scan</code> 在 <code>fix_strategies.md</code> —— 这样 <code>.prism-history.md</code> 的 <code>Sacrificed</code> 域才会收敛。</p>
+<h3 id="4-2-守恒定律会被曲解"><a href="#4-2-守恒定律会被曲解" class="headerlink" title="4.2 守恒定律会被曲解"></a>4.2 守恒定律会被曲解</h3><p>看到 <code>A × B = 常数</code> 容易手撕一张“优化”表，却忽略 <strong>常量本身会变</strong>。Prism 强调（l12 meta-law）：</p>
+<blockquote>
+<p><em>“把你的改进当新 artifact，再扫一遍 —— 你的改进掩盖了哪些原问题？那个被掩盖的性质在你改进里又重新显现了？”</em></p>
+</blockquote>
+<p>举例：我们把 <code>hash()</code> → JSON-string 去重，解决了跨进程随机化，<strong>但引入</strong>了 <code>json.dumps</code> 时序不稳定的问题 —— 又是一轮对抗。</p>
+<h3 id="4-3-prism-history-md-是增长引擎，不是档案"><a href="#4-3-prism-history-md-是增长引擎，不是档案" class="headerlink" title="4.3 .prism-history.md 是增长引擎，不是档案"></a>4.3 <code>.prism-history.md</code> 是增长引擎，不是档案</h3><p>每次 <code>/prism-reflect</code> 都会 <strong>追加</strong>到 <code>.prism-history.md</code>；下次 <code>/prism-scan</code> 会读它，并在 <code>Sacrificed</code> 域加权对应视角。<strong>不要手动删</strong> history —— 删了相当于忘掉自己之前扫视了哪些盲区。</p>
+<h2 id="5-复用方法-—-5-步把-Prism-安上自己的项目"><a href="#5-复用方法-—-5-步把-Prism-安上自己的项目" class="headerlink" title="5. 复用方法 — 5 步把 Prism 安上自己的项目"></a>5. 复用方法 — 5 步把 Prism 安上自己的项目</h2><ol>
+<li><strong>装上技能</strong> — <code>hermes skills install prism-scan prism-full prism-3way prism-discover prism-reflect</code> (源自 <a target="_blank" rel="noopener" href="https://github.com/Cranot/super-hermes">Cranot&#x2F;super-hermes</a>)。</li>
+<li><strong>探索领域</strong> — <code>/prism-discover</code> 你的 <code>main.py</code>，拿 10~20 个分析维度菜单。</li>
+<li><strong>挑值一棍</strong> — 选“错误恢复” &#x2F; “时间退化” &#x2F; “跨文件架构” 这样<strong>结构性</strong>的维度扫 <code>/prism-scan</code>（带 <code>--focus=&quot;...&quot;</code>）。</li>
+<li><strong>留约</strong> — 每次扫完立即 <code>/prism-reflect</code>，把 <code>CONSTRAINT REPORT</code> 写进项目 <code>.prism-history.md</code>，惠及下次。</li>
+<li><strong>验证-对抗-修复循环</strong> — 把 Prism 给的缺陷落为 pytest 用例 → 修复 → 要求它扫<strong>改动后的文件</strong>，确认没掩盖一手。</li>
+</ol>
+<h2 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h2><table>
+<thead>
+<tr>
+<th>我以前以为</th>
+<th>Prism 教会我的</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>代码审查靠肉眼 + linter</td>
+<td>结构缺陷藏在“隐式边界”里，肉眼看不见</td>
+</tr>
+<tr>
+<td>守一次 review 就够</td>
+<td>守恒定律告诉你：任何改进都会制造新缺陷</td>
+</tr>
+<tr>
+<td>去重&#x2F;缓存随便写</td>
+<td><code>hash()</code>、原子写、确定性键 —— 跨进程&#x2F;跨机都要意识到</td>
+</tr>
+</tbody></table>
+<p>Prism 的价值，远不于“给你 checklist”。它是一台<strong>能看到自己盲区的审查机</strong> —— 用动态棱镜替换固定眼光，用守恒定律取代肉眼直观。在 <code>agent-evolution</code> 上扫一次，就从 2419 行代码里捞出 13 处藏了 3 年之久的缺陷。</p>
+<p>如果你也在写一个 LLM 驱动的自进化引擎&#x2F;管线，<strong>强烈</strong>在第一次 <code>git push</code> 前跑一次 <code>/prism-reflect</code> —— 它可能会把一个“应该能跑”的 release 变回“等我修完最后一个裸 <code>except</code>”。</p>
+<blockquote>
+<p>相关代码：<a target="_blank" rel="noopener" href="https://github.com/yadinae/agent-evolution/blob/main/evolve_analysis.py">agent-evolution&#x2F;evolve_analysis.py</a> · <a target="_blank" rel="noopener" href="https://github.com/Cranot/super-hermes">Prism 技能</a> · <a target="_blank" rel="noopener" href="https://github.com/yadinae/agent-evolution/blob/main/.prism-history.md">.prism-history.md</a></p>
+</blockquote>
+<hr>
+<blockquote>
+<p><em>PS: Prism 系列技能作者是 Cranot，整个 <code>super-hermes</code> 技能集开源在 GitHub。感谢能看到自己盲角的工具。</em></p>
+</blockquote>
+<p><em>生成时间：2026-10-14 10:10</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/">https://boke.studyai.ltd/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Prism/">Prism</a><a class="post-meta__tags" href="/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5/">代码审查</a><a class="post-meta__tags" href="/tags/%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90/">静态分析</a><a class="post-meta__tags" href="/tags/Agent%E5%B7%A5%E7%A8%8B%E5%8C%96/">Agent工程化</a><a class="post-meta__tags" href="/tags/agent-evolution/">agent-evolution</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-2026-10-14-prism-structural-analysis.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/10/12/2026-10-12-qgs-three-layer-architecture/" title="QGS 三层架构：把质量门禁变成可组合的基础设施"><img class="cover" src="/img/cover-qgs-three-layer.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">QGS 三层架构：把质量门禁变成可组合的基础设施</div></div><div class="info-2"><div class="info-item-1"> 传统的 LLM 质量评审是黑盒：全靠一个大模型输出 JSON，既定位不准、又高误报、还贵。QGS 三层架构把判断拆成 确定性快筛（Layer1）+ 语义判断（Layer2）+ 独立反思（Layer3），把质量门禁从”评分器”变成了可组合、可调试、可扩展的基础设施。   1. 缘起 — 为什么要重构 QGS1.1 痛点：纯 LLM 评审的三大顽疾最早的 QGS（Quality Gate System）是个纯 LLM 评审器：把交付物塞进 prompt，让模型打分、给建议、输出 JSON。跑了一段时间后，三个问题暴露无遗：    问题 表现 后果    位置不准 LLM 只能”猜”行号，经常指错文件、错行、甚至幻觉出不存在的函数 开发者无法定位修复，信任度归零   误报率高 同一段代码，换个温度、换个模型，结论可能反转；测试文件里的 print() 也被当 P2 报上来 噪音淹没信号，评审变成”狼来了”   成本失控 每次评审都要调一次大模型，Token 消耗不可控；想加规则只能改 prompt，版本管理混乱 规模上不去，迭代慢   1.2 关键洞察：判断要分层把质量判断拆成三层，...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">90</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">230</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">31</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%BB%A3%E7%A0%81%E5%AE%A1%E6%9F%A5%E5%81%9A%E4%BA%86-3-%E5%B9%B4%EF%BC%8C%E8%BF%98%E6%98%AF%E6%B2%A1%E6%92%9E%E8%A7%81%E7%9C%9F%E6%AD%A3%E7%9A%84%E5%9D%91"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 代码审查做了 3 年，还是没撞见真正的坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-Prism-%E4%B8%8D%E6%98%AF%E2%80%9C%E6%A3%80%E6%9F%A5%E6%B8%85%E5%8D%95%E2%80%9D%EF%BC%8C%E6%98%AF%E2%80%9C%E5%8A%A8%E6%80%81%E8%AE%A4%E7%9F%A5%E6%A3%B1%E9%95%9C%E2%80%9D"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — Prism 不是“检查清单”，是“动态认知棱镜”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%AE%9E%E6%88%98-%E2%80%94-Prism-%E6%80%8E%E4%B9%88%E6%8A%8A-13-%E5%A4%84%E7%BC%BA%E9%99%B7%E8%97%8F%E5%88%B0%E6%98%8E%E7%99%BD"><span class="toc-number">3.</span> <span class="toc-text">3. 实战 — Prism 怎么把 13 处缺陷藏到明白</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-count-401-%E6%8A%8A%E6%97%A5%E5%BF%97%E5%99%AA%E5%A3%B0%E5%BD%93%E7%9C%9F%E5%AE%9E-HTTP-%E5%A4%B1%E8%B4%A5"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 .count(&#39;401&#39;) 把日志噪声当真实 HTTP 失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-hash-%E4%BD%9C%E4%B8%BA%E5%8E%BB%E9%87%8D%E4%B8%BB%E9%94%AE-%E2%80%94%E2%80%94-%E8%B7%A8%E8%BF%9B%E7%A8%8B%E9%9A%8F%E6%9C%BA%E5%8C%96"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 hash() 作为去重主键 —— 跨进程随机化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E7%A1%AC%E7%BC%96%E7%A0%81%E8%B7%AF%E5%BE%84-home-admin-hermes-vs-HERMES-HOME"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 硬编码路径 &#x2F;home&#x2F;admin&#x2F;.hermes vs HERMES_HOME</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E8%A3%B8-except-pass-%E6%8A%8A%E6%8D%9F%E5%9D%8F-JSON-%E5%90%9E%E6%88%90%E7%A9%BA%E5%AD%97%E5%85%B8-%E2%86%92-%E9%9A%8F%E5%90%8E%E8%A6%86%E7%9B%96%E5%8E%9F%E6%96%87%E4%BB%B6"><span class="toc-number">3.4.</span> <span class="toc-text">3.4 裸 except: pass 把损坏 JSON 吞成空字典 → 随后覆盖原文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E9%9D%9E%E5%8E%9F%E5%AD%90%E5%86%99-%E2%86%92-%E5%8D%8A%E5%86%99%E5%B4%A9%E6%BA%83%E7%95%99%E4%B8%8B%E6%8D%9F%E5%9D%8B-JSON"><span class="toc-number">3.5.</span> <span class="toc-text">3.5 非原子写 → 半写崩溃留下损坋 JSON</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-from-datetime-import-%E5%86%99%E8%BF%9B%E5%BE%AA%E7%8E%AF%E5%86%85"><span class="toc-number">3.6.</span> <span class="toc-text">3.6 from datetime import 写进循环内</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-consecutive-failure-%E7%9A%84%E9%AA%8C%E8%AF%81%E8%B7%AF%E5%BE%84%E7%BC%BA%E5%A4%B1"><span class="toc-number">3.7.</span> <span class="toc-text">3.7 consecutive_failure 的验证路径缺失</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E7%94%A8-Prism-%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84-3-%E7%82%B9"><span class="toc-number">4.</span> <span class="toc-text">4. 踩坑记录 — 用 Prism 需要注意的 3 点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E9%95%9C%E5%A4%B4%E6%88%90%E6%9C%AC%E4%B8%8D%E4%BE%BF%E5%AE%9C"><span class="toc-number">4.1.</span> <span class="toc-text">4.1 镜头成本不便宜</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%AE%88%E6%81%92%E5%AE%9A%E5%BE%8B%E4%BC%9A%E8%A2%AB%E6%9B%B2%E8%A7%A3"><span class="toc-number">4.2.</span> <span class="toc-text">4.2 守恒定律会被曲解</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-prism-history-md-%E6%98%AF%E5%A2%9E%E9%95%BF%E5%BC%95%E6%93%8E%EF%BC%8C%E4%B8%8D%E6%98%AF%E6%A1%A3%E6%A1%88"><span class="toc-number">4.3.</span> <span class="toc-text">4.3 .prism-history.md 是增长引擎，不是档案</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E5%A4%8D%E7%94%A8%E6%96%B9%E6%B3%95-%E2%80%94-5-%E6%AD%A5%E6%8A%8A-Prism-%E5%AE%89%E4%B8%8A%E8%87%AA%E5%B7%B1%E7%9A%84%E9%A1%B9%E7%9B%AE"><span class="toc-number">5.</span> <span class="toc-text">5. 复用方法 — 5 步把 Prism 安上自己的项目</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">6. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/" title="Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷"><img src="/img/cover-2026-10-14-prism-structural-analysis.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷"/></a><div class="content"><a class="title" href="/2026/10/14/2026-10-14-prism-structural-analysis-bug-hunt/" title="Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷">Prism 棱镜扫码 — 在 2419 行代码里找出 11 个人人略过的缺陷</a><time datetime="2026-10-14T02:00:00.000Z" title="发表于 2026-10-14 10:00:00">2026-10-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/12/2026-10-12-qgs-three-layer-architecture/" title="QGS 三层架构：把质量门禁变成可组合的基础设施"><img src="/img/cover-qgs-three-layer.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="QGS 三层架构：把质量门禁变成可组合的基础设施"/></a><div class="content"><a class="title" href="/2026/10/12/2026-10-12-qgs-three-layer-architecture/" title="QGS 三层架构：把质量门禁变成可组合的基础设施">QGS 三层架构：把质量门禁变成可组合的基础设施</a><time datetime="2026-10-12T02:00:00.000Z" title="发表于 2026-10-12 10:00:00">2026-10-12</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/10/2026-10-10-skill-routing-contract-audit/" title="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检"><img src="/img/cover-skill-routing-contract-audit.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检"/></a><div class="content"><a class="title" href="/2026/10/10/2026-10-10-skill-routing-contract-audit/" title="技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检">技能库也会断链：我给 190 个互相引用的 AI 技能装了每日契约巡检</a><time datetime="2026-10-10T02:00:00.000Z" title="发表于 2026-10-10 10:00:00">2026-10-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/07/2026-10-07-llm-decision-cache-sidecar/" title="重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑"><img src="/img/cover-llm-decision-cache-sidecar.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑"/></a><div class="content"><a class="title" href="/2026/10/07/2026-10-07-llm-decision-cache-sidecar/" title="重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑">重复的决策不该重复花钱 — LLM 决策缓存 sidecar 实战与三个反直觉的坑</a><time datetime="2026-10-07T02:00:00.000Z" title="发表于 2026-10-07 10:00:00">2026-10-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/02/2026-10-02-openai-regulation-storm/" title="AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级"><img src="/img/cover-ai-regulation-storm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级"/></a><div class="content"><a class="title" href="/2026/10/02/2026-10-02-openai-regulation-storm/" title="AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级">AI 监管风暴眼：OpenAI 的四重围城，与一场早有预谋的系统性升级</a><time datetime="2026-10-02T02:00:00.000Z" title="发表于 2026-10-02 10:00:00">2026-10-02</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
