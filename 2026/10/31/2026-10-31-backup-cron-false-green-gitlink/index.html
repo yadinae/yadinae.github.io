@@ -1,0 +1,345 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="我每天凌晨 2:30 有个 cron 把整个 Agent 的运行时目录 ~&#x2F;.hermes 快照到一个 GitHub 仓库，连续跑了三个月，每次报告都是「✅ 备份完成，11134 文件」。直到 10 月 30 号我例行核一个插件的提交状态，才发现：fresh clone 这个备份仓库出来，crew 和 homeassistant 两个插件是空目录，1855 个文件一个都不在。 备份的敌人不是崩溃">
+<meta property="og:type" content="article">
+<meta property="og:title" content="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="我每天凌晨 2:30 有个 cron 把整个 Agent 的运行时目录 ~&#x2F;.hermes 快照到一个 GitHub 仓库，连续跑了三个月，每次报告都是「✅ 备份完成，11134 文件」。直到 10 月 30 号我例行核一个插件的提交状态，才发现：fresh clone 这个备份仓库出来，crew 和 homeassistant 两个插件是空目录，1855 个文件一个都不在。 备份的敌人不是崩溃">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-2026-10-31-backup-cron-false-green-gitlink.png">
+<meta property="article:published_time" content="2026-10-31T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-10-31T03:33:02.830Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Cron">
+<meta property="article:tag" content="Git">
+<meta property="article:tag" content="备份">
+<meta property="article:tag" content="踩坑实录">
+<meta property="article:tag" content="运维">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-2026-10-31-backup-cron-false-green-gitlink.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件",
+  "url": "https://boke.studyai.ltd/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/",
+  "image": "https://boke.studyai.ltd/img/cover-2026-10-31-backup-cron-false-green-gitlink.png",
+  "datePublished": "2026-10-31T02:00:00.000Z",
+  "dateModified": "2026-10-31T03:33:02.830Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">96</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">246</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">32</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-2026-10-31-backup-cron-false-green-gitlink.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-10-31T02:00:00.000Z" title="发表于 2026-10-31 10:00:00">2026-10-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-10-31T03:33:02.830Z" title="更新于 2026-10-31 11:33:02">2026-10-31</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">工程实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>我每天凌晨 2:30 有个 cron 把整个 Agent 的运行时目录 <code>~/.hermes</code> 快照到一个 GitHub 仓库，连续跑了三个月，每次报告都是「✅ 备份完成，11134 文件」。直到 10 月 30 号我例行核一个插件的提交状态，才发现：<strong>fresh clone 这个备份仓库出来，crew 和 homeassistant 两个插件是空目录，1855 个文件一个都不在。</strong> 备份的敌人不是崩溃，是<strong>假绿灯</strong>——那个每天让你安心的文件计数，本身就是谎报的那一个。</p>
+</blockquote>
+<h2 id="1-缘起-—-从「改完插件没进-git」查起"><a href="#1-缘起-—-从「改完插件没进-git」查起" class="headerlink" title="1. 缘起 — 从「改完插件没进 git」查起"></a>1. 缘起 — 从「改完插件没进 git」查起</h2><p>10 月 30 号晚上，我给质量门禁插件打了两处补丁：一个交付物截断（防止超长输出撑爆评审上下文），一个给 FAIL 消息加「建议修复顺序」清单。改完跑 smoke test，全绿。</p>
+<p>然后按老规矩核提交状态，发现一个尴尬的事实：<strong>这两处改动根本不在任何 git 仓库里。</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># live 文件有改动</span><br><span class="line">grep -c DELIVERABLE_MAX_CHARS ~/.hermes/plugins/qgs-auto-gate/__init__.py</span><br><span class="line"># → 6</span><br><span class="line"></span><br><span class="line"># 但 git 追踪的是备份副本（旧版）</span><br><span class="line">git show HEAD:.../qgs-auto-gate/__init__.py | grep -c DELIVERABLE_MAX_CHARS</span><br><span class="line"># → 0</span><br></pre></td></tr></table></figure>
+
+<p>根因不复杂：<code>~/.hermes/</code> 是运行时目录，<strong>不是 git 仓库</strong>。仓库里存的是 <code>hermes_backup/</code> 快照副本，两者靠每天 2:30 的 cron 快照同步，不是实时镜像。改完 live 插件到下次快照之间，那段窗口期改动是裸奔的。这个教训值得单独记一条：</p>
+<blockquote>
+<p><strong>改 <code>~/.hermes/</code> 下的文件 ≠ 已提交。</strong> 改完必须立刻 <code>git add</code> 对应文件，不能等 cron「赌一把」。</p>
+</blockquote>
+<p>但它只是引子。顺着「快照到底靠不靠谱」往下挖，我撞上了真正让我后背发凉的东西。</p>
+<h2 id="2-核心方法-—-三个层层递进的坑"><a href="#2-核心方法-—-三个层层递进的坑" class="headerlink" title="2. 核心方法 — 三个层层递进的坑"></a>2. 核心方法 — 三个层层递进的坑</h2><h3 id="坑一：运行时目录和-git-仓库是两回事（上面这条）"><a href="#坑一：运行时目录和-git-仓库是两回事（上面这条）" class="headerlink" title="坑一：运行时目录和 git 仓库是两回事（上面这条）"></a>坑一：运行时目录和 git 仓库是两回事（上面这条）</h3><p>这条最直接。解法是把「改完即提交」固化成习惯，而不是依赖周期性快照兜底。快照是<strong>备份</strong>，不是<strong>版本控制</strong>，两者窗口期完全不同。</p>
+<h3 id="坑二：备份工作区里有嵌套-git，git-add-生成了-gitlink"><a href="#坑二：备份工作区里有嵌套-git，git-add-生成了-gitlink" class="headerlink" title="坑二：备份工作区里有嵌套 .git，git add 生成了 gitlink"></a>坑二：备份工作区里有嵌套 <code>.git</code>，<code>git add</code> 生成了 gitlink</h3><p>这是本次真正的坑。我的备份脚本逻辑是：把 <code>~/.hermes</code> 的几个目录拷进备份仓库工作区，然后 <code>git add -A &amp;&amp; git commit</code>。</p>
+<p>问题出在<strong>插件目录</strong>。crew 和 homeassistant 这两个插件是<strong>就地 <code>git clone</code> 装进来的</strong>——它们的目录里各自带了一个 <code>.git</code>。而备份脚本里有个 rsync 分支：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> <span class="built_in">command</span> -v rsync &amp;&gt;/dev/null; <span class="keyword">then</span></span><br><span class="line">    rsync -a --delete --exclude=<span class="string">&#x27;.git&#x27;</span> ... <span class="string">&quot;<span class="variable">$src</span>/&quot;</span> <span class="string">&quot;<span class="variable">$dst</span>/&quot;</span>   <span class="comment"># 这个分支会排除 .git</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">cp</span> -a <span class="string">&quot;<span class="variable">$src</span>/.&quot;</span> <span class="string">&quot;<span class="variable">$dst</span>/&quot;</span>    <span class="comment"># ← 实际走的是这里，没有任何 .git 排除逻辑</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>我的机器上 <strong>rsync 根本没装</strong>（<code>command -v rsync</code> 为空），所以永远走 <code>cp -a</code> 兜底分支——它把嵌套的 <code>.git</code> 目录<strong>原样拷进了备份工作区</strong>。</p>
+<p>于是 <code>git add -A</code> 看到 <code>backup/.../plugins/crew/</code> 里有个 <code>.git</code>，就把它当成一个<strong>内嵌 git 仓库</strong>，记录成一条 <strong>gitlink（mode <code>160000</code>）</strong>——只存一个 commit 指针，<strong>不存任何文件内容</strong>。git 当时还打印了警告：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">warning: adding embedded git repository: plugins/dash</span><br><span class="line">hint: Clones of the outer repository will not contain the contents</span><br></pre></td></tr></table></figure>
+
+<p>但 <code>git add -A</code> 的输出没被捕获、没被检查，这个警告就石沉大海了。</p>
+<h3 id="坑三：cron-报告用-find-计数，谎报了「完整性」"><a href="#坑三：cron-报告用-find-计数，谎报了「完整性」" class="headerlink" title="坑三：cron 报告用 find 计数，谎报了「完整性」"></a>坑三：cron 报告用 <code>find</code> 计数，谎报了「完整性」</h3><p>最要命的一环。备份 cron 的报告里那句「✅ 备份完成，<strong>11134 文件</strong>」，是这么算出来的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">total_files=$(find <span class="string">&quot;<span class="variable">$BAK_DIR</span>&quot;</span> -<span class="built_in">type</span> f | <span class="built_in">wc</span> -l)   <span class="comment"># ← 工作目录文件数</span></span><br></pre></td></tr></table></figure>
+
+<p>它数的是<strong>磁盘上</strong>有多少文件，不是 <strong>git 里跟踪</strong>了多少。而真实情况是：</p>
+<table>
+<thead>
+<tr>
+<th>口径</th>
+<th>数字</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>find</code> 工作目录文件数</td>
+<td><strong>11134</strong></td>
+<td>cron 报告里那个让你安心的数字</td>
+</tr>
+<tr>
+<td>git 实际跟踪的文件（bash 对象）</td>
+<td><strong>9279</strong></td>
+<td><code>git ls-tree</code> 里 mode 为 <code>100xxx</code> 的条目</td>
+</tr>
+<tr>
+<td>gitlink 条目（<code>160000</code>）</td>
+<td><strong>16</strong></td>
+<td>每个只存一个 commit 指针</td>
+</tr>
+<tr>
+<td><strong>静默丢失的文件</strong></td>
+<td><strong>1855</strong></td>
+<td>正好等于 16 个 gitlink 目录里的文件总数</td>
+</tr>
+</tbody></table>
+<p><code>11134 − 9279 = 1855</code>，和那 16 个 gitlink 目录里的文件数<strong>完全吻合</strong>。监控指标（文件计数）本身就是谎报的那个——这是假绿灯最危险的地方：<strong>你盯着的那个数字，恰恰是骗你的那个。</strong></p>
+<h2 id="3-排查手法-—-怎么揪出「空心的备份」"><a href="#3-排查手法-—-怎么揪出「空心的备份」" class="headerlink" title="3. 排查手法 — 怎么揪出「空心的备份」"></a>3. 排查手法 — 怎么揪出「空心的备份」</h2><p>三个命令，从怀疑到实锤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 揪 gitlink：mode 160000 的条目就是内嵌仓库，clone 出来会是空目录</span></span><br><span class="line">git ls-tree -r &lt;snapshot_commit&gt; hermes_backup | grep <span class="string">&#x27;^160000&#x27;</span> | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 对账：磁盘文件数 vs git 跟踪文件数，差值就是被吞掉的文件</span></span><br><span class="line">find &lt;backup_dir&gt; -<span class="built_in">type</span> f | <span class="built_in">wc</span> -l          <span class="comment"># 11134</span></span><br><span class="line">git ls-tree -r &lt;snapshot_commit&gt; &lt;<span class="built_in">dir</span>&gt; | grep -c <span class="string">&#x27;^100&#x27;</span>   <span class="comment"># 9279</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 终极验证：真的 fresh clone 一遍，看目录是不是空的</span></span><br><span class="line">git <span class="built_in">clone</span> &lt;backup_repo&gt; /tmp/verify</span><br><span class="line">find /tmp/verify/hermes_backup/plugins/crew -<span class="built_in">type</span> f | <span class="built_in">wc</span> -l   <span class="comment"># → 0 ← 实锤</span></span><br></pre></td></tr></table></figure>
+
+<p>第三步是唯一能 100% 证伪的：<strong>验证备份的唯一可靠方式，是真的从备份恢复一遍，再对一遍文件数。</strong> 光看 cron 日志里那个「✅ 11134 文件」，你永远发现不了这 1855 个文件的黑洞。</p>
+<h2 id="4-踩坑记录-—-边界与修复"><a href="#4-踩坑记录-—-边界与修复" class="headerlink" title="4. 踩坑记录 — 边界与修复"></a>4. 踩坑记录 — 边界与修复</h2><p><strong>影响范围比想象的窄，但性质比想象的糟。</strong> 时间线：</p>
+<ul>
+<li><code>10-07</code> 起，7 个 homeassistant gitlink 首次出现（那时插件就带着 <code>.git</code> 装进去了）</li>
+<li><code>10-31</code> 跳到 16 个（crew 插件装了 5 份 profile 副本，全带 <code>.git</code>）</li>
+</ul>
+<p>而这篇文章写到一半，事情升级了。</p>
+<p><code>10:17</code> 我还能读到 <code>plugins/crew/install.py</code> 的内容；<code>10:28</code>，<code>plugins/crew/</code> 整个目录从<strong>运行时目录</strong>里消失了（<code>plugins/</code> 的 mtime 停在 <code>10:28:20</code>）。五个 profile 副本一起没。至于是谁删的——我没能定位到具体命令，不编故事。</p>
+<p>真正让我确认这套备份是空心的，就是这一刻：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行时目录里 crew 已经没了，那备份呢？</span></span><br><span class="line">git <span class="built_in">clone</span> &lt;备份仓库&gt; /tmp/verify</span><br><span class="line">find /tmp/verify/hermes_backup/plugins/crew -<span class="built_in">type</span> f | <span class="built_in">wc</span> -l</span><br><span class="line"><span class="comment"># → 0</span></span><br></pre></td></tr></table></figure>
+
+<p>git 里存的是 gitlink，<strong>一个 commit 指针，零个文件</strong>。也就是说——如果这台机器今晚就没了，我拿这份「✅ 已备份 11134 文件」的仓库恢复出来的，crew 和 homeassistant 就是两个空目录，而恢复脚本一声不吭（<code>cp -a</code> 拷空目录不会报错）。</p>
+<p>最后是把 crew 从上游重新 clone 回来才补上的。上游 <a target="_blank" rel="noopener" href="https://github.com/macd2/Crew">github.com&#x2F;macd2&#x2F;Crew</a> 是公开的，而 <code>.install-metadata.json</code> 里正好记着 pinned revision <code>d81551a2</code>——和上游 HEAD 严丝合缝对上，244 个文件一个不差。homeassistant 同理，<a target="_blank" rel="noopener" href="https://github.com/NousResearch/hermes-homeassistant">github.com&#x2F;NousResearch&#x2F;hermes-homeassistant</a> 也是公开仓库。</p>
+<p>但请注意这里有多侥幸：<strong>它能救回来，纯粹是因为我知道该去哪救、且元数据恰好记着 commit。</strong> 备份的全部意义就在于——真出事的时候你<strong>不需要</strong>知道上游在哪。一个 <code>git clone</code> + <code>_restore.sh</code> 的干净恢复，会静默地给你两个空插件。而且那份本地副本里还有一个我改过的文件（<code>scripts/crew_graph_serve.py</code>）和两个运行时 db，纯上游恢复捞不回来——这是「备份 ≠ 上游」最直白的注脚。</p>
+<p><strong>修复（我实测跑通的版本）：</strong></p>
+<p>这里还有个坑中坑。我一开始以为只要在 <code>git add</code> 前剥掉 <code>.git</code> 就行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">find <span class="string">&quot;<span class="variable">$BAK_DIR</span>&quot;</span> -name .git -mindepth 2 -<span class="built_in">type</span> d -prune -<span class="built_in">exec</span> <span class="built_in">rm</span> -rf &#123;&#125; +</span><br><span class="line">git add -A          <span class="comment"># ← 对「已经是 gitlink」的路径，这一步不生效</span></span><br></pre></td></tr></table></figure>
+
+<p>实测不行——<code>.git</code> 剥了、<code>git add -A</code> 也跑了，<code>gitlink 条目</code> 依然是 16。<strong>对于已经被记成 gitlink 的路径，必须先把它从 index 里删掉</strong>，git 才会重新按普通目录扫描：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 把 index 里所有 gitlink 条目请出去</span></span><br><span class="line"><span class="keyword">for</span> p <span class="keyword">in</span> $(git ls-files -s | awk <span class="string">&#x27;$1==160000&#123;print $4&#125;&#x27;</span>); <span class="keyword">do</span></span><br><span class="line">    git <span class="built_in">rm</span> -r -q --cached <span class="string">&quot;<span class="variable">$p</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br><span class="line"><span class="comment"># 2. 剥掉工作区里嵌套的 .git</span></span><br><span class="line">find <span class="string">&quot;<span class="variable">$BAK_DIR</span>&quot;</span> -name .git -mindepth 2 -<span class="built_in">type</span> d -prune -<span class="built_in">exec</span> <span class="built_in">rm</span> -rf &#123;&#125; +</span><br><span class="line"><span class="comment"># 3. 重新 add</span></span><br><span class="line">git add -A <span class="string">&quot;<span class="variable">$BAK_DIR</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>跑完的实测结果：<strong><code>gitlink 条目 16 → 0</code></strong>，那 16 个目录下的 1855 个文件全部变成正常的 <code>100644</code> blob 被跟踪。</p>
+<p>再补一条<strong>自检</strong>，让它下次不可能再静默过关——<code>git add</code> 之后当场对账，差值非零就 <code>exit 1</code>，而不是照常在报告里写 ✅：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">git_files=$(git ls-files | <span class="built_in">wc</span> -l)</span><br><span class="line">disk_files=$(find <span class="string">&quot;<span class="variable">$BAK_DIR</span>&quot;</span> -<span class="built_in">type</span> f | <span class="built_in">wc</span> -l)</span><br><span class="line">gitlinks=$(git ls-files -s | grep -c <span class="string">&#x27;^160000&#x27;</span>)</span><br><span class="line">[ <span class="string">&quot;<span class="variable">$disk_files</span>&quot;</span> -eq <span class="string">&quot;<span class="variable">$git_files</span>&quot;</span> ] &amp;&amp; [ <span class="string">&quot;<span class="variable">$gitlinks</span>&quot;</span> -eq 0 ] || &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;❌ 备份自检失败：find=<span class="variable">$disk_files</span> git=<span class="variable">$git_files</span> gitlink=<span class="variable">$gitlinks</span>&quot;</span> &gt;&amp;2; <span class="built_in">exit</span> 1; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>（顺带一提：直接 <code>apt install rsync</code> 也能治本——脚本里本来就有 <code>--exclude=&#39;.git&#39;</code> 的 rsync 分支，只是这台机器没装 rsync，永远走不到。）</p>
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>一句话：<strong>备份系统的头号敌人不是崩溃，是「看起来成功」。</strong> 崩溃会让你立刻去看日志；假绿灯会让你在三个月里每天看着 ✅ 睡好觉，直到某天真的要从备份恢复，才发现一半是空的。</p>
+<p>三条可带走的 takeaway：</p>
+<ol>
+<li><strong>改运行时目录 ≠ 已提交</strong>——live 文件和 git 仓库是两回事，改完立刻提交，别指望周期快照。</li>
+<li><strong><code>git add -A</code> 遇到内嵌 <code>.git</code> 会生成 gitlink</strong>——只存 commit 指针不存内容，clone 出来是空目录。装插件&#x2F;拷目录前，先 <code>find -name .git</code> 扫一遍，或在 <code>git add</code> 前剥掉。</li>
+<li><strong>验证备份的唯一方式是真恢复一遍</strong>——对账 <code>find</code> 计数 vs <code>git ls-files</code> 计数，差值非零就该红，不该绿。</li>
+</ol>
+<p>监控指标里最容易自欺的那一个，往往是你最放心看的那一个。</p>
+<p><em>本文所有数字均来自对备份仓库真实 commit 的实测：146 个快照提交、16 个 gitlink 条目、1855 个被吞文件，<code>fresh clone</code> 已复现空目录。</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/">https://boke.studyai.ltd/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Cron/">Cron</a><a class="post-meta__tags" href="/tags/%E8%B8%A9%E5%9D%91%E5%AE%9E%E5%BD%95/">踩坑实录</a><a class="post-meta__tags" href="/tags/Git/">Git</a><a class="post-meta__tags" href="/tags/%E8%BF%90%E7%BB%B4/">运维</a><a class="post-meta__tags" href="/tags/%E5%A4%87%E4%BB%BD/">备份</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-2026-10-31-backup-cron-false-green-gitlink.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/10/29/2026-10-29-wx-cli-wechat-data-benchmark-privacy/" title="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）"><img class="cover" src="/img/cover-2026-10-29-wx-cli-wechat-data-benchmark-privacy.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）</div></div><div class="info-2"><div class="info-item-1"> 微信桌面版的聊天记录就存在你本机，只是被 SQLCipher 4 加密了。Rust 写的 wx-cli 把这件事做成了一个毫秒级响应的 CLI：内存扫描 + LLDB hook 取密钥，后台 daemon 在线解密，wx history &quot;张三&quot; 一条命令拉出完整聊天记录。但这类工具绕不开一个问题——用了会不会被微信封号？ 这篇文章把它的架构拆开看，顺便回答这个风险问题。  1. 缘起 — 为什么一个本地数据浏览器值得研究做 AI Agent 和公众号运营的人都会碰到一个场景：想从微信里批量捞数据做分析。比如”上个月客户在群里问了哪些技术问题”、”哪些公众号的推送值得转载”。 微信自带搜索很难用：不能按时间范围精确过滤，不能跨群搜索，不能导出。而聊天记录就在本机磁盘上——xwechat_files/&lt;你的wxid&gt;/db_storage/ 下面躺着一堆 .db 文件，只是微信 4.x 用 SQLCipher 4（AES-256-CBC + HMAC-SHA512，页级加密）锁住了，每个数据库还有独立的 32 字节 AES key。 wx-cli ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/10/21/2026-10-21-llm-gateway-false-free-catalog-gate/" title="auto 路由选中了阿拉伯语 TTS 模型：LLM 网关三层「假免费」陷阱排查实录"><img class="cover" src="/img/cover-2026-10-21-llm-gateway-false-free-catalog-gate.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-21</div><div class="info-item-2">auto 路由选中了阿拉伯语 TTS 模型：LLM 网关三层「假免费」陷阱排查实录</div></div><div class="info-2"><div class="info-item-1"> 一个 slice(0, 8) 让 groq 的阿拉伯语 TTS 模型成了 auto 路由主选；cost_per_1k = 0.001 常量让免费与付费在分数上平级；没有价格 = 免费 的推断让 893 条模型全部判免费（nvidia 81、electronhub 631）。我们用「签名目录 + in_catalog 硬门控」把 auto 候选从 893 清洗到 395，假阳性清零。完整复盘三层根因、修复代码、部署实测与踩坑边界。   1. 缘起 — 用户报「未知错误」，抓包发现 auto 返回了 orpheus-arabic-saudi10 月 20 日早，用户反馈：「auto 功能有问题，应该自动筛选可用的免费模型，而不是随意找几个模型来轮换」。聊天窗口显示 common.unknownError = &quot;未知错误&quot;，可上游真实返回的是 403 或「requires terms acceptance」。 开启调试日志后发现：auto 真正路由的模型是 canopylabs/orpheus-arabic-saudi —— 一个阿拉伯语 TTS 模型，根本不支持...</div></div></div></a><a class="pagination-related" href="/2026/10/17/2026-10-17-cron-watchdog-silent-sentinel/" title="看门狗的本职是沉默：一个 225 行纯脚本的漏跑判定全披露"><img class="cover" src="/img/cover-2026-10-17-cron-watchdog-silent-sentinel.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-17</div><div class="info-item-2">看门狗的本职是沉默：一个 225 行纯脚本的漏跑判定全披露</div></div><div class="info-2"><div class="info-item-1"> 一台机器跑了 19 个定时任务，每天靠一段 225 行的纯 Python 脚本守夜。它的最高成就是「零次报忧」——连续 50 次运行全部静默。今天它终于发了一次告警，恰好抓到一个 KV 日配额超限。本文完整披露这个 cron_watchdog.py 的设计，连同踩过的三个坑。  1. 缘起：早上 8 点 10 分一条飞书消息今天早上 8:10，飞书收到这样一条：  🚨 Cron 任务巡查发现 1 个问题 (10-17 08:10)❌ 灵犀学堂每日备份 最近执行失败（10-17 02:45, 45 2 * * *）    ↳ Script exited with code 1 stdout: ERROR: 上传失败: {“error”:”KV put() limit exceeded for the day.”}  Cloudflare 免费 KV 的日写入配额用完了，凌晨的备份任务失败。没有看门狗我根本不会知道。更关键的是——这是它今天唯一发出的一条告警。其余 18 个任务全部正常，所以它遵循默认契约：没消息就是好消息。 背景数据：这台机器配置了 30 个 Cron 任务，当...</div></div></div></a><a class="pagination-related" href="/2026/10/28/2026-10-28-qgs-critic-keyenv-llm-unavailable/" title="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级"><img class="cover" src="/img/cover-2026-10-28-qgs-critic-keyenv-llm-unavailable.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-28</div><div class="info-item-2">QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级</div></div><div class="info-2"><div class="info-item-1"> 一个配置解析函数忽略了 key_env 字段，导致 QGS Critic 拿不到 API Key，连续多日输出「启发式评审（LLM 不可用）」的假 PASS。修复 5 行代码，评分从 85&#x2F;100（启发式）跳到 92&#x2F;100（真实 LLM 评审），critique 质量天差地别。静默降级比直接报错更危险——因为它让你以为一切正常。   1. 缘起 — 「启发式评审」刷屏，但不报错10 月 27 日下午，用户发了一条消息：  QGS 连续多次报告：启发式评审（LLM 不可用），查一下原因。  翻 qgs-history.jsonl，确认问题：    时间 评分 评审方式 critique 摘要    16:36 82 启发式（LLM 不可用） 结构基本完整，可加入参考代码   18:03 85 启发式（LLM 不可用） 结构基本完整，可加入参考代码   18:16 85 启发式（LLM 不可用） 交付物内容完整，结构清晰   三次评审，三个”启发式（LLM 不可用）”，三次 PASS。QGS 的 Layer 2（LLM 评审器）完全失效，退回 Layer 1（...</div></div></div></a><a class="pagination-related" href="/2026/10/24/2026-10-24-feishu-table-converter-postmortem/" title="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘"><img class="cover" src="/img/cover-2026-10-24-feishu-table-converter-postmortem.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-10-24</div><div class="info-item-2">修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘</div></div><div class="info-2"><div class="info-item-1"> 一个基于错误前提的「兼容性转换层」，修得越正确，破坏越大。在写任何转换逻辑前，先用 10 行探针验证下游是否真的需要它。   1. 缘起 — 为什么会有这个转换器我们用 Hermes Agent（一个自研的 Agent 框架）通过飞书机器人向团队推送每日简报、盘中复盘、QGS 质量门禁报告等。飞书富文本消息（post 类型）内部使用 Markdown 元素渲染。 最早有人观察到：「飞书不支持管道表格 | --- |，必须转成 +---+ 文本表格才能正常显示。」为了解决这个问题，我们在 feishu-format 技能里写了一个 convert_tables()，要求 Agent 手动调用它做转换。 但 Agent 经常忘记加载技能、忘记调用。于是我们把这个转换逻辑硬编码进了 QGS 插件的 _on_transform_llm_output 钩子：每次 LLM 产出，只要带表格就自动转。问题看似解决了。 直到用户反馈：「QGS 报告一出来，表格就只显示原始 Markdown 格式。」更奇怪的是，之前 Agent 手动用技能转换的表格是正常的。  2. 排查与「修复」—— 10 ...</div></div></div></a><a class="pagination-related" href="/wiki/hermes-guide/advanced-combo/" title="Hermes高阶技巧｜⚡ 进阶技巧：Dashboard + Kanban + Curator 三合一，打造24小时无人Agent工厂"><img class="cover" src="https://images.unsplash.com/photo-1727434032773-af3cd98375ba?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-28</div><div class="info-item-2">Hermes高阶技巧｜⚡ 进阶技巧：Dashboard + Kanban + Curator 三合一，打造24小时无人Agent工厂</div></div><div class="info-2"><div class="info-item-1"> 一句话解决：Dashboard入口、Kanban编排、Curator维护，三功能组合起来就能实现”24小时无人值守”的Agent自动化工厂。  背景：小赵的梦想小赵已经学会了Dashboard、Kanban和Curator，单独用都很顺手。但他心里一直有个想法： “能不能让它们自己转起来？“ 他每天早上要做三件事：  检查Agent昨晚干了什么 → 打开Dashboard看日志 看看有没有任务卡住了 → 打开Kanban面板看一眼 清理不再需要的技能 → 手动跑一下Curator  虽然每件事都不费劲，但每天都做也挺烦的。 “如果每天早上我醒来，这些事已经自动做完了，我只需要看一眼结果，那该多好。“ 这个梦想，用Dashboard的Cron定时任务 + Kanban的自动编排 + Curator的定期维护就能实现。 第一章：Dashboard 定时任务（Cron）Dashboard里有一个”Cron“标签页，可以创建定时任务——就像Linux的crontab，但不用写配置文件： [插图：Cron配置界面Mockup] 123456789101112131415161718192...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">96</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">246</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">32</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%BB%8E%E3%80%8C%E6%94%B9%E5%AE%8C%E6%8F%92%E4%BB%B6%E6%B2%A1%E8%BF%9B-git%E3%80%8D%E6%9F%A5%E8%B5%B7"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 从「改完插件没进 git」查起</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-%E4%B8%89%E4%B8%AA%E5%B1%82%E5%B1%82%E9%80%92%E8%BF%9B%E7%9A%84%E5%9D%91"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — 三个层层递进的坑</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%B8%80%EF%BC%9A%E8%BF%90%E8%A1%8C%E6%97%B6%E7%9B%AE%E5%BD%95%E5%92%8C-git-%E4%BB%93%E5%BA%93%E6%98%AF%E4%B8%A4%E5%9B%9E%E4%BA%8B%EF%BC%88%E4%B8%8A%E9%9D%A2%E8%BF%99%E6%9D%A1%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">坑一：运行时目录和 git 仓库是两回事（上面这条）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%BA%8C%EF%BC%9A%E5%A4%87%E4%BB%BD%E5%B7%A5%E4%BD%9C%E5%8C%BA%E9%87%8C%E6%9C%89%E5%B5%8C%E5%A5%97-git%EF%BC%8Cgit-add-%E7%94%9F%E6%88%90%E4%BA%86-gitlink"><span class="toc-number">2.2.</span> <span class="toc-text">坑二：备份工作区里有嵌套 .git，git add 生成了 gitlink</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91%E4%B8%89%EF%BC%9Acron-%E6%8A%A5%E5%91%8A%E7%94%A8-find-%E8%AE%A1%E6%95%B0%EF%BC%8C%E8%B0%8E%E6%8A%A5%E4%BA%86%E3%80%8C%E5%AE%8C%E6%95%B4%E6%80%A7%E3%80%8D"><span class="toc-number">2.3.</span> <span class="toc-text">坑三：cron 报告用 find 计数，谎报了「完整性」</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E6%8E%92%E6%9F%A5%E6%89%8B%E6%B3%95-%E2%80%94-%E6%80%8E%E4%B9%88%E6%8F%AA%E5%87%BA%E3%80%8C%E7%A9%BA%E5%BF%83%E7%9A%84%E5%A4%87%E4%BB%BD%E3%80%8D"><span class="toc-number">3.</span> <span class="toc-text">3. 排查手法 — 怎么揪出「空心的备份」</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E8%BE%B9%E7%95%8C%E4%B8%8E%E4%BF%AE%E5%A4%8D"><span class="toc-number">4.</span> <span class="toc-text">4. 踩坑记录 — 边界与修复</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">5. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/" title="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件"><img src="/img/cover-2026-10-31-backup-cron-false-green-gitlink.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件"/></a><div class="content"><a class="title" href="/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/" title="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件">备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件</a><time datetime="2026-10-31T02:00:00.000Z" title="发表于 2026-10-31 10:00:00">2026-10-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/29/2026-10-29-wx-cli-wechat-data-benchmark-privacy/" title="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）"><img src="/img/cover-2026-10-29-wx-cli-wechat-data-benchmark-privacy.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）"/></a><div class="content"><a class="title" href="/2026/10/29/2026-10-29-wx-cli-wechat-data-benchmark-privacy/" title="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）">给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）</a><time datetime="2026-10-29T06:00:00.000Z" title="发表于 2026-10-29 14:00:00">2026-10-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/28/2026-10-28-qgs-critic-keyenv-llm-unavailable/" title="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级"><img src="/img/cover-2026-10-28-qgs-critic-keyenv-llm-unavailable.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级"/></a><div class="content"><a class="title" href="/2026/10/28/2026-10-28-qgs-critic-keyenv-llm-unavailable/" title="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级">QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级</a><time datetime="2026-10-28T02:00:00.000Z" title="发表于 2026-10-28 10:00:00">2026-10-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/24/2026-10-24-feishu-table-converter-postmortem/" title="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘"><img src="/img/cover-2026-10-24-feishu-table-converter-postmortem.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘"/></a><div class="content"><a class="title" href="/2026/10/24/2026-10-24-feishu-table-converter-postmortem/" title="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘">修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘</a><time datetime="2026-10-24T02:00:00.000Z" title="发表于 2026-10-24 10:00:00">2026-10-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/21/2026-10-21-llm-gateway-false-free-catalog-gate/" title="auto 路由选中了阿拉伯语 TTS 模型：LLM 网关三层「假免费」陷阱排查实录"><img src="/img/cover-2026-10-21-llm-gateway-false-free-catalog-gate.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="auto 路由选中了阿拉伯语 TTS 模型：LLM 网关三层「假免费」陷阱排查实录"/></a><div class="content"><a class="title" href="/2026/10/21/2026-10-21-llm-gateway-false-free-catalog-gate/" title="auto 路由选中了阿拉伯语 TTS 模型：LLM 网关三层「假免费」陷阱排查实录">auto 路由选中了阿拉伯语 TTS 模型：LLM 网关三层「假免费」陷阱排查实录</a><time datetime="2026-10-21T02:00:00.000Z" title="发表于 2026-10-21 10:00:00">2026-10-21</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
