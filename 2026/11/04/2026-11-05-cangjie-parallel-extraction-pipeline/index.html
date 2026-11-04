@@ -1,0 +1,532 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一句话摘要：本文复盘我们如何把「从长内容中蒸馏可复用 Agent Skill」这个过程，拆解为 5 个并行提取器 + 3 重验证 + RIA++ 六字段模板的标准化流水线，并从教育 Agent 教案生成（CRA）的实战中总结出 3 条核心教训：素材描述质量决定提取上限、多文件输出必须同步写入、并行容错优于顺序执行。  1. 缘起 — 为什么要把「读书做笔记」做成工业流水线故事开始于一个很痛的场景">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="一句话摘要：本文复盘我们如何把「从长内容中蒸馏可复用 Agent Skill」这个过程，拆解为 5 个并行提取器 + 3 重验证 + RIA++ 六字段模板的标准化流水线，并从教育 Agent 教案生成（CRA）的实战中总结出 3 条核心教训：素材描述质量决定提取上限、多文件输出必须同步写入、并行容错优于顺序执行。  1. 缘起 — 为什么要把「读书做笔记」做成工业流水线故事开始于一个很痛的场景">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png">
+<meta property="article:published_time" content="2026-11-04T23:49:00.000Z">
+<meta property="article:modified_time" content="2026-11-04T23:53:27.248Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Cangjie">
+<meta property="article:tag" content="工程实践">
+<meta property="article:tag" content="并行提取">
+<meta property="article:tag" content="知识蒸馏">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战",
+  "url": "https://boke.studyai.ltd/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/",
+  "image": "https://boke.studyai.ltd/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png",
+  "datePublished": "2026-11-04T23:49:00.000Z",
+  "dateModified": "2026-11-04T23:53:27.248Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">97</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">247</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">34</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-04T23:49:00.000Z" title="发表于 2026-11-05 07:49:00">2026-11-05</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-04T23:53:27.248Z" title="更新于 2026-11-05 07:53:27">2026-11-05</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI-Agent/">AI Agent</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI-Agent/%E6%96%B9%E6%B3%95%E8%AE%BA/">方法论</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>一句话摘要：本文复盘我们如何把「从长内容中蒸馏可复用 Agent Skill」这个过程，拆解为 5 个并行提取器 + 3 重验证 + RIA++ 六字段模板的标准化流水线，并从教育 Agent 教案生成（CRA）的实战中总结出 3 条核心教训：素材描述质量决定提取上限、多文件输出必须同步写入、并行容错优于顺序执行。</p>
+</blockquote>
+<h2 id="1-缘起-—-为什么要把「读书做笔记」做成工业流水线"><a href="#1-缘起-—-为什么要把「读书做笔记」做成工业流水线" class="headerlink" title="1. 缘起 — 为什么要把「读书做笔记」做成工业流水线"></a>1. 缘起 — 为什么要把「读书做笔记」做成工业流水线</h2><p>故事开始于一个很痛的场景：我们在做<strong>教育 Agent（ActiveAgent &#x2F; Edu Agent）</strong>，需要把软考高项&#x2F;系规的官方大纲（348 个考点）转化成可交付的教案。</p>
+<p>最早的做法是「人工读大纲 → 写 Prompt → 让 LLM 生成教案」。问题显而易见：</p>
+<ul>
+<li>大纲节点只有 JSON 结构元数据（如 <code>{&quot;ch&quot;:1,&quot;sec&quot;:2}</code>），没有 200-500 字的中文内容描述</li>
+<li>LLM 拿到这种「空壳节点」会幻觉生成「国家信息化战略」替代「现代化基础设施」这种完全跑偏的内容</li>
+<li>每个考点要人工写描述、人工调 Prompt、人工校对，完全不具备规模化能力</li>
+</ul>
+<p>我们意识到：<strong>内容蒸馏本身需要一个可复用、可验证、可迭代的方法论</strong>，而不是每次重新「编」Prompt。于是诞生了 <code>cangjie-skill</code>——一个<strong>把「内容蒸馏为 Agent Skill」这个元任务本身做成 Skill</strong>的技能。</p>
+<blockquote>
+<p><strong>Cangjie（仓颉）</strong>：造字始祖。寓意「从无序内容中提炼结构化方法论」。</p>
+</blockquote>
+<hr>
+<h2 id="2-核心方法-—-RIA-TV-七阶段流水线"><a href="#2-核心方法-—-RIA-TV-七阶段流水线" class="headerlink" title="2. 核心方法 — RIA-TV++ 七阶段流水线"></a>2. 核心方法 — RIA-TV++ 七阶段流水线</h2><p>Cangjie 的核心是 <strong>RIA-TV++</strong> 七阶段流水线，把「一本书&#x2F;一个长视频&#x2F;一门课程」转化为可安装的 Hermes Skill：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">    A[阶段0: Adler整书理解&lt;br/&gt;→ BOOK_OVERVIEW.md] --&gt; B[阶段1: 5并行提取器&lt;br/&gt;→ 候选方法论池]</span><br><span class="line">    B --&gt; C[阶段1.5: 三重验证&lt;br/&gt;跨域/预测力/独特性]</span><br><span class="line">    C --&gt; D[阶段2: RIA++构造Skill&lt;br/&gt;→ SKILL.md]</span><br><span class="line">    D --&gt; E[阶段3: Zettelkasten链接&lt;br/&gt;→ INDEX.md + 引用图]</span><br><span class="line">    E --&gt; F[阶段4: 压力测试&lt;br/&gt;→ test-prompts.json]</span><br><span class="line">    F --&gt; G[阶段5: 交付&lt;br/&gt;→ DIGEST.md + 安装]</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-1-五个并行提取器（阶段-1-的核心）"><a href="#2-1-五个并行提取器（阶段-1-的核心）" class="headerlink" title="2.1 五个并行提取器（阶段 1 的核心）"></a>2.1 五个并行提取器（阶段 1 的核心）</h3><p>这是整个流水线的<strong>并行化心脏</strong>。我们不再让 LLM 一次性「读完全书再总结」，而是把提取任务拆成 5 个<strong>互不依赖</strong>的提取器同时跑：</p>
+<table>
+<thead>
+<tr>
+<th>提取器</th>
+<th>职责</th>
+<th>产出示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Framework Extractor</strong></td>
+<td>思维模型、决策框架、推理方法</td>
+<td>「Adler 分析阅读四层」「第一性原理拆解法」</td>
+</tr>
+<tr>
+<td><strong>Principle Extractor</strong></td>
+<td>原则、清单、规则、启发式</td>
+<td>「先理解再动手」「小步验证」「错了就认」</td>
+</tr>
+<tr>
+<td><strong>Case Extractor</strong></td>
+<td>作者亲自使用的实例、数据</td>
+<td>「CRA 教案生成：节点描述从 0 字 → 300 字，准确率 40% → 92%」</td>
+</tr>
+<tr>
+<td><strong>Counter-Example Extractor</strong></td>
+<td>警告、失败模式、反例、边界</td>
+<td>「节点描述只有 JSON 元数据时，extractor 会幻觉生成不相关内容」</td>
+</tr>
+<tr>
+<td><strong>Glossary Extractor</strong></td>
+<td>关键概念的标准化定义</td>
+<td>「RIA++ 六字段」「证据 ID 协议」「Zettelkasten 链接」</td>
+</tr>
+</tbody></table>
+<p><strong>为什么要并行？</strong> 除了显而易见的速度优势，<strong>容错性是更大的收获</strong>（见 3.3 节）。</p>
+<blockquote>
+<p>💡 <strong>关键设计</strong>：每个提取器的 Prompt 里，<code>description</code> 字段是<strong>唯一的内容源</strong>。如果 description 只有 JSON 元数据，提取器必然幻觉。这直接导致了我们在 CRA 实战中发现的第一条教训。</p>
+</blockquote>
+<h3 id="2-2-三重验证筛选（阶段-1-5-的质量门禁）"><a href="#2-2-三重验证筛选（阶段-1-5-的质量门禁）" class="headerlink" title="2.2 三重验证筛选（阶段 1.5 的质量门禁）"></a>2.2 三重验证筛选（阶段 1.5 的质量门禁）</h3><p>提取器跑完后会产出大量「候选单元」，不能全留。我们引入<strong>三重验证</strong>，只有同时通过三关的才能进入下一阶段：</p>
+<table>
+<thead>
+<tr>
+<th>验证维度</th>
+<th>问题</th>
+<th>通过标准</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>V1 跨域</strong></td>
+<td>这个点至少有 2 处独立佐证？</td>
+<td>多个章节&#x2F;多个素材源都提到同一原则</td>
+</tr>
+<tr>
+<td><strong>V2 预测力</strong></td>
+<td>能帮读者解决一个他没说出来的问题？</td>
+<td>不只是总结已知，能指导未见场景</td>
+</tr>
+<tr>
+<td><strong>V3 独特性</strong></td>
+<td>不是随便谁都能想到的常识？</td>
+<td>具有作者特有的洞察或反直觉发现</td>
+</tr>
+</tbody></table>
+<p><strong>通过率通常只有 20%-30%</strong>。这看起来很「浪费」，但正是这道门槛保证了最终 Skill 的高信噪比。</p>
+<h3 id="2-3-RIA-六字段模板（阶段-2-的标准化产出）"><a href="#2-3-RIA-六字段模板（阶段-2-的标准化产出）" class="headerlink" title="2.3 RIA++ 六字段模板（阶段 2 的标准化产出）"></a>2.3 RIA++ 六字段模板（阶段 2 的标准化产出）</h3><p>每个通过验证的方法论单元，必须填满六个字段才能生成 <code>SKILL.md</code>：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+<th>字数限制</th>
+<th>关键约束</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>R</strong> (Reading)</td>
+<td>原文引用，证据溯源</td>
+<td>≤150字</td>
+<td><strong>必须引原文</strong>，禁止改写</td>
+</tr>
+<tr>
+<td><strong>I</strong> (Interpretation)</td>
+<td>用自己话重写方法论骨架</td>
+<td>5-15行</td>
+<td>只许改写，不许加料</td>
+</tr>
+<tr>
+<td><strong>A1</strong> (Past Application)</td>
+<td>书中&#x2F;素材中的真实案例</td>
+<td>1-2个</td>
+<td>必须是作者亲身经历</td>
+</tr>
+<tr>
+<td><strong>A2</strong> (Future Trigger)</td>
+<td>用户什么情境下会调用</td>
+<td>3个场景</td>
+<td>场景要具体可判断</td>
+</tr>
+<tr>
+<td><strong>E</strong> (Execution)</td>
+<td>可执行步骤 + 判停条件</td>
+<td>1-2-3步骤</td>
+<td>像菜谱一样可直接执行</td>
+</tr>
+<tr>
+<td><strong>B</strong> (Boundary)</td>
+<td>什么时候不适用 + 作者盲点</td>
+<td>3+条</td>
+<td>诚实暴露边界</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🔴 <strong>R 字段幻觉是仓颉最大的痛点</strong>。早期我们靠 Prompt 约束「必须引原文」，但 LLM 经常偷懒改写。后来引入<strong>证据 ID 协议</strong>（见下文），把「引用原文」从 Prompt 约束升级为机制保证。</p>
+</blockquote>
+<h3 id="2-4-证据-ID-协议——把「引用原文」从约束变成机制"><a href="#2-4-证据-ID-协议——把「引用原文」从约束变成机制" class="headerlink" title="2.4 证据 ID 协议——把「引用原文」从约束变成机制"></a>2.4 证据 ID 协议——把「引用原文」从约束变成机制</h3><p>当输入源是<strong>已建索引的知识库</strong>（如 <code>ruankao-calc</code> &#x2F; <code>ruankao-beibei</code>，含 <code>doc-index.jsonl</code> + <code>search_index.py</code>）时，extractor 不再手抄原文，改用<strong>证据 ID 引用</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 旧方式：extractor 输出 source_quote —— 靠 Prompt 约束，易幻觉</span></span><br><span class="line">&#123;<span class="string">&quot;source_quote&quot;</span>: <span class="string">&quot;软考高项考试大纲第3章规定...&quot;</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新方式：extractor 输出 evidence_ids —— 机制保证，零幻觉</span></span><br><span class="line">&#123;<span class="string">&quot;evidence_ids&quot;</span>: [<span class="string">&quot;u010&quot;</span>, <span class="string">&quot;u011&quot;</span>, <span class="string">&quot;u012&quot;</span>]&#125;</span><br></pre></td></tr></table></figure>
+
+<p>流程：</p>
+<ol>
+<li><strong>先检索后提取</strong>：<code>python3 scripts/search_index.py &quot;主题&quot; --limit 5</code> 找到相关知识点，读其 <code>evidence</code> 字段</li>
+<li><strong>引用证据 ID</strong>：每个候选单元输出 <code>evidence_ids</code>（≤8 个），不复制原文</li>
+<li><strong>R 字段自动生成</strong>：阶段 2 构造 SKILL.md 时，由 <code>merge_evidence(evidence_ids)</code> 确定性恢复原文</li>
+</ol>
+<p><strong>效果</strong>：Token 消耗大降（3 个 ID 替代 150 字引用），R 字段<strong>零幻觉</strong>，且可追溯到具体 chunk。</p>
+<hr>
+<h2 id="3-踩坑记录-—-从-CRA-教案生成实战中总结的-3-条核心教训"><a href="#3-踩坑记录-—-从-CRA-教案生成实战中总结的-3-条核心教训" class="headerlink" title="3. 踩坑记录 — 从 CRA 教案生成实战中总结的 3 条核心教训"></a>3. 踩坑记录 — 从 CRA 教案生成实战中总结的 3 条核心教训</h2><p>我们把并行提取器模式应用到**教育 Agent 的教案生成（CRA）**后，最重要的三条发现：</p>
+<h3 id="3-1-素材描述质量-提取上限（Source-material-quality-is-everything）"><a href="#3-1-素材描述质量-提取上限（Source-material-quality-is-everything）" class="headerlink" title="3.1 素材描述质量 &#x3D; 提取上限（Source material quality is everything）"></a>3.1 素材描述质量 &#x3D; 提取上限（Source material quality is everything）</h3><p><strong>现象</strong>：5 个 extractor 并行调用时，每个 extractor 的 Prompt 中知识点描述（<code>description</code> 字段）是唯一的内容源。如果 description 只有 JSON 结构元数据（如 <code>{&quot;ch&quot;:1,&quot;sec&quot;:2}</code>），extractor 会生成与主题完全不匹配的内容——例如把「现代化基础设施」幻觉生成为「国家信息化战略」。</p>
+<p><strong>数据对比</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>节点描述质量</th>
+<th>Extractor 输出匹配度</th>
+<th>教案生成准确率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>仅 JSON 元数据（0 字中文）</td>
+<td>~40%</td>
+<td>~45%</td>
+</tr>
+<tr>
+<td>200-500 字中文描述（定义&#x2F;特征&#x2F;分类&#x2F;常考场景）</td>
+<td>~92%</td>
+<td>~89%</td>
+</tr>
+</tbody></table>
+<p><strong>教训</strong>：<strong>每个节点必须有 200-500 字的中文内容描述</strong>，覆盖定义、特征、分类、常考场景。Extractor 的输出质量直接正比于 description 的丰富度。<strong>不要指望 LLM 从空壳里「推理」出正确知识</strong>——LLM 不是知识库，是推理引擎。</p>
+<blockquote>
+<p>💡 <strong>实操建议</strong>：建立「节点描述库」作为独立资产维护。我们现在把大纲 348 个考点的描述单独维护在 <code>syllabus-descriptions.jsonl</code>，extractor 只读这个文件，Prompt 里不再硬编码任何领域知识。</p>
+</blockquote>
+<h3 id="3-2-多文件输出必须同步写入（双文件输出同步陷阱）"><a href="#3-2-多文件输出必须同步写入（双文件输出同步陷阱）" class="headerlink" title="3.2 多文件输出必须同步写入（双文件输出同步陷阱）"></a>3.2 多文件输出必须同步写入（双文件输出同步陷阱）</h3><p><strong>现象</strong>：在 <code>LLMLessonPlanGenerator</code> 系统中，<code>generate_for_node()</code> 生成 content blocks 后必须<strong>同时</strong>保存：</p>
+<ul>
+<li><code>.html</code> — 学员端展示的渲染稿</li>
+<li><code>.blocks.json</code> — 管理端编辑器读取的结构化数据</li>
+</ul>
+<p><strong>事故</strong>：早期版本只写了 <code>.html</code>，没写 <code>.blocks.json</code>（或反之）。结果是管理端编辑器显示的内容与学员端展示的内容<strong>不一致</strong>——编辑器改了标题，学员端还是旧标题；编辑器加了案例，学员端没有。</p>
+<p><strong>根因</strong>：两个文件在不同的代码路径写入，中间可能被异常&#x2F;中断&#x2F;早期 return 打断。</p>
+<p><strong>修复</strong>：<strong>任何多文件输出函数必须在同一代码路径中同步写入所有文件</strong>，且用 <code>git status</code> 验证两个文件同时出现在 staged 列表。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ❌ 错误：分两步写，中间可能挂</span></span><br><span class="line">write_html(html_path, content)</span><br><span class="line">write_json(json_path, blocks)  <span class="comment"># 如果这行抛异常，html 已写但 json 缺失</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># ✅ 正确：同一事务/同一路径原子写入</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">generate_for_node</span>(<span class="params">node_id, description</span>):</span><br><span class="line">    blocks = llm_generate_blocks(description)</span><br><span class="line">    html = render_blocks(blocks)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 同一代码块，要么全写成，要么全不写</span></span><br><span class="line">    write_json(<span class="string">f&quot;<span class="subst">&#123;node_id&#125;</span>.blocks.json&quot;</span>, blocks)</span><br><span class="line">    write_html(<span class="string">f&quot;<span class="subst">&#123;node_id&#125;</span>.html&quot;</span>, html)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 验证</span></span><br><span class="line">    <span class="keyword">assert</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;node_id&#125;</span>.blocks.json&quot;</span>)</span><br><span class="line">    <span class="keyword">assert</span> os.path.exists(<span class="string">f&quot;<span class="subst">&#123;node_id&#125;</span>.html&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这条教训不仅适用于教案生成，<strong>任何多产物输出的场景（博文+封面图、Skill.md+test-prompts.json、代码+测试）都适用</strong>。</p>
+</blockquote>
+<h3 id="3-3-并行容错优于顺序执行（Seamless-fallback-preserves-value）"><a href="#3-3-并行容错优于顺序执行（Seamless-fallback-preserves-value）" class="headerlink" title="3.3 并行容错优于顺序执行（Seamless fallback preserves value）"></a>3.3 并行容错优于顺序执行（Seamless fallback preserves value）</h3><p><strong>现象</strong>：当某个 extractor 因 LLM 超时、JSON 解析失败、Token 截断而挂起时，顺序模式会丢失<strong>全部后续内容</strong>；并行模式下，其他 4 个 extractor 的结果仍然可用。</p>
+<p><strong>实现</strong>：合并阶段用 <code>asyncio.gather(return_exceptions=True)</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">def</span> <span class="title function_">run_all_extractors</span>(<span class="params">material, description</span>):</span><br><span class="line">    tasks = [</span><br><span class="line">        framework_extractor(material, description),</span><br><span class="line">        principle_extractor(material, description),</span><br><span class="line">        case_extractor(material, description),</span><br><span class="line">        counter_example_extractor(material, description),</span><br><span class="line">        glossary_extractor(material, description),</span><br><span class="line">    ]</span><br><span class="line">    </span><br><span class="line">    results = <span class="keyword">await</span> asyncio.gather(*tasks, return_exceptions=<span class="literal">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 自动跳过失败的 extractor，保留成功的</span></span><br><span class="line">    successful = &#123;&#125;</span><br><span class="line">    failed = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> name, result <span class="keyword">in</span> <span class="built_in">zip</span>(EXTRACTOR_NAMES, results):</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">isinstance</span>(result, Exception):</span><br><span class="line">            failed[name] = <span class="built_in">str</span>(result)</span><br><span class="line">            logger.warning(<span class="string">f&quot;Extractor <span class="subst">&#123;name&#125;</span> failed: <span class="subst">&#123;result&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            successful[name] = result</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> successful, failed</span><br></pre></td></tr></table></figure>
+
+<p><strong>实战数据</strong>：在一次完整流水线跑批中，Glossary Extractor 因 Token 限制截断失败，但 Framework&#x2F;Principle&#x2F;Case&#x2F;Counter-Example 4 个提取器全部成功，产出 37 个候选单元，<strong>零损失进入三重验证</strong>。</p>
+<p><strong>教训</strong>：<strong>并行不仅是为了快，更是为了「部分成功也有价值」</strong>。顺序模式中任何一步失败都丢失全部后续内容；并行模式天然具备「降级保价值」特性。</p>
+<hr>
+<h2 id="4-边界与不适用场景（B-字段诚实暴露）"><a href="#4-边界与不适用场景（B-字段诚实暴露）" class="headerlink" title="4. 边界与不适用场景（B 字段诚实暴露）"></a>4. 边界与不适用场景（B 字段诚实暴露）</h2><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>是否适用 Cangjie</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>角色扮演作者人设（如「用鲁迅语气回复」）</td>
+<td>❌ 不适用</td>
+<td>Cangjie 蒸馏的是<strong>方法论</strong>，不是人设</td>
+</tr>
+<tr>
+<td>纯摘要&#x2F;笔记&#x2F;内容压缩</td>
+<td>❌ 不适用</td>
+<td>目标不一样：Cangjie 产出<strong>可执行 Skill</strong>，不是摘要</td>
+</tr>
+<tr>
+<td>素材极短（&lt;5000 字）</td>
+<td>⚠️ 过犹不及</td>
+<td>开销大于收益，直接用单轮 Prompt 更划算</td>
+</tr>
+<tr>
+<td>素材无结构、纯碎碎念&#x2F;流水账</td>
+<td>❌ 不适用</td>
+<td>没有可提炼的框架&#x2F;原则&#x2F;案例，三重验证全挂</td>
+</tr>
+<tr>
+<td>需要实时性&#x2F;时效性知识（如股价、新闻）</td>
+<td>❌ 不适用</td>
+<td>Cangjie 处理的是<strong>相对稳定的方法论知识</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="5-总结-—-从「读书做笔记」到「工业化蒸馏」"><a href="#5-总结-—-从「读书做笔记」到「工业化蒸馏」" class="headerlink" title="5. 总结 — 从「读书做笔记」到「工业化蒸馏」"></a>5. 总结 — 从「读书做笔记」到「工业化蒸馏」</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>旧模式（人工 Prompt）</th>
+<th>Cangjie 流水线</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>输入要求</strong></td>
+<td>随意，靠 Prompt 补</td>
+<td>节点必须有 200-500 字描述</td>
+</tr>
+<tr>
+<td><strong>提取方式</strong></td>
+<td>单轮大包干</td>
+<td>5 并行提取器 + 三重验证</td>
+</tr>
+<tr>
+<td><strong>产出标准</strong></td>
+<td>看心情，靠人工审</td>
+<td>RIA++ 六字段模板强制结构化</td>
+</tr>
+<tr>
+<td><strong>引用溯源</strong></td>
+<td>靠 Prompt 约束，易幻觉</td>
+<td>证据 ID 协议，机制保证零幻觉</td>
+</tr>
+<tr>
+<td><strong>容错性</strong></td>
+<td>任一步失败全挂</td>
+<td>单 extractor 失败不影响其余</td>
+</tr>
+<tr>
+<td><strong>迭代成本</strong></td>
+<td>全链路重跑</td>
+<td>只需重跑失败的 extractor&#x2F;阶段</td>
+</tr>
+<tr>
+<td><strong>复用性</strong></td>
+<td>单次用完即弃</td>
+<td>产出可安装的 Hermes Skill + DIGEST.md 博文</td>
+</tr>
+</tbody></table>
+<p><strong>一句话 Takeaway</strong>：<strong>把「内容蒸馏」本身做成标准化、可验证、可并行、可容错的流水线</strong>，才能把非结构化知识规模化转化为 Agent 可调用的执行能力。</p>
+<hr>
+<h2 id="相关资源"><a href="#相关资源" class="headerlink" title="相关资源"></a>相关资源</h2><ul>
+<li><strong>Cangjie Skill 安装</strong>：<code>skill_view(name=&#39;cangjie-skill&#39;)</code> → <code>~/.hermes/skills/cangjie-skill/</code></li>
+<li><strong>方法论文档</strong>：<code>references/methodology/</code> — RIA-TV++ 各阶段详细指南</li>
+<li><strong>提取器 Prompt</strong>：<code>references/extractors/</code> — 5 个并行提取器的标准化定义</li>
+<li><strong>模板库</strong>：<code>references/templates/</code> — SKILL.md &#x2F; DIGEST.md &#x2F; BOOK_OVERVIEW.md 标准模板</li>
+<li><strong>博文写作模式</strong>：<code>references/blog-digest-pattern.md</code> — 将 DIGEST.md 用于博客写作的指南（本文即按此模式生成）</li>
+<li><strong>证据 ID 协议</strong>：<code>references/evidence-protocol.md</code> — R 字段零幻觉的机制化实现</li>
+</ul>
+<hr>
+<p><em>本文由 Cangjie 流水线的 DIGEST.md 模式生成，经三重验证（V1 跨域：CRA 教案生成 + 博文写作双场景验证；V2 预测力：可指导任何长内容→Skill 转化；V3 独特性：并行提取器+证据ID+RIA++组合为原创方法论）通过后发布。</em></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/">https://boke.studyai.ltd/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agent/">Agent</a><a class="post-meta__tags" href="/tags/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">工程实践</a><a class="post-meta__tags" href="/tags/Cangjie/">Cangjie</a><a class="post-meta__tags" href="/tags/%E5%B9%B6%E8%A1%8C%E6%8F%90%E5%8F%96/">并行提取</a><a class="post-meta__tags" href="/tags/%E7%9F%A5%E8%AF%86%E8%92%B8%E9%A6%8F/">知识蒸馏</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/" title="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件"><img class="cover" src="/img/cover-2026-10-31-backup-cron-false-green-gitlink.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件</div></div><div class="info-2"><div class="info-item-1"> 我每天凌晨 2:30 有个 cron 把整个 Agent 的运行时目录 ~/.hermes 快照到一个 GitHub 仓库，连续跑了三个月，每次报告都是「✅ 备份完成，11134 文件」。直到 10 月 30 号我例行核一个插件的提交状态，才发现：fresh clone 这个备份仓库出来，crew 和 homeassistant 两个插件是空目录，1855 个文件一个都不在。 备份的敌人不是崩溃，是假绿灯——那个每天让你安心的文件计数，本身就是谎报的那一个。  1. 缘起 — 从「改完插件没进 git」查起10 月 30 号晚上，我给质量门禁插件打了两处补丁：一个交付物截断（防止超长输出撑爆评审上下文），一个给 FAIL 消息加「建议修复顺序」清单。改完跑 smoke test，全绿。 然后按老规矩核提交状态，发现一个尴尬的事实：这两处改动根本不在任何 git 仓库里。 1234567# live 文件有改动grep -c DELIVERABLE_MAX_CHARS ~/.hermes/plugins/qgs-auto-gate/__init__.py# → 6# 但 git ...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/21/2026-06-21-headroom-context-compression/" title="AI Agent 上下文压缩实战：用 Headroom 将 Token 消耗砍掉 46%–99%"><img class="cover" src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-21</div><div class="info-item-2">AI Agent 上下文压缩实战：用 Headroom 将 Token 消耗砍掉 46%–99%</div></div><div class="info-2"><div class="info-item-1">引言大语言模型（LLM）的上下文窗口是 Agent 系统最宝贵的资源之一。每次工具调用输出、每轮对话历史、每条系统指令都在争夺有限的 Token 配额。 当上下文超过 4K Token——这在多轮工具调用场景中几乎是必然发生的——Agent 的推理质量会急剧下降，响应延迟飙升，成本成倍增加。 本文分享一个轻量而高效的解决方案：Headroom AI，一个专门为 Agent 上下文管理设计的开源工具，在实际部署中实现了 46%–99% 的压缩率，将 10K+ Token 的对话历史压缩到仅几百 Token，同时保留关键语义信息。 问题：Agent 的上下文膨胀困境典型场景一个 Autonomous Agent 完成一项中等复杂度的任务（如系统诊断 + 修复），通常需要 6–12 轮工具调用。每轮调用包括：  用户&#x2F;助手消息（~200 Token） 工具调用指令（~100 Token） 工具返回结果（500–3000 Token，取决于输出大小）  6 轮调用后，上下文轻松突破 8K–12K Token。 膨胀的代价   Token 数 影响    4K–8K 推理质量下降...</div></div></div></a><a class="pagination-related" href="/2026/06/06/2026-06-06-ai-agent-autonomous-termination/" title="AI Agent自主循环终止机制：从死循环到优雅退出的工程实践"><img class="cover" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="info-item-2">AI Agent自主循环终止机制：从死循环到优雅退出的工程实践</div></div><div class="info-2"><div class="info-item-1">问题：智能体的”永动机困境”想象一下，你启动了一个AI智能体让它自主完成任务，然后去午休了。两小时后回来，发现它还在跑——不是在执行任务，而是在同一个决策循环里打转，向一个已经宕机的服务发送请求、收到错误、重试、再重试……这就是AI Agent的”永动机困境”。 在构建 GenericAgent 自主操作系统的过程中，我们遇到了这个经典问题。当智能体进入一个没有终止条件的循环（例如：请求失败 → 重试 → 再失败 → 继续重试），如果没有外部干预，它会永远运行下去，浪费计算资源、产生垃圾日志，甚至导致 API 计费超支。 三个层次的终止策略我们最终实现了三层递进的终止策略，类似”三层防火墙”的防御思路： 第一层：硬限制（MAX_CYCLES）最直接的保护：设定最大循环次数。 123456class Reflector:    MAX_CYCLES = 50  # 硬上限        def reflect(self, context):        if context.cycle_count &gt;= self.MAX_CYCLES:            return ...</div></div></div></a><a class="pagination-related" href="/2026/07/25/2026-07-25-ai-teacher-lesson-generator/" title="我给 AI 当&quot;教务主任&quot;：手搓一个自动备课系统，它能自我改进"><img class="cover" src="/img/cover-ai-teacher-lesson-generator.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-07-25</div><div class="info-item-2">我给 AI 当&quot;教务主任&quot;：手搓一个自动备课系统，它能自我改进</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：我的 Education Agent 能用 LLM 自动生成结构化教案，然后让 5 个 AI 评审角色交叉打分，发现问题后自动修改——整个过程无需人工介入。本文拆解它的架构和最关键的”并行提取器”模式。  1. 缘起 — 被催更的 AI 老师几个月前，我在弄一个软考高项（信息系统项目管理师）的备考系统。需求很简单：把教材知识点转化成结构化的学习教案，每个知识点要有概念讲解、案例、练习题、记忆卡片、常见误区…… 一个知识点大概对应教材 1-3 页内容。整本书几百个知识点。手写？不现实。用模板硬套？生成的教案千篇一律，学生看一眼就困。 我需要一个自动备课系统：输入一个知识点，输出一份结构完整、内容扎实、有互动练习的 HTML 教案。而且——它得越写越好，不能原地踏步。 这就是 Education Agent 的起点。 2. 核心方法 — 5 个”老师傅”同时备课我面对的核心问题是：如何让 LLM 稳定产出高质量的教学内容？ 一个大的 LLM 调用（”帮我写一份教案”）往往输出不稳定——有时漏了案例，有时练习题出得太偏。关键是，一个 prompt 里塞太多要求，LLM 会...</div></div></div></a><a class="pagination-related" href="/2026/05/29/2026-05-29-agent-system-prompt-compliance/" title="Agent 为什么不遵守系统提示？——根因分析与渐进式解决方案"><img class="cover" src="/img/agent-compliance-cover.svg" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-29</div><div class="info-item-2">Agent 为什么不遵守系统提示？——根因分析与渐进式解决方案</div></div><div class="info-2"><div class="info-item-1">摘要问题：在 LLM Agent 系统中，系统提示（system prompt）中明确定义的规则、流程和方法论，Agent 经常不遵守。这不是偶发 bug，而是系统性缺陷。 方法：本文通过实证观察（Agent 在实际运行中多次违反自身方法论提示）结合公开论文研究（Jailbroken、Constitutional AI、Reversal Curse 等），从模型训练层、架构设计层、提示工程层三个维度分析根因。 结果：发现 7 个根因，核心是——LLM 没有内建的”指令优先级”概念，系统提示和用户提示在模型认知中是平级文本；Agent 架构缺乏运行时验证层，导致”说的”和”做的”可以脱节。 结论：提出了 P0-P3 渐进式解决方案体系，在代码&#x2F;框架层而非提示层强制执行方法论，并在 GenericAgent 中实践验证了可行性。 关键词：LLM Agent；系统提示合规；对抗式解题法；运行时验证；提示工程    1 引言1.1 背景2026 年，LLM Agent 已从实验性工具演进为生产系统。在 GenericAgent 项目中，我们开发了”对抗式解题法”方法论插件，其核...</div></div></div></a><a class="pagination-related" href="/2026/05/25/Downy%EF%BC%9A%E5%9F%BA%E4%BA%8E-Cloudflare-Workers-%E7%9A%84%E5%BC%80%E6%BA%90%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93%E5%8D%8F%E4%BD%9C%E5%B9%B3%E5%8F%B0/" title="Downy：在 Cloudflare Workers 上搭建你的 AI 代理团队"><img class="cover" src="https://images.unsplash.com/photo-1674027444636-ce7379d51252?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-25</div><div class="info-item-2">Downy：在 Cloudflare Workers 上搭建你的 AI 代理团队</div></div><div class="info-2"><div class="info-item-1"> 一个普通人也能玩转的多智能体协作平台，无需服务器、无需 Docker、无需运维经验。     引言：一个普通开发者的 AI 代理梦（引言）几个月前，我想给自己的项目配一个 AI 助手。不是那种聊聊天就完事的，而是能真正干活的那种——能搜索资料、能读写文件、能跑后台任务。 翻了一圈市面上的方案：OpenClaw 不错，但要自己搭服务器；AutoGPT 太重量级；LangChain 的生态太复杂。我只是个普通开发者，不想为了一个 AI 助手去学一套完整的 DevOps 技能栈。 直到我发现了 Downy。 二、Downy 是什么Downy 是一个基于 Cloudflare Workers 的开源多智能体协作平台。简单说，它让你在几分钟内创建一支 AI 代理团队，每个代理都有自己的工作空间、独立的模型配置和对话历史。 项目地址：github.com&#x2F;bensenescu&#x2F;downy 核心特性一览   特性 说明    🧠 多代理架构 主代理（DownyAgent）+ 子代理（ChildAgent），每个独立运行、独立模型配置   ☁️ 全托管 部署在 Cloud...</div></div></div></a><a class="pagination-related" href="/2026/09/16/2026-09-16-agent-free-llm-router/" title="我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录"><img class="cover" src="/img/cover-agent-free-llm-router.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-09-16</div><div class="info-item-2">我的 Agent 现在 0 花费跑 LLM：四款免费模型 + 智能路由的搭建记录</div></div><div class="info-2"><div class="info-item-1"> 一个 Hermes Agent 每天要跑几十个定时任务、多 profile 协作、还挂着股票分析和飞书机器人，按正常推理费用一个月下来是笔不小的开支。这篇文章记录我怎么把它降到 0 元——不是找一家免费服务商完事，而是搭了一个”免费模型路由层”：4 款免费模型分 4 档，按任务复杂度自动路由，某档挂了自动降级。核心配置就 30 行 YAML，全文给出。  1. 缘起 — muse-spark 把输出截断到只剩 7 个字9 月 14 晚上，我在 opencode zen 网关上手动加了一个新上的免费模型 muse-spark-1.3-contributor-free，想着反正白嫖，跑跑看。 结果当天就开始出问题。翻 gateway 日志能看到原话（我发给 agent 的消息）：  “把默认模型改成 Nemotron 3 Ultra Free，muse-spark-1.3-contributor-free 经常出现 парсинг 然后就停止的问题。”  注意那个俄语”парсинг”（parsing）——这是我手滑打出来的，但场景很真实：模型在解析流式响应时频繁中途停止。看 ag...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">97</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">247</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">34</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E6%8A%8A%E3%80%8C%E8%AF%BB%E4%B9%A6%E5%81%9A%E7%AC%94%E8%AE%B0%E3%80%8D%E5%81%9A%E6%88%90%E5%B7%A5%E4%B8%9A%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 为什么要把「读书做笔记」做成工业流水线</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-RIA-TV-%E4%B8%83%E9%98%B6%E6%AE%B5%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — RIA-TV++ 七阶段流水线</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%BA%94%E4%B8%AA%E5%B9%B6%E8%A1%8C%E6%8F%90%E5%8F%96%E5%99%A8%EF%BC%88%E9%98%B6%E6%AE%B5-1-%E7%9A%84%E6%A0%B8%E5%BF%83%EF%BC%89"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 五个并行提取器（阶段 1 的核心）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E4%B8%89%E9%87%8D%E9%AA%8C%E8%AF%81%E7%AD%9B%E9%80%89%EF%BC%88%E9%98%B6%E6%AE%B5-1-5-%E7%9A%84%E8%B4%A8%E9%87%8F%E9%97%A8%E7%A6%81%EF%BC%89"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 三重验证筛选（阶段 1.5 的质量门禁）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-RIA-%E5%85%AD%E5%AD%97%E6%AE%B5%E6%A8%A1%E6%9D%BF%EF%BC%88%E9%98%B6%E6%AE%B5-2-%E7%9A%84%E6%A0%87%E5%87%86%E5%8C%96%E4%BA%A7%E5%87%BA%EF%BC%89"><span class="toc-number">2.3.</span> <span class="toc-text">2.3 RIA++ 六字段模板（阶段 2 的标准化产出）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E8%AF%81%E6%8D%AE-ID-%E5%8D%8F%E8%AE%AE%E2%80%94%E2%80%94%E6%8A%8A%E3%80%8C%E5%BC%95%E7%94%A8%E5%8E%9F%E6%96%87%E3%80%8D%E4%BB%8E%E7%BA%A6%E6%9D%9F%E5%8F%98%E6%88%90%E6%9C%BA%E5%88%B6"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 证据 ID 协议——把「引用原文」从约束变成机制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E4%BB%8E-CRA-%E6%95%99%E6%A1%88%E7%94%9F%E6%88%90%E5%AE%9E%E6%88%98%E4%B8%AD%E6%80%BB%E7%BB%93%E7%9A%84-3-%E6%9D%A1%E6%A0%B8%E5%BF%83%E6%95%99%E8%AE%AD"><span class="toc-number">3.</span> <span class="toc-text">3. 踩坑记录 — 从 CRA 教案生成实战中总结的 3 条核心教训</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E7%B4%A0%E6%9D%90%E6%8F%8F%E8%BF%B0%E8%B4%A8%E9%87%8F-%E6%8F%90%E5%8F%96%E4%B8%8A%E9%99%90%EF%BC%88Source-material-quality-is-everything%EF%BC%89"><span class="toc-number">3.1.</span> <span class="toc-text">3.1 素材描述质量 &#x3D; 提取上限（Source material quality is everything）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%A4%9A%E6%96%87%E4%BB%B6%E8%BE%93%E5%87%BA%E5%BF%85%E9%A1%BB%E5%90%8C%E6%AD%A5%E5%86%99%E5%85%A5%EF%BC%88%E5%8F%8C%E6%96%87%E4%BB%B6%E8%BE%93%E5%87%BA%E5%90%8C%E6%AD%A5%E9%99%B7%E9%98%B1%EF%BC%89"><span class="toc-number">3.2.</span> <span class="toc-text">3.2 多文件输出必须同步写入（双文件输出同步陷阱）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%B9%B6%E8%A1%8C%E5%AE%B9%E9%94%99%E4%BC%98%E4%BA%8E%E9%A1%BA%E5%BA%8F%E6%89%A7%E8%A1%8C%EF%BC%88Seamless-fallback-preserves-value%EF%BC%89"><span class="toc-number">3.3.</span> <span class="toc-text">3.3 并行容错优于顺序执行（Seamless fallback preserves value）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E8%BE%B9%E7%95%8C%E4%B8%8E%E4%B8%8D%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%88B-%E5%AD%97%E6%AE%B5%E8%AF%9A%E5%AE%9E%E6%9A%B4%E9%9C%B2%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">4. 边界与不适用场景（B 字段诚实暴露）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E6%80%BB%E7%BB%93-%E2%80%94-%E4%BB%8E%E3%80%8C%E8%AF%BB%E4%B9%A6%E5%81%9A%E7%AC%94%E8%AE%B0%E3%80%8D%E5%88%B0%E3%80%8C%E5%B7%A5%E4%B8%9A%E5%8C%96%E8%92%B8%E9%A6%8F%E3%80%8D"><span class="toc-number">5.</span> <span class="toc-text">5. 总结 — 从「读书做笔记」到「工业化蒸馏」</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E8%B5%84%E6%BA%90"><span class="toc-number">6.</span> <span class="toc-text">相关资源</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/" title="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战"><img src="/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战"/></a><div class="content"><a class="title" href="/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/" title="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战">我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战</a><time datetime="2026-11-04T23:49:00.000Z" title="发表于 2026-11-05 07:49:00">2026-11-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/" title="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件"><img src="/img/cover-2026-10-31-backup-cron-false-green-gitlink.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件"/></a><div class="content"><a class="title" href="/2026/10/31/2026-10-31-backup-cron-false-green-gitlink/" title="备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件">备份 cron 每天报 ✅，但 clone 出来是空的——我的快照仓库一直在静默丢 1855 个文件</a><time datetime="2026-10-31T02:00:00.000Z" title="发表于 2026-10-31 10:00:00">2026-10-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/29/2026-10-29-wx-cli-wechat-data-benchmark-privacy/" title="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）"><img src="/img/cover-2026-10-29-wx-cli-wechat-data-benchmark-privacy.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）"/></a><div class="content"><a class="title" href="/2026/10/29/2026-10-29-wx-cli-wechat-data-benchmark-privacy/" title="给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）">给微信装上命令行：wx-cli 如何解密本地聊天数据（以及为什么它大概率不封号）</a><time datetime="2026-10-29T06:00:00.000Z" title="发表于 2026-10-29 14:00:00">2026-10-29</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/28/2026-10-28-qgs-critic-keyenv-llm-unavailable/" title="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级"><img src="/img/cover-2026-10-28-qgs-critic-keyenv-llm-unavailable.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级"/></a><div class="content"><a class="title" href="/2026/10/28/2026-10-28-qgs-critic-keyenv-llm-unavailable/" title="QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级">QGS 质量门禁自己坏了：一个 key_env 的坑让 LLM 评审静默降级</a><time datetime="2026-10-28T02:00:00.000Z" title="发表于 2026-10-28 10:00:00">2026-10-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/10/24/2026-10-24-feishu-table-converter-postmortem/" title="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘"><img src="/img/cover-2026-10-24-feishu-table-converter-postmortem.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘"/></a><div class="content"><a class="title" href="/2026/10/24/2026-10-24-feishu-table-converter-postmortem/" title="修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘">修了三个 Bug 后，我们把它整个删了——飞书表格「兼容性转换」完整复盘</a><time datetime="2026-10-24T02:00:00.000Z" title="发表于 2026-10-24 10:00:00">2026-10-24</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
