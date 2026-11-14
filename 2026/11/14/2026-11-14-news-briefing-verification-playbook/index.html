@@ -1,0 +1,365 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律 | 颂雅风的博客</title><meta name="author" content="颂雅风"><meta name="copyright" content="颂雅风"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一句话摘要：我们跑了一个「每日 AI 新闻简报」cron，半年来跟 403&#x2F;404&#x2F;429、Next.js 假错误、限流降级死磕，最终沉淀出 10 条自动化采集铁律——任何要做「定时抓取内容」的 Agent 都能直接抄走。  1. 缘起 — 第一版简报全是 404，用户直接炸了故事从一个尴尬的早晨开始。我给 Hermes 写了个「每日 AI 新闻简报」cron，每天 8 点自">
+<meta property="og:type" content="article">
+<meta property="og:title" content="每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律">
+<meta property="og:url" content="https://boke.studyai.ltd/2026/11/14/2026-11-14-news-briefing-verification-playbook/">
+<meta property="og:site_name" content="颂雅风的博客">
+<meta property="og:description" content="一句话摘要：我们跑了一个「每日 AI 新闻简报」cron，半年来跟 403&#x2F;404&#x2F;429、Next.js 假错误、限流降级死磕，最终沉淀出 10 条自动化采集铁律——任何要做「定时抓取内容」的 Agent 都能直接抄走。  1. 缘起 — 第一版简报全是 404，用户直接炸了故事从一个尴尬的早晨开始。我给 Hermes 写了个「每日 AI 新闻简报」cron，每天 8 点自">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://boke.studyai.ltd/img/cover-2026-11-14-news-briefing-verification-playbook.png">
+<meta property="article:published_time" content="2026-11-14T02:05:00.000Z">
+<meta property="article:modified_time" content="2026-11-14T03:00:43.196Z">
+<meta property="article:author" content="颂雅风">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="cron">
+<meta property="article:tag" content="工程实践">
+<meta property="article:tag" content="数据采集">
+<meta property="article:tag" content="自动化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://boke.studyai.ltd/img/cover-2026-11-14-news-briefing-verification-playbook.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律",
+  "url": "https://boke.studyai.ltd/2026/11/14/2026-11-14-news-briefing-verification-playbook/",
+  "image": "https://boke.studyai.ltd/img/cover-2026-11-14-news-briefing-verification-playbook.png",
+  "datePublished": "2026-11-14T02:05:00.000Z",
+  "dateModified": "2026-11-14T03:00:43.196Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "颂雅风",
+      "url": "https://boke.studyai.ltd"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/avatar-tech.svg"><link rel="canonical" href="https://boke.studyai.ltd/2026/11/14/2026-11-14-news-briefing-verification-playbook/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="stylesheet" href="/css/index.css?v=5.5.4"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?0e0c1425b3bc072fe689b623a33aaf0d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":400,"highlightFullpage":false,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":150,"languages":{"author":"作者: 颂雅风","link":"链接: ","source":"来源: 颂雅风的博客","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.13.0/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: true,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 8.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">101</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">257</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">35</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url(/img/cover-2026-11-14-news-briefing-verification-playbook.png);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/img/logo-tech.svg" alt="Logo"><span class="site-name">颂雅风的博客</span></a><a class="nav-page-title" href="/"><span class="site-name">每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-11-14T02:05:00.000Z" title="发表于 2026-11-14 10:05:00">2026-11-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-11-14T03:00:43.196Z" title="更新于 2026-11-14 11:00:43">2026-11-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI-Agent/">AI Agent</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/AI-Agent/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">工程实践</a></span></div><div class="meta-secondline"></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><blockquote>
+<p>一句话摘要：我们跑了一个「每日 AI 新闻简报」cron，半年来跟 403&#x2F;404&#x2F;429、Next.js 假错误、限流降级死磕，最终沉淀出 10 条自动化采集铁律——任何要做「定时抓取内容」的 Agent 都能直接抄走。</p>
+</blockquote>
+<h2 id="1-缘起-—-第一版简报全是-404，用户直接炸了"><a href="#1-缘起-—-第一版简报全是-404，用户直接炸了" class="headerlink" title="1. 缘起 — 第一版简报全是 404，用户直接炸了"></a>1. 缘起 — 第一版简报全是 404，用户直接炸了</h2><p>故事从一个尴尬的早晨开始。我给 Hermes 写了个「每日 AI 新闻简报」cron，每天 8 点自动抓 AI 圈热点、生成摘要、推送到飞书。</p>
+<p>第一版跑出来，用户就回了一句话：<strong>「这个链接是 404，你从哪儿总结的对应的内容？」</strong></p>
+<p>我复盘发现，整份简报 8 条新闻，<strong>5 条链接点进去是 404</strong>。而更讽刺的是——那些「摘要」都是我根据新闻标题<strong>脑补</strong>的，压根没抓到正文。</p>
+<p>一个数据采集 Agent，连「链接有效」和「内容真实」这两条底线都没守住。用户瞬间失去了信任。</p>
+<p>这次翻车直接让我重新设计整条采集管线。半年来踩的坑，全部沉淀成了下面这 10 条铁律。</p>
+<hr>
+<h2 id="2-核心方法-—-10-条铁律"><a href="#2-核心方法-—-10-条铁律" class="headerlink" title="2. 核心方法 — 10 条铁律"></a>2. 核心方法 — 10 条铁律</h2><h3 id="铁律-1：绝不允许「根据标题拼-URL」"><a href="#铁律-1：绝不允许「根据标题拼-URL」" class="headerlink" title="铁律 1：绝不允许「根据标题拼 URL」"></a>铁律 1：绝不允许「根据标题拼 URL」</h3><p>这是所有坑里最致命的。我犯过两次：</p>
+<ul>
+<li><strong>Ars Technica</strong>：按标题猜 <code>.../apple-working-to-cram-massive-gemini-model-into-iphone-to-power-new-siri/</code> → 404，真实 slug 略不同</li>
+<li><strong>TechCrunch Groq 故事</strong>：按 HN 热帖日期猜 <code>May 27</code> → 404，真实发布是 May 29，URL 里日期是<strong>发布日不是提交日</strong></li>
+</ul>
+<p><strong>正确姿势</strong>：要么从分类页用 DOM 提取真实链接，要么用搜索 API 搜「标题关键词」拿到真实 URL。<strong>永远不要手工拼链接。</strong></p>
+<h3 id="铁律-2：抓到正文才算数，标题不等于内容"><a href="#铁律-2：抓到正文才算数，标题不等于内容" class="headerlink" title="铁律 2：抓到正文才算数，标题不等于内容"></a>铁律 2：抓到正文才算数，标题不等于内容</h3><p>第一版简报的另一宗罪——只看标题就编摘要。</p>
+<p>正确流程是：拿到 URL → <code>urllib</code> 抓正文 → 提取 <code>og:description</code> &#x2F; <code>&lt;title&gt;</code> → 用<strong>真实抓到的文字</strong>做摘要。宁可发 5 条验证过的，也不发 8 条里有 3 条是编的。</p>
+<h3 id="铁律-3：403-≠-内容不存在，它是「网站反爬」"><a href="#铁律-3：403-≠-内容不存在，它是「网站反爬」" class="headerlink" title="铁律 3：403 ≠ 内容不存在，它是「网站反爬」"></a>铁律 3：403 ≠ 内容不存在，它是「网站反爬」</h3><p>这是我花最多时间才想通的一点。踩过的具体案例：</p>
+<table>
+<thead>
+<tr>
+<th>被墙站点</th>
+<th>返回</th>
+<th>替代来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>geekwire.com</code></td>
+<td>403</td>
+<td>CNBC &#x2F; TNW</td>
+</tr>
+<tr>
+<td><code>techxplore.com</code></td>
+<td>403</td>
+<td>Mashable SE Asia &#x2F; 官方企业博客</td>
+</tr>
+<tr>
+<td><code>dronexl.co</code></td>
+<td>403</td>
+<td>Nintendo Wire &#x2F; GameDeveloper</td>
+</tr>
+<tr>
+<td><code>openai.com/index/*</code></td>
+<td>全部 403</td>
+<td><code>patchtheplanet.org</code>（官方项目微站）</td>
+</tr>
+</tbody></table>
+<p><strong>铁律</strong>：403 只说明「该站反爬强」，不代表新闻是假的。用关键词搜同一故事，找到 2 个以上独立主流源即可采用。<strong>优先找官方但未被墙的镜像</strong>（如 OpenAI 的自建项目站），其次才是第三方转载。</p>
+<h3 id="铁律-4：Next-js-的「客户端渲染错误」是假阴性"><a href="#铁律-4：Next-js-的「客户端渲染错误」是假阴性" class="headerlink" title="铁律 4：Next.js 的「客户端渲染错误」是假阴性"></a>铁律 4：Next.js 的「客户端渲染错误」是假阴性</h3><p><code>anthropic.com</code> 这种 Next.js 站点，用浏览器打开经常报 <code>Application error: a client-side exception has occurred</code>。<strong>千万别当成链接坏了。</strong></p>
+<p>真相：服务端渲染的 <code>&lt;title&gt;</code> 和 <code>og:description</code> 永远都在，只是页面 JS 崩了。用 Python <code>urllib</code> 直接 GET 就能拿到 meta 标签。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib.request</span><br><span class="line">req = urllib.request.Request(url, headers=&#123;<span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/5.0&#x27;</span>&#125;)</span><br><span class="line"><span class="keyword">with</span> urllib.request.urlopen(req, timeout=<span class="number">15</span>) <span class="keyword">as</span> resp:</span><br><span class="line">    html = resp.read().decode(<span class="string">&#x27;utf-8&#x27;</span>, errors=<span class="string">&#x27;replace&#x27;</span>)</span><br><span class="line">    <span class="comment"># og:title 和 og:description 一定在，评分 validity=25 而非 0</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="铁律-5：Web-Search-API-会挂，DDG-HTML-端点永远是保底"><a href="#铁律-5：Web-Search-API-会挂，DDG-HTML-端点永远是保底" class="headerlink" title="铁律 5：Web Search API 会挂，DDG HTML 端点永远是保底"></a>铁律 5：Web Search API 会挂，DDG HTML 端点永远是保底</h3><p><code>web_search</code> 后端（tavily）在 cron 里会偶尔报 <code>&quot;Query is missing.&quot;</code>，免费备用源返回空数组，重试无用。</p>
+<p><strong>救命的方案</strong>：直接用 DuckDuckGo 的 HTML 端点，免 key、约 0.7s 返回 5 条结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> urllib.request, urllib.parse, re</span><br><span class="line"></span><br><span class="line">UA = &#123;<span class="string">&quot;User-Agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (X11; Linux x86_64; rv:139.0) Gecko/20100101 Firefox/139.0&quot;</span>&#125;</span><br><span class="line"><span class="keyword">def</span> <span class="title function_">ddg</span>(<span class="params">q</span>):</span><br><span class="line">    u = <span class="string">&quot;https://html.duckduckgo.com/html/?q=&quot;</span> + urllib.parse.quote(q)</span><br><span class="line">    raw = urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=<span class="number">18</span>).read().decode(<span class="string">&quot;utf-8&quot;</span>, <span class="string">&quot;replace&quot;</span>)</span><br><span class="line">    out = []</span><br><span class="line">    <span class="keyword">for</span> m <span class="keyword">in</span> re.finditer(<span class="string">r&#x27;&lt;a rel=&quot;nofollow&quot; class=&quot;result__a&quot; href=&quot;([^&quot;]+)&quot;[^&gt;]*&gt;(.*?)&lt;/a&gt;&#x27;</span>, raw, re.S):</span><br><span class="line">        href = m.group(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="string">&quot;uddg=&quot;</span> <span class="keyword">in</span> href:  <span class="comment"># DDG 包了一层重定向，要解开拿真实 URL</span></span><br><span class="line">            href = urllib.parse.unquote(re.search(<span class="string">r&#x27;uddg=([^&amp;]+)&#x27;</span>, href).group(<span class="number">1</span>))</span><br><span class="line">        out.append((re.sub(<span class="string">r&#x27;&lt;[^&gt;]+&gt;&#x27;</span>, <span class="string">&#x27;&#x27;</span>, m.group(<span class="number">2</span>)).strip(), href))</span><br><span class="line">    <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+
+<p>注意：DDG 对<strong>非常新的长尾词</strong>不稳（搜「标题」会空，搜「故事」反而能命中）——<strong>永远按故事搜，别按 URL 搜</strong>。</p>
+<h3 id="铁律-6：MCP-服务有-60-秒冷却，别狂重试"><a href="#铁律-6：MCP-服务有-60-秒冷却，别狂重试" class="headerlink" title="铁律 6：MCP 服务有 60 秒冷却，别狂重试"></a>铁律 6：MCP 服务有 60 秒冷却，别狂重试</h3><p><code>mcp_anysearch_extract</code> 连挂 3 次后，整个服务进入<strong>约 60 秒冷却期</strong>，期间所有 MCP 工具全被锁。</p>
+<p><strong>正确策略</strong>：同一个 URL 最多重试 2 次。第 3 次失败立刻切到 <code>execute_code</code> + Python <code>urllib</code>，别在 MCP 的死循环里浪费轮次。</p>
+<h3 id="铁律-7：X-Twitter-用-FxEmbed-免-key-拿一手消息"><a href="#铁律-7：X-Twitter-用-FxEmbed-免-key-拿一手消息" class="headerlink" title="铁律 7：X&#x2F;Twitter 用 FxEmbed 免 key 拿一手消息"></a>铁律 7：X&#x2F;Twitter 用 FxEmbed 免 key 拿一手消息</h3><p><code>api.fxtwitter.com</code> 是无 key 的 X 数据桥。拉大咖时间线：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">handles = [<span class="string">&#x27;sama&#x27;</span>, <span class="string">&#x27;OpenAI&#x27;</span>, <span class="string">&#x27;AnthropicAI&#x27;</span>, <span class="string">&#x27;karpathy&#x27;</span>, <span class="string">&#x27;ylecun&#x27;</span>]</span><br><span class="line"><span class="keyword">for</span> h <span class="keyword">in</span> handles:</span><br><span class="line">    url = <span class="string">f&quot;https://api.fxtwitter.com/2/profile/<span class="subst">&#123;h&#125;</span>/statuses&quot;</span></span><br><span class="line">    data = json.loads(urllib.request.urlopen(urllib.request.Request(</span><br><span class="line">        url, headers=&#123;<span class="string">&#x27;User-Agent&#x27;</span>: <span class="string">&#x27;Mozilla/5.0&#x27;</span>&#125;), timeout=<span class="number">10</span>).read())</span><br><span class="line">    <span class="comment"># data[&#x27;results&#x27;] 按时间倒序：text / likes / reposts / url</span></span><br></pre></td></tr></table></figure>
+
+<p>单条推文用 <code>api.fxtwitter.com/{handle}/status/{id}</code>，能拿到逐字原文——当源博客被墙&#x2F;付费墙时，这是最快的一手引用。<code>/2/search</code> 端点会 404，但 <code>/2/profile</code> 非常稳。</p>
+<h3 id="铁律-8：429-是「限流」不是「失效」，VentureBeat-最典型"><a href="#铁律-8：429-是「限流」不是「失效」，VentureBeat-最典型" class="headerlink" title="铁律 8：429 是「限流」不是「失效」，VentureBeat 最典型"></a>铁律 8：429 是「限流」不是「失效」，VentureBeat 最典型</h3><p>VentureBeat 的 <code>urllib</code> GET 稳定返回 429（Too Many Requests）。<strong>文章存在且公开</strong>，只是反爬频率限制。</p>
+<p>绕过：用浏览器打开分类页 <code>venturebeat.com/category/ai</code> → 用 DOM 查询取真实 URL → 再直接导航。注意过滤「Credit: VentureBeat made with…」这种图片署名噪声，它的 href 跟文章链接一样但内容无关。VentureBeat 是 JS 路由，点击卡片<strong>不触发跳转</strong>，必须用 DOM 拿到真实 href 再导航。</p>
+<h3 id="铁律-9：Tavily-的-content-字段是「页脚垃圾」"><a href="#铁律-9：Tavily-的-content-字段是「页脚垃圾」" class="headerlink" title="铁律 9：Tavily 的 content 字段是「页脚垃圾」"></a>铁律 9：Tavily 的 content 字段是「页脚垃圾」</h3><p>Tavily 返回的 <code>content</code> 字段经常是<strong>协议文本、导航菜单、页脚链接</strong>这种 boilerplate，不是文章摘要。<strong>永远别信它</strong>，一律回源抓正文。</p>
+<h3 id="铁律-10：每个-403-404-都要「先验证后采用」，宁可少发"><a href="#铁律-10：每个-403-404-都要「先验证后采用」，宁可少发" class="headerlink" title="铁律 10：每个 403&#x2F;404 都要「先验证后采用」，宁可少发"></a>铁律 10：每个 403&#x2F;404 都要「先验证后采用」，宁可少发</h3><p>最后一条是总纲。任何一条新闻，<strong>没有真实抓取到 200 + 正文，就不放进简报</strong>。5 条验证过的 &gt; 8 条半编的。用户信任的崩塌，比少发几条新闻贵得多。</p>
+<hr>
+<h2 id="3-踩坑记录-—-反例与边界"><a href="#3-踩坑记录-—-反例与边界" class="headerlink" title="3. 踩坑记录 — 反例与边界"></a>3. 踩坑记录 — 反例与边界</h2><h3 id="坑-1：版本号-域名别猜"><a href="#坑-1：版本号-域名别猜" class="headerlink" title="坑 1：版本号 &#x2F; 域名别猜"></a>坑 1：版本号 &#x2F; 域名别猜</h3><ul>
+<li>当初直接写 <code>theverge.com/google/veo3-ai-video-generation</code> → 404。Verge 的 slug 压缩规则我没猜对，果断换 <code>news.ycombinator.com/item?id=</code> 页面做权威源。</li>
+<li>DDG 对「Carbou-X 的 blog URL」搜空、但搜「模型页 + TNW」能命中——<strong>永远搜故事，不搜 URL</strong>。</li>
+</ul>
+<h3 id="坑-2：这些铁律什么时候不适用"><a href="#坑-2：这些铁律什么时候不适用" class="headerlink" title="坑 2：这些铁律什么时候不适用"></a>坑 2：这些铁律什么时候不适用</h3><ul>
+<li><strong>只要目标站没有反爬</strong>（如自家 API、RSS），铁律 3&#x2F;8 用不上，直接用最省事的请求即可</li>
+<li><strong>低频采集</strong>（周更、一次性）不必上 FxEmbed &#x2F; DDG 降级这套，直接 <code>urllib</code> 足够</li>
+<li><strong>有付费 API 额度</strong>时，铁律 5 的 DDG 保底只是 Plan B，别自废武功不用正经搜索</li>
+</ul>
+<h3 id="坑-3：容易混淆的概念"><a href="#坑-3：容易混淆的概念" class="headerlink" title="坑 3：容易混淆的概念"></a>坑 3：容易混淆的概念</h3><table>
+<thead>
+<tr>
+<th>状态码</th>
+<th>含义</th>
+<th>常见误判</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>403</td>
+<td>反爬 &#x2F; 需要 UA</td>
+<td>❌ 误以为内容不存在</td>
+</tr>
+<tr>
+<td>404</td>
+<td>内容真的不存在</td>
+<td>✅ 链接写错了</td>
+</tr>
+<tr>
+<td>429</td>
+<td>限流，频率太快</td>
+<td>❌ 误以为服务挂了</td>
+</tr>
+<tr>
+<td>Next.js 报错</td>
+<td>客户端渲染崩溃</td>
+<td>❌ 误以为整站挂了（meta 还在）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p><strong>核心结论</strong>：自动化采集的信任，建立在「每条链接真实有效、每段摘要回源可查」之上。宁可发 5 条验证过的，不发 8 条有 3 条是编的。用户的信任一旦因为一条 404 崩塌，再多的信息量也补不回来。</p>
+<p><strong>一句话 takeaway</strong>：抓取 Agent 的第一原则不是「抓到更多」，而是「每一条都验证过」。</p>
+<p><strong>相关资源</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/FixTweet/FxTwitter">FxEmbed API 文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://hn.algolia.com/api">Hacker News API（权威备用源）</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd">颂雅风</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://boke.studyai.ltd/2026/11/14/2026-11-14-news-briefing-verification-playbook/">https://boke.studyai.ltd/2026/11/14/2026-11-14-news-briefing-verification-playbook/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://boke.studyai.ltd" target="_blank">颂雅风的博客</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Agent/">Agent</a><a class="post-meta__tags" href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96/">自动化</a><a class="post-meta__tags" href="/tags/%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5/">工程实践</a><a class="post-meta__tags" href="/tags/%E6%95%B0%E6%8D%AE%E9%87%87%E9%9B%86/">数据采集</a><a class="post-meta__tags" href="/tags/cron/">cron</a></div><div class="post-share"><div class="social-share" data-image="/img/cover-2026-11-14-news-briefing-verification-playbook.png" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.6/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2026/11/11/2026-11-11-memvid-cleanup-breaks-terminal-tool/" title="删了 memvid 环境，Hermes terminal 工具全军覆没 —— 一次清理引发的 uv wrapper 依赖地狱"><img class="cover" src="/img/cover-2026-11-11-memvid-cleanup-breaks-terminal-tool.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">删了 memvid 环境，Hermes terminal 工具全军覆没 —— 一次清理引发的 uv wrapper 依赖地狱</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：删除 Hermes installs/&lt;hash&gt;/ 目录清理磁盘时，看似无关的 memvid 运行环境竟被 terminal 工具强依赖 —— 原因是 Hermes 的 uv wrapper 启动时强制读取当前活跃 install 目录的 facts.json，缺失即崩溃。清理前必须确认：无 cron 引用该 install、无进程在用、准备好回退方案。   1. 缘起 —— 一次看似无害的磁盘清理故事始于 2026-11-10。根分区 96%（仅剩 1.6G），我决定清理 Hermes 遗留的大目录。du -sh ~/.hermes/installs/* 显示有一个 b346adcddd9da5cc 目录占用 696M，里面是 Python 3.14 的完整 venv，标记为 memvid 运行环境。 心想：memvid 早就改用本地 wheel 安装到主环境了，这个旧 install 应该没用了吧？直接 rm -rf 删了。 接着跑个 terminal 命令验证一下，结果报错： 1RuntimeError: cannot read dependen...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2026/06/06/2026-06-06-ai-agent-autonomous-termination/" title="AI Agent自主循环终止机制：从死循环到优雅退出的工程实践"><img class="cover" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-06</div><div class="info-item-2">AI Agent自主循环终止机制：从死循环到优雅退出的工程实践</div></div><div class="info-2"><div class="info-item-1">问题：智能体的”永动机困境”想象一下，你启动了一个AI智能体让它自主完成任务，然后去午休了。两小时后回来，发现它还在跑——不是在执行任务，而是在同一个决策循环里打转，向一个已经宕机的服务发送请求、收到错误、重试、再重试……这就是AI Agent的”永动机困境”。 在构建 GenericAgent 自主操作系统的过程中，我们遇到了这个经典问题。当智能体进入一个没有终止条件的循环（例如：请求失败 → 重试 → 再失败 → 继续重试），如果没有外部干预，它会永远运行下去，浪费计算资源、产生垃圾日志，甚至导致 API 计费超支。 三个层次的终止策略我们最终实现了三层递进的终止策略，类似”三层防火墙”的防御思路： 第一层：硬限制（MAX_CYCLES）最直接的保护：设定最大循环次数。 123456class Reflector:    MAX_CYCLES = 50  # 硬上限        def reflect(self, context):        if context.cycle_count &gt;= self.MAX_CYCLES:            return ...</div></div></div></a><a class="pagination-related" href="/2026/06/21/2026-06-21-headroom-context-compression/" title="AI Agent 上下文压缩实战：用 Headroom 将 Token 消耗砍掉 46%–99%"><img class="cover" src="https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-21</div><div class="info-item-2">AI Agent 上下文压缩实战：用 Headroom 将 Token 消耗砍掉 46%–99%</div></div><div class="info-2"><div class="info-item-1">引言大语言模型（LLM）的上下文窗口是 Agent 系统最宝贵的资源之一。每次工具调用输出、每轮对话历史、每条系统指令都在争夺有限的 Token 配额。 当上下文超过 4K Token——这在多轮工具调用场景中几乎是必然发生的——Agent 的推理质量会急剧下降，响应延迟飙升，成本成倍增加。 本文分享一个轻量而高效的解决方案：Headroom AI，一个专门为 Agent 上下文管理设计的开源工具，在实际部署中实现了 46%–99% 的压缩率，将 10K+ Token 的对话历史压缩到仅几百 Token，同时保留关键语义信息。 问题：Agent 的上下文膨胀困境典型场景一个 Autonomous Agent 完成一项中等复杂度的任务（如系统诊断 + 修复），通常需要 6–12 轮工具调用。每轮调用包括：  用户&#x2F;助手消息（~200 Token） 工具调用指令（~100 Token） 工具返回结果（500–3000 Token，取决于输出大小）  6 轮调用后，上下文轻松突破 8K–12K Token。 膨胀的代价   Token 数 影响    4K–8K 推理质量下降...</div></div></div></a><a class="pagination-related" href="/2026/04/12/2026-04-13-ai-agent-workflow-guide/" title="AI Agent 完全指南：2026 年如何用多代理系统提升工作效率"><img class="cover" src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-13</div><div class="info-item-2">AI Agent 完全指南：2026 年如何用多代理系统提升工作效率</div></div><div class="info-2"><div class="info-item-1"> 写在前面：本文系统整理了我在过去三个月里使用 AI Agent 的完整经验，包含工具选型、工作流设计、成本控制等实战内容。如果你也想构建自己的 AI 工作体系，这篇值得收藏。   一、为什么需要 AI Agent？1.1 从「工具」到「助手」的进化回想一下我们是怎么用 AI 的：  提问 → 等待回答 → 手动复制 → 粘贴到其他工具 → 继续下一步  这是典型的「工具思维」—— AI 只是一个更强的搜索引擎。 但 Agent 改变了这个关系：  设定目标 → AI 自动规划步骤 → 执行 → 反馈结果 → 人类只需审核  我称之为「助手思维」—— AI 不再是工具，而是能独立完成任务的数字员工。 1.2 我的真实收益过去三个月，我用 AI Agent 完成了：    任务类型 原来耗时 现在耗时 效率提升    每周 AI 新闻简报 3 小时 15 分钟 12x   公众号文章创作 6 小时 2 小时 3x   代码 code review 2 小时 20 分钟 6x   竞品分析报告 8 小时 1.5 小时 5.3x   时间不是省出来的，是重新分配了。  二、多代理协作系...</div></div></div></a><a class="pagination-related" href="/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/" title="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战"><img class="cover" src="/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-11-05</div><div class="info-item-2">我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战</div></div><div class="info-2"><div class="info-item-1"> 一句话摘要：本文复盘我们如何把「从长内容中蒸馏可复用 Agent Skill」这个过程，拆解为 5 个并行提取器 + 3 重验证 + RIA++ 六字段模板的标准化流水线，并从教育 Agent 教案生成（CRA）的实战中总结出 3 条核心教训：素材描述质量决定提取上限、多文件输出必须同步写入、并行容错优于顺序执行。  1. 缘起 — 为什么要把「读书做笔记」做成工业流水线故事开始于一个很痛的场景：我们在做教育 Agent（ActiveAgent &#x2F; Edu Agent），需要把软考高项&#x2F;系规的官方大纲（348 个考点）转化成可交付的教案。 最早的做法是「人工读大纲 → 写 Prompt → 让 LLM 生成教案」。问题显而易见：  大纲节点只有 JSON 结构元数据（如 {&quot;ch&quot;:1,&quot;sec&quot;:2}），没有 200-500 字的中文内容描述 LLM 拿到这种「空壳节点」会幻觉生成「国家信息化战略」替代「现代化基础设施」这种完全跑偏的内容 每个考点要人工写描述、人工调 Prompt、人工校对，完全不具备规模化能力  ...</div></div></div></a><a class="pagination-related" href="/2026/08/01/2026-08-01-activeagent-idle-spin-diagnosis/" title="我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录"><img class="cover" src="/img/cover-activeagent-idle-spin-v2.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-08-01</div><div class="info-item-2">我的 Agent 假装上班了 5 天：自主系统「空转」诊断实录</div></div><div class="info-2"><div class="info-item-1"> 每天 21:00 准点发报告、每 15 分钟执行一次”工作循环”——我的自主 Agent 看起来忙得不可开交。但有人问了一句：”怎么每次报告的内容都差不多？” 一查之下发现：它从 7&#x2F;27 起就在空转，5 天产出了零。 这篇记录完整的 8 处断链诊断与修复过程，附可直接抄的检查清单。     1. 缘起：一个让人起疑的问题我搭了一套名为 ActiveAgent 的三向 Agent 互联运行时（连接教育 Agent、股票 MCP 网关和 Hermes），它有两个核心承诺：  每 15 分钟一次 tick：自动扫描 3 个项目 × 9 个维度，发现问题就修复 每天 21:00 报告：汇总当天干了什么、进度如何  某天我翻看连续几天的每日报告，越看越不对劲：  “怎么每次报告的内容都差不多呢？教案进度始终只有 1 个评审，自主扫描都是那几个数字。”  直觉告诉我它可能没在正常工作。于是开始排查——这一查，牵出一串**”看起来活着、实际上空转”**的连环断链。 2. 核心方法：8 处断链的定位与修复 第一步：确认”它真的没干活”先看数据全景：    组件 表面状态 实际状态 ...</div></div></div></a><a class="pagination-related" href="/2026/04/14/2026-04-15-ai-trends/" title="2025年AI圈巨变：多模态和Agent如何改变我们的生活？"><img class="cover" src="https://images.unsplash.com/photo-1644088379091-d574269d422f?w=1600&h=900&fit=crop&q=80" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2026-04-15</div><div class="info-item-2">2025年AI圈巨变：多模态和Agent如何改变我们的生活？</div></div><div class="info-2"><div class="info-item-1">2025年AI圈巨变：多模态和Agent如何改变我们的生活？你有没有发现，最近和AI聊天的方式正在悄悄改变？ 以前，你可能习惯于输入一段文字，等待AI生成回复。如今，你可以直接给AI发一张图片，让它分析图表数据；也可以告诉AI”帮我整理一下这个月的报销”，然后看着它自动打开网页、填写表单、完成操作。 2025年4月，多模态大模型和AI Agent成为各大科技公司竞逐的新焦点。AI正在从”能说会道”走向”能看会做”。这场变革将如何影响每个人的生活？ 一、多模态大模型：AI的”五感”正在觉醒什么叫多模态？简单说，就是AI不仅能处理文字，还能理解图像、音频、视频等多种信息形式。就像人类有视觉、听觉、嗅觉、味觉、触觉五感一样，多模态AI正在拥有自己的”感官系统”。 4月，字节跳动旗下的火山引擎发布了豆包1.5深度思考模型。它不仅能”深度思考”，还能”看图思考”——上传一张航拍照片，AI会自动分析地貌特征，判断某区域是否适合开发；给AI一张企业项目管理流程图，它能迅速理解逻辑关系并回答你的问题。 OpenAI最新发布的o3和o4-mini模型同样具备强大的多模态能力，首次实现了”用图像思考...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="giscus-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/img/avatar-tech.svg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">颂雅风</div><div class="author-info-description">颂雅风的个人博客，分享技术学习、生活思考和知识积累</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">101</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">257</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">35</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yadinae"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/yadinae" target="_blank" title="GitHub"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">🌌 探索无限知识宇宙</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E7%BC%98%E8%B5%B7-%E2%80%94-%E7%AC%AC%E4%B8%80%E7%89%88%E7%AE%80%E6%8A%A5%E5%85%A8%E6%98%AF-404%EF%BC%8C%E7%94%A8%E6%88%B7%E7%9B%B4%E6%8E%A5%E7%82%B8%E4%BA%86"><span class="toc-number">1.</span> <span class="toc-text">1. 缘起 — 第一版简报全是 404，用户直接炸了</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95-%E2%80%94-10-%E6%9D%A1%E9%93%81%E5%BE%8B"><span class="toc-number">2.</span> <span class="toc-text">2. 核心方法 — 10 条铁律</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-1%EF%BC%9A%E7%BB%9D%E4%B8%8D%E5%85%81%E8%AE%B8%E3%80%8C%E6%A0%B9%E6%8D%AE%E6%A0%87%E9%A2%98%E6%8B%BC-URL%E3%80%8D"><span class="toc-number">2.1.</span> <span class="toc-text">铁律 1：绝不允许「根据标题拼 URL」</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-2%EF%BC%9A%E6%8A%93%E5%88%B0%E6%AD%A3%E6%96%87%E6%89%8D%E7%AE%97%E6%95%B0%EF%BC%8C%E6%A0%87%E9%A2%98%E4%B8%8D%E7%AD%89%E4%BA%8E%E5%86%85%E5%AE%B9"><span class="toc-number">2.2.</span> <span class="toc-text">铁律 2：抓到正文才算数，标题不等于内容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-3%EF%BC%9A403-%E2%89%A0-%E5%86%85%E5%AE%B9%E4%B8%8D%E5%AD%98%E5%9C%A8%EF%BC%8C%E5%AE%83%E6%98%AF%E3%80%8C%E7%BD%91%E7%AB%99%E5%8F%8D%E7%88%AC%E3%80%8D"><span class="toc-number">2.3.</span> <span class="toc-text">铁律 3：403 ≠ 内容不存在，它是「网站反爬」</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-4%EF%BC%9ANext-js-%E7%9A%84%E3%80%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%B8%B2%E6%9F%93%E9%94%99%E8%AF%AF%E3%80%8D%E6%98%AF%E5%81%87%E9%98%B4%E6%80%A7"><span class="toc-number">2.4.</span> <span class="toc-text">铁律 4：Next.js 的「客户端渲染错误」是假阴性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-5%EF%BC%9AWeb-Search-API-%E4%BC%9A%E6%8C%82%EF%BC%8CDDG-HTML-%E7%AB%AF%E7%82%B9%E6%B0%B8%E8%BF%9C%E6%98%AF%E4%BF%9D%E5%BA%95"><span class="toc-number">2.5.</span> <span class="toc-text">铁律 5：Web Search API 会挂，DDG HTML 端点永远是保底</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-6%EF%BC%9AMCP-%E6%9C%8D%E5%8A%A1%E6%9C%89-60-%E7%A7%92%E5%86%B7%E5%8D%B4%EF%BC%8C%E5%88%AB%E7%8B%82%E9%87%8D%E8%AF%95"><span class="toc-number">2.6.</span> <span class="toc-text">铁律 6：MCP 服务有 60 秒冷却，别狂重试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-7%EF%BC%9AX-Twitter-%E7%94%A8-FxEmbed-%E5%85%8D-key-%E6%8B%BF%E4%B8%80%E6%89%8B%E6%B6%88%E6%81%AF"><span class="toc-number">2.7.</span> <span class="toc-text">铁律 7：X&#x2F;Twitter 用 FxEmbed 免 key 拿一手消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-8%EF%BC%9A429-%E6%98%AF%E3%80%8C%E9%99%90%E6%B5%81%E3%80%8D%E4%B8%8D%E6%98%AF%E3%80%8C%E5%A4%B1%E6%95%88%E3%80%8D%EF%BC%8CVentureBeat-%E6%9C%80%E5%85%B8%E5%9E%8B"><span class="toc-number">2.8.</span> <span class="toc-text">铁律 8：429 是「限流」不是「失效」，VentureBeat 最典型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-9%EF%BC%9ATavily-%E7%9A%84-content-%E5%AD%97%E6%AE%B5%E6%98%AF%E3%80%8C%E9%A1%B5%E8%84%9A%E5%9E%83%E5%9C%BE%E3%80%8D"><span class="toc-number">2.9.</span> <span class="toc-text">铁律 9：Tavily 的 content 字段是「页脚垃圾」</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%93%81%E5%BE%8B-10%EF%BC%9A%E6%AF%8F%E4%B8%AA-403-404-%E9%83%BD%E8%A6%81%E3%80%8C%E5%85%88%E9%AA%8C%E8%AF%81%E5%90%8E%E9%87%87%E7%94%A8%E3%80%8D%EF%BC%8C%E5%AE%81%E5%8F%AF%E5%B0%91%E5%8F%91"><span class="toc-number">2.10.</span> <span class="toc-text">铁律 10：每个 403&#x2F;404 都要「先验证后采用」，宁可少发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%B8%A9%E5%9D%91%E8%AE%B0%E5%BD%95-%E2%80%94-%E5%8F%8D%E4%BE%8B%E4%B8%8E%E8%BE%B9%E7%95%8C"><span class="toc-number">3.</span> <span class="toc-text">3. 踩坑记录 — 反例与边界</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-1%EF%BC%9A%E7%89%88%E6%9C%AC%E5%8F%B7-%E5%9F%9F%E5%90%8D%E5%88%AB%E7%8C%9C"><span class="toc-number">3.1.</span> <span class="toc-text">坑 1：版本号 &#x2F; 域名别猜</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-2%EF%BC%9A%E8%BF%99%E4%BA%9B%E9%93%81%E5%BE%8B%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%B8%8D%E9%80%82%E7%94%A8"><span class="toc-number">3.2.</span> <span class="toc-text">坑 2：这些铁律什么时候不适用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9D%91-3%EF%BC%9A%E5%AE%B9%E6%98%93%E6%B7%B7%E6%B7%86%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="toc-number">3.3.</span> <span class="toc-text">坑 3：容易混淆的概念</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">4. 总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/11/14/2026-11-14-news-briefing-verification-playbook/" title="每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律"><img src="/img/cover-2026-11-14-news-briefing-verification-playbook.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律"/></a><div class="content"><a class="title" href="/2026/11/14/2026-11-14-news-briefing-verification-playbook/" title="每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律">每天抓 AI 新闻的 cron，教会我的 10 条自动化采集铁律</a><time datetime="2026-11-14T02:05:00.000Z" title="发表于 2026-11-14 10:05:00">2026-11-14</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/11/2026-11-11-memvid-cleanup-breaks-terminal-tool/" title="删了 memvid 环境，Hermes terminal 工具全军覆没 —— 一次清理引发的 uv wrapper 依赖地狱"><img src="/img/cover-2026-11-11-memvid-cleanup-breaks-terminal-tool.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="删了 memvid 环境，Hermes terminal 工具全军覆没 —— 一次清理引发的 uv wrapper 依赖地狱"/></a><div class="content"><a class="title" href="/2026/11/11/2026-11-11-memvid-cleanup-breaks-terminal-tool/" title="删了 memvid 环境，Hermes terminal 工具全军覆没 —— 一次清理引发的 uv wrapper 依赖地狱">删了 memvid 环境，Hermes terminal 工具全军覆没 —— 一次清理引发的 uv wrapper 依赖地狱</a><time datetime="2026-11-11T02:01:00.000Z" title="发表于 2026-11-11 10:01:00">2026-11-11</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/07/2026-11-07-openllm-cloudflare-workers-port/" title="我们把 LLM 网关搬到 Cloudflare Workers，编译全过却静默翻车——5 个隐形移植 Bug"><img src="/img/cover-2026-11-07-openllm-cloudflare-workers-port.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我们把 LLM 网关搬到 Cloudflare Workers，编译全过却静默翻车——5 个隐形移植 Bug"/></a><div class="content"><a class="title" href="/2026/11/07/2026-11-07-openllm-cloudflare-workers-port/" title="我们把 LLM 网关搬到 Cloudflare Workers，编译全过却静默翻车——5 个隐形移植 Bug">我们把 LLM 网关搬到 Cloudflare Workers，编译全过却静默翻车——5 个隐形移植 Bug</a><time datetime="2026-11-07T00:10:00.000Z" title="发表于 2026-11-07 08:10:00">2026-11-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/05/2026-11-05-llm-router-decision-cache/" title="我们把 LLM 路由器冷启动从 65 秒干到 1.7 秒——决策缓存三件套实战"><img src="/img/cover-2026-11-05-llm-router-decision-cache.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我们把 LLM 路由器冷启动从 65 秒干到 1.7 秒——决策缓存三件套实战"/></a><div class="content"><a class="title" href="/2026/11/05/2026-11-05-llm-router-decision-cache/" title="我们把 LLM 路由器冷启动从 65 秒干到 1.7 秒——决策缓存三件套实战">我们把 LLM 路由器冷启动从 65 秒干到 1.7 秒——决策缓存三件套实战</a><time datetime="2026-11-05T00:10:00.000Z" title="发表于 2026-11-05 08:10:00">2026-11-05</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/" title="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战"><img src="/img/cover-2026-11-05-cangjie-parallel-extraction-pipeline.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战"/></a><div class="content"><a class="title" href="/2026/11/04/2026-11-05-cangjie-parallel-extraction-pipeline/" title="我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战">我们把「内容蒸馏」做成了并行流水线——Cangjie 技能的 5 个提取器与 3 重验证实战</a><time datetime="2026-11-04T23:49:00.000Z" title="发表于 2026-11-05 07:49:00">2026-11-05</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">&copy;&nbsp;2025 - 2026 By 颂雅风</span><span class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 8.1.1</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.5.4</a></span></div><div class="footer_custom_text">Powered by <a href="https://hexo.io" target="_blank">Hexo</a> & <a href="https://butterfly.js.org" target="_blank">Butterfly</a> Theme</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/utils.min.js"></script><script src="https://cdn.jsdelivr.net/npm/hexo-theme-butterfly@5.5.4/source/js/main.min.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = {"data-mapping":"pathname","data-strict":0,"data-reactions-enabled":1,"data-emit-metadata":0,"data-input-position":"top","data-lang":"zh-CN","data-loading":"lazy"}
+
+  const getGiscusTheme = theme => theme === 'dark' ? 'dark' : 'light'
+
+  const createScriptElement = config => {
+    const ele = document.createElement('script')
+    Object.entries(config).forEach(([key, value]) => {
+      ele.setAttribute(key, value)
+    })
+    return ele
+  }
+
+  const loadGiscus = (el = document, key) => {
+    const mappingConfig = isShuoshuo
+      ? { 'data-mapping': 'specific', 'data-term': key }
+      : { 'data-mapping': (option && option['data-mapping']) || 'pathname' }
+
+    const giscusConfig = {
+      src: 'https://giscus.app/client.js',
+      'data-repo': 'yadinae/yadinae.github.io',
+      'data-repo-id': 'R_kgDORMx6OQ',
+      'data-category-id': 'DIC_kwDORMx6Oc4C3f7M',
+      'data-theme': getGiscusTheme(document.documentElement.getAttribute('data-theme')),
+      'data-reactions-enabled': '1',
+      crossorigin: 'anonymous',
+      async: true,
+      ...option,
+      ...mappingConfig
+    }
+
+    const scriptElement = createScriptElement(giscusConfig)
+
+    el.querySelector('#giscus-wrap').appendChild(scriptElement)
+
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyGiscus = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+  }
+
+  const changeGiscusTheme = theme => {
+    const iframe = document.querySelector('#giscus-wrap iframe')
+    if (iframe) {
+      const message = {
+        giscus: {
+          setConfig: {
+            theme: getGiscusTheme(theme)
+          }
+        }
+      }
+      iframe.contentWindow.postMessage(message, 'https://giscus.app')
+    }
+  }
+
+  btf.addGlobalFn('themeChange', changeGiscusTheme, 'giscus')
+
+  if (isShuoshuo) {
+    'Giscus' === 'Giscus'
+      ? window.shuoshuoComment = { loadComment: loadGiscus }
+      : window.loadOtherComment = loadGiscus
+    return
+  }
+
+  if ('Giscus' === 'Giscus' || !false) {
+    if (false) btf.loadComment(document.getElementById('giscus-wrap'), loadGiscus)
+    else loadGiscus()
+  } else {
+    window.loadOtherComment = loadGiscus
+  }
+})()</script></div></div></body></html>
