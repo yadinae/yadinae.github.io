@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520">
+  <defs>
+    <style>
+      text { font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', 'Source Han Sans SC', 'WenQuanYi Micro Hei', sans-serif; }
+    </style>
+  </defs>
+  <rect width="800" height="520" fill="#f8f9fa" rx="12"/>
+
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#2c3e50">v1 → v2 核心变化对比</text>
+
+  <!-- Headers -->
+  <rect x="40" y="60" width="160" height="36" rx="6" fill="#34495e"/>
+  <text x="120" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">对比维度</text>
+
+  <rect x="210" y="60" width="270" height="36" rx="6" fill="#e74c3c" opacity="0.85"/>
+  <text x="345" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">v1（旧文章）</text>
+
+  <rect x="490" y="60" width="270" height="36" rx="6" fill="#27ae60" opacity="0.85"/>
+  <text x="625" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">v2（新文章）</text>
+
+  <!-- Row 1: 角色 -->
+  <rect x="40" y="105" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="128" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">我的角色</text>
+
+  <rect x="210" y="105" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="125" text-anchor="middle" font-size="12" fill="#7f8c8d">解题者 + 判别者</text>
+  <text x="345" y="138" text-anchor="middle" font-size="10" fill="#95a5a6">（又当员工又当经理）</text>
+
+  <rect x="490" y="105" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="125" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">Arena（总经理）</text>
+  <text x="625" y="138" text-anchor="middle" font-size="10" fill="#95a5a6">（只组队、评判、培训）</text>
+
+  <!-- Row 2: 解题者 -->
+  <rect x="40" y="149" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="172" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">解题者</text>
+
+  <rect x="210" y="149" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="172" text-anchor="middle" font-size="12" fill="#7f8c8d">1 个（我自己）</text>
+
+  <rect x="490" y="149" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="172" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">6 个专家角色</text>
+
+  <!-- Row 3: 判别者 -->
+  <rect x="40" y="193" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="216" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">判别者</text>
+
+  <rect x="210" y="193" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="216" text-anchor="middle" font-size="12" fill="#7f8c8d">6 个硬编码维度</text>
+
+  <rect x="490" y="193" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="216" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">9 个仓库角色（可扩展）</text>
+
+  <!-- Row 4: 团队管理 -->
+  <rect x="40" y="237" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="260" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">团队管理</text>
+
+  <rect x="210" y="237" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="260" text-anchor="middle" font-size="12" fill="#7f8c8d">无</text>
+
+  <rect x="490" y="237" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="260" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">可增减、可替换、按需选聘</text>
+
+  <!-- Row 5: 通讯 -->
+  <rect x="40" y="281" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="304" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">通讯方式</text>
+
+  <rect x="210" y="281" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="304" text-anchor="middle" font-size="12" fill="#7f8c8d">轮询 output.txt</text>
+
+  <rect x="490" y="281" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="304" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">白板协议（WHITEBOARD.md）</text>
+
+  <!-- Row 6: 质量 -->
+  <rect x="40" y="325" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="348" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">质量保障</text>
+
+  <rect x="210" y="325" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="348" text-anchor="middle" font-size="12" fill="#7f8c8d">收敛即完</text>
+
+  <rect x="490" y="325" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="348" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">失职分析 → 判别者升级</text>
+
+  <!-- Row 7: 专家来源 -->
+  <rect x="40" y="369" width="160" height="36" rx="4" fill="#ecf0f1"/>
+  <text x="120" y="392" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c3e50">专家来源</text>
+
+  <rect x="210" y="369" width="270" height="36" rx="4" fill="#fdedec"/>
+  <text x="345" y="392" text-anchor="middle" font-size="12" fill="#7f8c8d">自建</text>
+
+  <rect x="490" y="369" width="270" height="36" rx="4" fill="#e8f8f5"/>
+  <text x="625" y="392" text-anchor="middle" font-size="12" fill="#27ae60" font-weight="bold">211 个即插即用（agency-agents-zh）</text>
+
+  <!-- Arrow overlay -->
+  <rect x="200" y="440" width="400" height="36" rx="18" fill="#3498db" opacity="0.9"/>
+  <text x="400" y="464" text-anchor="middle" font-size="15" font-weight="bold" fill="#fff">➡ 从一个人单干 → 一家 AI 公司 ⬆</text>
+
+  <text x="400" y="500" text-anchor="middle" font-size="11" fill="#95a5a6">v2 不是推翻重来，是组织升级</text>
+</svg>

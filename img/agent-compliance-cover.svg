@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0c29"/>
+      <stop offset="50%" style="stop-color:#302b63"/>
+      <stop offset="100%" style="stop-color:#24243e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00d2ff"/>
+      <stop offset="100%" style="stop-color:#3a7bd5"/>
+    </linearGradient>
+    <linearGradient id="accent2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f857a6"/>
+      <stop offset="100%" style="stop-color:#ff5858"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  
+  <!-- Grid pattern background -->
+  <g opacity="0.05">
+    <line x1="0" y1="200" x2="1600" y2="200" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="400" x2="1600" y2="400" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="600" x2="1600" y2="600" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="800" x2="1600" y2="800" stroke="white" stroke-width="0.5"/>
+    <line x1="400" y1="0" x2="400" y2="900" stroke="white" stroke-width="0.5"/>
+    <line x1="800" y1="0" x2="800" y2="900" stroke="white" stroke-width="0.5"/>
+    <line x1="1200" y1="0" x2="1200" y2="900" stroke="white" stroke-width="0.5"/>
+  </g>
+
+  <!-- Title area -->
+  <text x="800" y="260" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="52" font-weight="bold" fill="white" text-anchor="middle" filter="url(#glow)">Agent 为什么不遵守系统提示？</text>
+  
+  <text x="800" y="330" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="28" fill="#c0c0d0" text-anchor="middle">根因分析与渐进式解决方案</text>
+
+  <!-- Divider -->
+  <rect x="600" y="370" width="400" height="3" rx="1.5" fill="url(#accent)"/>
+  <rect x="720" y="370" width="160" height="3" rx="1.5" fill="url(#accent2)"/>
+
+  <!-- Subtitle -->
+  <text x="800" y="430" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18" fill="#8080a0" text-anchor="middle">GenericAgent 研究项目 · 2026-05-29</text>
+
+  <!-- Key findings blocks -->
+  <g transform="translate(180, 520)">
+    <rect width="340" height="120" rx="12" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="170" y="35" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="bold" fill="#00d2ff" text-anchor="middle">7 个根因</text>
+    <text x="170" y="65" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#b0b0c8" text-anchor="middle">模型层·架构层·提示工程层</text>
+    <text x="170" y="90" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#8080a0" text-anchor="middle">指令优先级缺失 · 工具驱动短路</text>
+    <text x="170" y="110" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#8080a0" text-anchor="middle">语义衰减 · 注意力稀释 · 自指悖论</text>
+  </g>
+
+  <g transform="translate(630, 520)">
+    <rect width="340" height="120" rx="12" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="170" y="35" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="bold" fill="#f857a6" text-anchor="middle">P0-P3 解决方案</text>
+    <text x="170" y="65" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#b0b0c8" text-anchor="middle">从"说"到"做"的渐进式框架</text>
+    <text x="170" y="90" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#8080a0" text-anchor="middle">P0 阻塞 · P1 重试 · P2 约束 · P3 评分</text>
+    <text x="170" y="110" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#8080a0" text-anchor="middle">代码层强制 · 运行时验证</text>
+  </g>
+
+  <g transform="translate(1080, 520)">
+    <rect width="340" height="120" rx="12" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="170" y="35" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="bold" fill="#00d2ff" text-anchor="middle">分层防御架构</text>
+    <text x="170" y="65" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#b0b0c8" text-anchor="middle">验证不在提示层，在执行层</text>
+    <text x="170" y="90" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#8080a0" text-anchor="middle">系统提示 → 输出检查 → 纠正</text>
+    <text x="170" y="110" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="13" fill="#8080a0" text-anchor="middle">→ 工具约束 → 智能评分</text>
+  </g>
+
+  <!-- Bottom tagline -->
+  <text x="800" y="820" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="14" fill="#505070" text-anchor="middle">GenericAgent · 对抗式解题法 · boke.studyai.ltd</text>
+</svg>
